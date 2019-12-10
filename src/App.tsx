@@ -11,6 +11,22 @@ const App: React.FC = () => {
       <div className="section">
         <h1 className="title">UQ Toilet Paper 🧻</h1>
         <p className="block">So you can plan your timetable in peace. Responsive!</p>
+        <div style={{display: 'flex', flexWrap: 'wrap'}}>
+          <th style={{order: 0, width: '4em'}} className="has-text-centered">Time</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <th style={{order: i+1, width: '4em'}} className="has-text-centered">{i+8}</th>)}
+          
+          <th style={{order: 0}}>Monday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+
+          <th style={{order: 0}}>Tuesday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+
+          {Array.from(Array(16).keys())
+            .map((i) => <div style={{order: i, height: 0, flexBasis: '100%'}}></div>)}
+        </div>
         <div className="columns is-gapless">
           <div className="column is-hidden-mobile is-1">
             <TimeColumn></TimeColumn>
