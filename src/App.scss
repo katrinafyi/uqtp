@@ -1,1 +1,18 @@
 @import 'bulma/bulma.sass';
+
+.rtable {
+  display: flex;
+  td, th {
+    display: block;
+  }
+}
+
+@media screen and (max-width: $tablet) {
+  .rtable {
+    display: block,
+  }
+
+  .rtable td, .rtable th {
+    width: 100% !important;
+  }
+}
