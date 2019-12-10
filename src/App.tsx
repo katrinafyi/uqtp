@@ -12,21 +12,42 @@ const App: React.FC = () => {
         <h1 className="title">UQ Toilet Paper 🧻</h1>
         <p className="block">So you can plan your timetable in peace. Responsive!</p>
         <div style={{flexWrap: 'wrap'}} className="table rtable">
-          <th style={{order: 0, width: '4em'}} className="has-text-centered">Time</th>
+          <th style={{order: 0, flexGrow: 20}} className="has-text-centered">Time</th>
           {Array.from(Array(15).keys())
-            .map((i) => <th style={{order: i+1, width: '4em'}} className="has-text-centered">{i+8}</th>)}
+            .map((i) => <th style={{order: i+1, flexGrow: 20}} className="has-text-centered">{i+8}</th>)}
+
+          <div className="rtable-spacer"></div>
           
           <th style={{order: 0}}>Monday</th>
           {Array.from(Array(15).keys())
-            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+            .map((i) => <td style={{order: i+1}}>{"jio emieov mfweio mveiow mvefmqvio qemvioqwm oiCourse "+i}</td>)}
             
-
+            <div className="rtable-spacer"></div>
           <th style={{order: 0}}>Tuesday</th>
           {Array.from(Array(15).keys())
             .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
-
+<div className="rtable-spacer"></div>
+          <th style={{order: 0}}>Tuesday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+<div className="rtable-spacer"></div>
+          <th style={{order: 0}}>Tuesday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+<div className="rtable-spacer"></div>
+          <th style={{order: 0}}>Tuesday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+<th style={{order: 0}}>Tuesday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+<div className="rtable-spacer"></div>
+<th style={{order: 0}}>Tuesday</th>
+          {Array.from(Array(15).keys())
+            .map((i) => <td style={{order: i+1}}>{"Course "+i}</td>)}
+<div className="rtable-spacer"></div>
           {Array.from(Array(16).keys())
-            .map((i) => <div style={{order: i, height: 0, flexBasis: '100%'}}></div>)}
+            .map((i) => <div className="rtable-break" style={{order: i}}></div>)}
         </div>
         <div className="block">Below is the Bulma columns implementation.</div>
         <div className="columns is-gapless">

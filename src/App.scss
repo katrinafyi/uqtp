@@ -1,18 +1,28 @@
 @import 'bulma/bulma.sass';
-
+// https://codepen.io/davidelrizzo/pen/GobVLe
 .rtable {
   display: flex;
-  td, th {
+  & > td, & > th {
     display: block;
+    overflow: hidden; 
+    flex-grow: 100;
+    flex-basis: 0;
   }
+}
+
+.rtable-break {
+  height: 0;
+  flex-basis: 100%;
 }
 
 @media screen and (max-width: $tablet) {
   .rtable {
-    display: block,
+    display: block;
+    & > td, & > th {
+      width: 100% !important;
+    }
   }
-
-  .rtable td, .rtable th {
-    width: 100% !important;
+  .rtable-spacer {
+    margin-bottom: $block-spacing;
   }
 }
