@@ -40,7 +40,7 @@ const App: React.FC = () => {
     setFileError(undefined);
   };
 
-  const courses = _.sortedUniqBy(persistState.allSessions, (x) => x.course);
+  const courses = _.uniq(persistState.allSessions.map(x => x.course)).sort();
 
   return (
     <div className="container">
@@ -69,7 +69,7 @@ const App: React.FC = () => {
         
         <div className="columns is-multiline is-mobile">
           {courses.map(c => <div className="column is-2-desktop">
-            <SessionPicker code={c.course}></SessionPicker>
+            <SessionPicker code={c}></SessionPicker>
           </div>)}
         </div>
 
