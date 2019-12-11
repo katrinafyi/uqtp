@@ -22,7 +22,7 @@ export const FileInput = ({setFile, fileName, ...other}: Props) => {
                     <FaFileUpload></FaFileUpload>
                 </span>
                 <span className="file-label">
-                    Upload Excel timetable...
+                    Select Excel timetable...
                 </span>
             </span>
             <span className="file-name">
