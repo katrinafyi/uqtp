@@ -14,11 +14,9 @@
     display: block;
   }
 }
-.timetable.is-bordered {
-  & > td, & > th {
-    margin-top: -1px;
-    margin-left: -1px;
-  }
+
+.pixel-border {
+  //box-shadow: 0 0 1px $border;
 }
 
 .rtable-spacer {
