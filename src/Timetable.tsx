@@ -2,10 +2,10 @@ import React from 'react';
 import _ from 'lodash';
 
 const Timetable: React.FC = () => {
-    const makeTimes = () => [
-        <th className=" col-time has-text-centered is-hidden-tablet">Time</th>,
+    const makeTimes = (desktop: boolean) => [
+        <th className={"col-time has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}>Time</th>,
         ..._.range(15).map(i =>
-            <th className=" col-time has-text-centered is-hidden-tablet">{i + 8}</th>)
+            <th className={"col-time has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}>{i + 8}</th>)
     ];
 
     const makeDay = (d: number) => [
@@ -17,11 +17,9 @@ const Timetable: React.FC = () => {
     ];
 
     return <div className="table timetable">
-        <th className="has-text-centered is-hidden-mobile">Time</th>
-        {Array.from(Array(15).keys())
-            .map((i) => <th className="has-text-centered is-hidden-mobile">{i + 8}</th>)}
+        {makeTimes(true)}
         {_.range(5).map(i => <>
-            {_.zip(makeTimes(), makeDay(i))}
+            {_.zip(makeTimes(false), makeDay(i))}
             <div className="rtable-spacer"></div></>
         )}
     </div>;
