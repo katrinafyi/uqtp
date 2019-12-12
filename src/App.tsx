@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer } from 'react';
 import logo from './logo.svg';
 import './App.scss';
 import _ from 'lodash';
@@ -12,13 +12,14 @@ import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { TimetableState, defaultState, CourseSession, CourseActivity } from './logic/types';
 import { SessionSelectors } from './SessionSelectors';
+import { timetableStateReducer } from './logic/reducers';
 
 const App: React.FC = () => {
   const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState<string>();
 
-  const [persistState, setPersistState] = useState<TimetableState>(defaultState);
-
+  const [persistState, dispatch] = useReducer(timetableStateReducer, defaultState);
+  console.log(persistState);
   const onClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
     try {
@@ -29,9 +30,9 @@ const App: React.FC = () => {
         return;
       }
 
-      console.log(JSON.stringify(parsed));
+      //console.log(JSON.stringify(parsed));
+      dispatch({type: 'setAllSessions', sessions: parsed});
       setFileError(undefined);
-      setPersistState({ ...persistState, allSessions: parsed });
     } catch (e) {
       setFileError("error while importing: " + e.toString());
       return;
@@ -46,6 +47,10 @@ const App: React.FC = () => {
   const activities = _.uniqWith(persistState.allSessions.map(
     ({course, activity, activityType, group}) => 
       ({course, activity, activityType, group}) as CourseActivity), _.isEqual);
+
+  const setSelected = (course: string, activity: string, group: string | null) => {
+    dispatch({type: 'setActivityGroup', course, activity, group});
+  }
 
   return (
     <div className="container">
@@ -72,7 +77,9 @@ const App: React.FC = () => {
 
         <h4 className="title is-4">Courses</h4>
         
-        <SessionSelectors allActivities={activities}></SessionSelectors>
+        <SessionSelectors allActivities={activities} 
+          selected={persistState.selectedActivities} 
+          setSelected={setSelected}></SessionSelectors>
 
         <hr></hr>
 
