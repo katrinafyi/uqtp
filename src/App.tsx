@@ -44,9 +44,9 @@ const App: React.FC = () => {
   const courses = _.uniq(persistState.allSessions.map(x => x.course)).sort();
   console.log(persistState.allSessions);
   
-  const activities = _.uniqWith(persistState.allSessions.map(
-    ({course, activity, activityType, group}) => 
-      ({course, activity, activityType, group}) as CourseActivity), _.isEqual);
+  const activities = _(persistState.allSessions)
+    .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseActivity)
+    .uniqWith(_.isEqual).value();
 
   const setSelected = (course: string, activity: string, group: string | null) => {
     dispatch({type: 'setActivityGroup', course, activity, group});
@@ -63,7 +63,7 @@ const App: React.FC = () => {
     <div className="container">
       <div className="section">
         <h1 className="title">UQ Toilet Paper 🧻</h1>
-        <p className="block">So you can plan your timetable in peace. Responsive!</p>
+        <p className="block">Plan your timetable in peace, away from UQ's bureaucracy. Works on mobile!</p>
 
 
         <div className="title is-4">Data</div>

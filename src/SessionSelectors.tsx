@@ -29,11 +29,11 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
     const makeActivitySelector = (actType: string, groups: string[]) => 
     <><div className="field is-horizontal">
         <div className="field-label is-normal">
-            <label className="label" style={{width: '3em'}}>{actType}</label>
+            <a className="label" style={{width: '3em'}}>{actType}</a>
         </div>
         <div className="field-body"><div className="field is-narrow">
             <div className="control"><div className="select">
-                <select className="" value={selected[actType] || nullString}
+                <select className="" value={selected[actType] ?? nullString}
                     onChange={makeOnChange(actType)}>
                     <option value={nullString}>(none)</option>
                     {groups.map(s => <option>{s}</option>)}
@@ -52,7 +52,7 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
 export const SessionSelectors = ({ allActivities, selected, setSelected }: Props) => {
     const byCourse = _.groupBy(allActivities, (x) => x.course);
     
-    const courses = _.uniq(allActivities.map(x => x.course));
+    const courses = _(allActivities).map(x => x.course).uniq().value();
 
     return <>
         <div className="columns is-multiline is-mobile">
