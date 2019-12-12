@@ -19,6 +19,11 @@ export const timetableStateReducer = (state: TimetableState, action: TimetableSt
     switch (action.type) {
         case 'setAllSessions':
             draft.allSessions = action.sessions;
+            action.sessions.forEach(sess => {
+                if (draft.selectedGroups?.[sess.course]?.[sess.activity] === undefined) {
+                    _.set(draft.selectedGroups, [sess.course, sess.activity], sess.group);
+                }
+            })
             break;
         case 'setActivityGroup':
             if (action.group === null) {
