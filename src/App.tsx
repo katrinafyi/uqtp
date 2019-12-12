@@ -10,8 +10,8 @@ import Timetable from './Timetable';
 
 import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
-import { TimetableState, defaultState } from './logic/types';
-import { SessionPicker } from './SessionPicker';
+import { TimetableState, defaultState, CourseSession, CourseActivity } from './logic/types';
+import { SessionSelectors } from './SessionSelectors';
 
 const App: React.FC = () => {
   const [file, setFile] = useState<File>();
@@ -41,6 +41,11 @@ const App: React.FC = () => {
   };
 
   const courses = _.uniq(persistState.allSessions.map(x => x.course)).sort();
+  console.log(persistState.allSessions);
+  
+  const activities = _.uniqWith(persistState.allSessions.map(
+    ({course, activity, activityType, group}) => 
+      ({course, activity, activityType, group}) as CourseActivity), _.isEqual);
 
   return (
     <div className="container">
@@ -67,11 +72,7 @@ const App: React.FC = () => {
 
         <h4 className="title is-4">Courses</h4>
         
-        <div className="columns is-multiline is-mobile">
-          {courses.map(c => <div className="column is-2-desktop">
-            <SessionPicker code={c}></SessionPicker>
-          </div>)}
-        </div>
+        <SessionSelectors allActivities={activities}></SessionSelectors>
 
         <hr></hr>
 
