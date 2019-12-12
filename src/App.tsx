@@ -50,7 +50,14 @@ const App: React.FC = () => {
 
   const setSelected = (course: string, activity: string, group: string | null) => {
     dispatch({type: 'setActivityGroup', course, activity, group});
-  }
+  };
+
+  const isSessionSelected = (x: CourseSession) => 
+    _.get(persistState.selectedGroups, [x.course, x.activity], null) === x.group;
+
+  const selectedSessions = persistState.allSessions.filter(isSessionSelected);
+
+
 
   return (
     <div className="container">
@@ -76,16 +83,15 @@ const App: React.FC = () => {
         <hr></hr>
 
         <h4 className="title is-4">Courses</h4>
-        
         <SessionSelectors allActivities={activities} 
-          selected={persistState.selectedActivities} 
+          selected={persistState.selectedGroups} 
           setSelected={setSelected}></SessionSelectors>
 
         <hr></hr>
 
         <h4 className="title is-4">Timetable</h4>
 
-        <Timetable></Timetable>
+        <Timetable selectedSessions={selectedSessions}></Timetable>
 
       </div>
     </div>

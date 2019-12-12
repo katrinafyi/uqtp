@@ -22,9 +22,9 @@ export const timetableStateReducer = (state: TimetableState, action: TimetableSt
             break;
         case 'setActivityGroup':
             if (action.group === null) {
-                _.unset(draft.selectedActivities, [action.course, action.activity]);
+                _.unset(draft.selectedGroups, [action.course, action.activity]);
             } else {
-                _.set(draft.selectedActivities, [action.course, action.activity], action.group);
+                _.set(draft.selectedGroups, [action.course, action.activity], action.group);
             }
             break;
         default:
