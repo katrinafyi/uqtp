@@ -30,7 +30,7 @@ const oldColumns = [
     'Subject Code', 'Description', 'Group', 'Activity', 'Day', 'Time', 'Campus', 'Location', 'Duration', 'Dates',
 ];
 
-const newColumns = [
+const newColumns: (keyof CourseSession)[] = [
     'course', 'description', 'activity', 'group', 'day', 'time', 'campus', 'location', 'duration', 'dates',
 ];
 

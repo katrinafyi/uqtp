@@ -1,4 +1,4 @@
-import { TimetableState, CourseSession } from "./types";
+import { TimetableState, CourseSession, SelectedActivities } from "./types";
 import produce from 'immer';
 import _ from "lodash";
 
@@ -12,6 +12,13 @@ export type TimetableStateAction = {
     group: string | null,
 }
 
+export const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, sessions: CourseSession[]) => 
+    sessions.forEach(sess => {
+        if (selectedGroups?.[sess.course]?.[sess.activity] === undefined) {
+            _.set(selectedGroups, [sess.course, sess.activity], sess.group);
+        }
+    });
+
 export const timetableStateReducer = (state: TimetableState, action: TimetableStateAction) => produce(state, (draft) => {
     console.log('producing new state for action:');
     console.log(action);
@@ -19,11 +26,7 @@ export const timetableStateReducer = (state: TimetableState, action: TimetableSt
     switch (action.type) {
         case 'setAllSessions':
             draft.allSessions = action.sessions;
-            action.sessions.forEach(sess => {
-                if (draft.selectedGroups?.[sess.course]?.[sess.activity] === undefined) {
-                    _.set(draft.selectedGroups, [sess.course, sess.activity], sess.group);
-                }
-            })
+            setDefaultGroupsForSessions(draft.selectedGroups, action.sessions);
             break;
         case 'setActivityGroup':
             if (action.group === null) {

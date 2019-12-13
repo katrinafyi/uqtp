@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { FaFileUpload } from 'react-icons/fa';
 
 export interface Props extends React.HTMLAttributes<HTMLDivElement>{
@@ -32,4 +32,4 @@ export const FileInput = ({setFile, fileName, ...other}: Props) => {
     </div>;
 };
 
-export default FileInput;
+export default memo(FileInput);

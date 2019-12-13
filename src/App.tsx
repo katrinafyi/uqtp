@@ -11,7 +11,7 @@ import Timetable from './Timetable';
 import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { TimetableState, defaultState, CourseSession, CourseActivity } from './logic/types';
-import { SessionSelectors } from './SessionSelectors';
+import SessionSelectors from './SessionSelectors';
 import { timetableStateReducer } from './logic/reducers';
 
 const App: React.FC = () => {
@@ -32,7 +32,6 @@ const App: React.FC = () => {
 
       //console.log(JSON.stringify(parsed));
       dispatch({type: 'setAllSessions', sessions: parsed});
-      setFileError(undefined);
     } catch (e) {
       setFileError("error while importing: " + e.toString());
       return;

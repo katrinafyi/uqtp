@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { CourseActivity } from './logic/types';
 import _ from 'lodash';
 
@@ -27,7 +27,7 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
     }
 
     const makeActivitySelector = (actType: string, groups: string[]) => 
-    <><div className="field is-horizontal">
+    <div key={actType} className="field is-horizontal">
         <div className="field-label is-normal">
             <a className="label" style={{width: '3em'}}>{actType}</a>
         </div>
@@ -36,11 +36,11 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
                 <select className="" value={selected[actType] ?? nullString}
                     onChange={makeOnChange(actType)}>
                     <option value={nullString}>(none)</option>
-                    {groups.map(s => <option>{s}</option>)}
+                    {groups.map(s => <option key={s}>{s}</option>)}
                 </select>
             </div></div>
         </div></div>
-    </div></>;
+    </div>;
 
     return <div className="box">
         <div className="title is-5 is-no-wrap">{activities[0].course.split('_')[0]}</div>
@@ -49,18 +49,22 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
     </div>;
 }
 
-export const SessionSelectors = ({ allActivities, selected, setSelected }: Props) => {
+const MemoCourseSessionSelector = memo(CourseSessionSelector);
+
+const SessionSelectors = ({ allActivities, selected, setSelected }: Props) => {
     const byCourse = _.groupBy(allActivities, (x) => x.course);
     
     const courses = _(allActivities).map(x => x.course).uniq().value();
 
     return <>
         <div className="columns is-multiline is-mobile">
-            {courses.map(c => <div className="column is-6-mobile is-narrow">
-                <CourseSessionSelector activities={byCourse[c]} 
-                    selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}></CourseSessionSelector>
+            {courses.map(c => <div key={c} className="column is-6-mobile is-narrow">
+                <MemoCourseSessionSelector activities={byCourse[c]} 
+                    selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}></MemoCourseSessionSelector>
             </div>)}
             <div className="column is-3 is-hidden-touch"></div>
         </div>
     </>;
 }
+
+export default memo(SessionSelectors);

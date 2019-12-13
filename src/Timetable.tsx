@@ -30,22 +30,22 @@ const Timetable: React.FC<Props> = ({selectedSessions}) => {
     const makeTimes = (desktop: boolean) => [
         <th className={"col-time has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}>Time</th>,
         ..._.range(15).map(i =>
-            <th className={"col-time has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}>{i + 8}</th>)
+            <th key={i+8} className={"col-time has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}>{i + 8}</th>)
     ];
 
     const makeDay = (d: number) => [
         <th className="has-text-centered">Monday {d}</th>,
-        ..._.range(15).map((h) => <td className="has-text-centered">
-            {byDayTime[d][8+h].map(s => <div className="is-info is-medium is-fullwidth">{s.course}</div>)}
+        ..._.range(15).map((i) => <td className="has-text-centered">
+            {byDayTime[d][8+i].map(s => <div key={i+8} className="is-info is-medium is-fullwidth">{s.course}</div>)}
         </td>)
     ];
 
     return <div className="table timetable">
         {makeTimes(true)}
-        {_.range(5).map(i => <>
+        {_.range(5).map(i => <React.Fragment key={i}>
             {_.zip(makeTimes(false), makeDay(i))}
-            <div className="rtable-spacer"></div></>
-        )}
+            <div className="rtable-spacer"></div>
+        </React.Fragment>)}
     </div>;
 };
 
