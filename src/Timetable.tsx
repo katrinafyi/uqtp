@@ -90,12 +90,13 @@ type DayColumnProps = {
 }
 
 const DayColumn = ({day, daySessions}: DayColumnProps) => {
-    const timeColumn = makeTimeElements(false);
+    const [timeHeader, ...timeColumn] = makeTimeElements(false);
     return <>
+        {timeHeader}
         <div className="th thead has-text-centered is-size-5 ">{DAY_NAMES[day]}</div>
-        {_.range(START_HOUR, END_HOUR+1).map((h) =>
+        {_.range(START_HOUR, END_HOUR+1).map((h, i) =>
             <React.Fragment key={h}>
-                {timeColumn[h]}
+                {timeColumn[i]}
                 <div className={"td has-text-centered " + hourStyle}>
                     {daySessions[h].map(s => <TimetableSession session={s}></TimetableSession>)}
                 </div>
