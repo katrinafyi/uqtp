@@ -10,7 +10,7 @@ import Timetable from './Timetable';
 
 import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
-import { TimetableState, defaultState, CourseSession, CourseActivity } from './logic/types';
+import { TimetableState, DEFAULT_PERSIST, CourseSession, CourseActivity } from './logic/types';
 import SessionSelectors from './SessionSelectors';
 import { timetableStateReducer } from './logic/reducers';
 
@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState<string>();
 
-  const [persistState, dispatch] = useReducer(timetableStateReducer, defaultState);
+  const [persistState, dispatch] = useReducer(timetableStateReducer, DEFAULT_PERSIST);
   console.log(persistState);
   const onClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();

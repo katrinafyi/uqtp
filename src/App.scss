@@ -4,19 +4,12 @@
 .timetable {
   display: grid;
   grid-template-columns: 4rem;
-  grid-template-rows: min-content repeat(15, min-content);
+  grid-template-rows: min-content repeat(11, min-content);
   
   grid-auto-columns: 1fr;
   grid-auto-rows: min-content;
 
   grid-auto-flow: column;
-  & > td, & > th {
-    display: block;
-  }
-}
-
-.pixel-border {
-  //box-shadow: 0 0 1px $border;
 }
 
 .rtable-spacer {
@@ -48,4 +41,23 @@
 
 .is-no-wrap {
   white-space: nowrap;;
+}
+
+.th, .td {
+  border: $table-cell-border;
+  border-width: $table-cell-border-width;
+  padding: $table-cell-padding;
+  vertical-align: top;
+}
+
+.th {
+  font-weight: bold;
+}
+
+.thead {
+  background-color: $table-head-background-color;
+  &.th, &.td {
+    border-width: $table-head-cell-border-width;
+    color: $table-head-cell-color;
+  }
 }
