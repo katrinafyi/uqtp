@@ -1,12 +1,13 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import _ from 'lodash';
-import { CourseSession, DAY_NAMES } from './logic/types';
-import { computeDayTimeArrays, makeSessionKey, getCourseCode } from './logic/functions';
+import { CourseEvent, DAY_NAMES } from './logic/types';
+import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted } from './logic/functions';
 
 import {css} from 'emotion';
+import { HighlightContext } from './HightlightContext';
 
 export type Props = {
-    selectedSessions: CourseSession[],
+    selectedSessions: CourseEvent[],
 }
 
 const START_HOUR = 8;
@@ -41,12 +42,15 @@ const sessionStyle = css({
     borderRight: '1px solid #dbdbdb',
     
     backgroundColor: 'hsl(0, 0%, 98%)',
+    '&.highlighted': {
+        backgroundColor: 'hsl(0, 0%, 90%)',
+    },
 
     color: 'black',
 });
 
 type TimetableSessionProps = {
-    session: CourseSession
+    session: CourseEvent
 }
 
 const TimetableSession = (({session}: TimetableSessionProps) => {
@@ -56,10 +60,23 @@ const TimetableSession = (({session}: TimetableSessionProps) => {
         'PRA': 'is-warning',
     };
 
-    return <a className={" " + sessionStyle}>
+    const {highlight, setHighlight, setSelectedGroup} = useContext(HighlightContext);
+    const thisHighlighted = isHighlighted(session, highlight);
+    const onClick = () => {
+        if (highlight && thisHighlighted) {
+            setSelectedGroup(session.group);
+            setHighlight(null);
+        } else {
+            setHighlight({...session});
+        }
+    };
+
+    const highlightClass = thisHighlighted ? 'highlighted ' : ' ';
+
+    return <a className={highlightClass + sessionStyle} onClick={onClick}>
         <span className="is-family-monospace has-text-weight-bold">{getCourseCode(session.course)}</span>
         <div className={"tags has-addons has-text-weight-semibold " + typeTagStyle}>
-            <span className={"tag  " + (activityCSS[session.activityType]) ?? "" }>{session.activity}</span>
+            <span className={"tag  " + (activityCSS[session.activityType!]) ?? "" }>{session.activity}</span>
             <span className="tag is-light is-dark ">{session.group}</span>
         </div>
     </a>;
@@ -92,7 +109,7 @@ const hourStyle = css({
 
 type DayColumnProps = {
     day: number,
-    daySessions: CourseSession[][]
+    daySessions: CourseEvent[][]
 }
 
 const DayColumn = (({day, daySessions}: DayColumnProps) => {

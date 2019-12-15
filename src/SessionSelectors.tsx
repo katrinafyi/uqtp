@@ -1,15 +1,15 @@
 import React, { memo } from 'react';
-import { CourseActivity } from './logic/types';
+import { CourseGroup } from './logic/types';
 import _ from 'lodash';
 
 interface CourseSessionSelectorProps {
-    activities: CourseActivity[],
+    activities: CourseGroup[],
     selected: {[activity: string]: string},
     setSelected: (activity: string, group: string | null) => any,
 }
 
 export interface Props {
-    allActivities: CourseActivity[],
+    allActivities: CourseGroup[],
     selected: {[course: string]: {[activity: string]: string}},
     setSelected: (course: string, activity: string, group: string | null) => any,
 };

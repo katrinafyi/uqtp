@@ -1,6 +1,6 @@
 import XLSX from 'xlsx';
 import _ from 'lodash';
-import { CourseSession, DayOfWeek } from './types';
+import { CourseEvent, DayOfWeek } from './types';
 import parse from 'date-fns/parse'
 import { minTime } from 'date-fns';
 
@@ -30,7 +30,7 @@ const oldColumns = [
     'Subject Code', 'Description', 'Group', 'Activity', 'Day', 'Time', 'Campus', 'Location', 'Duration', 'Dates',
 ];
 
-const newColumns: (keyof CourseSession)[] = [
+const newColumns: (keyof CourseEvent)[] = [
     'course', 'description', 'activity', 'group', 'day', 'time', 'campus', 'location', 'duration', 'dates',
 ];
 
@@ -66,7 +66,7 @@ export const parseSheetRows = (rows: string[][]) => {
             duration: 60 * parseFloat(obj.duration.replace(/ hrs?$/, '')),
             day: days.indexOf(obj.day),
             time: parseTime(obj.time),
-        } as CourseSession;
+        } as CourseEvent;
     };
     
 

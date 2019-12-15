@@ -1,10 +1,10 @@
-import { TimetableState, CourseSession, SelectedActivities } from "./types";
+import { TimetableState, CourseEvent, SelectedActivities } from "./types";
 import produce from 'immer';
 import _ from "lodash";
 
 export type TimetableStateAction = {
     type: 'setAllSessions',
-    sessions: CourseSession[]
+    sessions: CourseEvent[]
 } | {
     type: 'setActivityGroup',
     course: string,
@@ -12,7 +12,7 @@ export type TimetableStateAction = {
     group: string | null,
 }
 
-export const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, sessions: CourseSession[]) => 
+export const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, sessions: CourseEvent[]) => 
     sessions.forEach(sess => {
         if (selectedGroups?.[sess.course]?.[sess.activity] === undefined) {
             _.set(selectedGroups, [sess.course, sess.activity], sess.group);

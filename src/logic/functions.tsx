@@ -1,9 +1,9 @@
-import { CourseSession } from "./types";
+import { CourseEvent, CourseActivity, CourseGroup } from "./types";
 import _ from "lodash";
 
-export const computeDayTimeArrays = (sessions: CourseSession[]) => {
+export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     const byDayTime = _.range(7)
-        .map(() => _.range(24).map(() => [] as CourseSession[]));
+        .map(() => _.range(24).map(() => [] as CourseEvent[]));
 
     sessions.forEach(session => {
         // we know the event starts somewhere in this hour.
@@ -23,7 +23,10 @@ export const computeDayTimeArrays = (sessions: CourseSession[]) => {
     return byDayTime;
 };
 
-export const makeSessionKey = (session: CourseSession) => 
+export const makeSessionKey = (session: CourseEvent) => 
     [session.course, session.activity, session.group, session.day, session.time.hour].join('|');
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
+
+export const isHighlighted = (session: CourseGroup, highlight: CourseActivity | null) => 
+    session.course === highlight?.course && session.activity === highlight.activity;
