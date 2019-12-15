@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import _ from 'lodash';
 import { CourseSession, DAY_NAMES } from './logic/types';
 import { computeDayTimeArrays, makeSessionKey, getCourseCode } from './logic/functions';
@@ -12,10 +12,16 @@ export type Props = {
 const START_HOUR = 8;
 const END_HOUR = 18;
 
+const typeTagStyle = css({
+    flexWrap: 'nowrap',
+});
+
 const sessionStyle = css({
+
+
     flexGrow: 1,
     flexBasis: 0,
-    wordBreak: 'break-all',
+    wordBreak: 'keep-all',
 
     // paddingTop: '0.5em',
     //lineHeight: 1,
@@ -34,7 +40,7 @@ const sessionStyle = css({
     borderLeft: '1px solid #dbdbdb',
     borderRight: '1px solid #dbdbdb',
     
-    backgroundColor: 'hsl(0, 0%, 96%)',
+    backgroundColor: 'hsl(0, 0%, 98%)',
 
     color: 'black',
 });
@@ -43,21 +49,21 @@ type TimetableSessionProps = {
     session: CourseSession
 }
 
-const TimetableSession = ({session}: TimetableSessionProps) => {
+const TimetableSession = (({session}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'is-info',
         'TUT': 'is-success',
         'PRA': 'is-warning',
     };
 
-    return <a key={makeSessionKey(session)} className={" " + sessionStyle}>
+    return <a className={" " + sessionStyle}>
         <span className="is-family-monospace has-text-weight-bold">{getCourseCode(session.course)}</span>
-        <div className="tags has-addons has-text-weight-semibold	">
-            <span className={"tag " + (activityCSS[session.activityType]) ?? "" }>{session.activity}</span>
-            <span className="tag is-dark ">{session.group}</span>
+        <div className={"tags has-addons has-text-weight-semibold " + typeTagStyle}>
+            <span className={"tag  " + (activityCSS[session.activityType]) ?? "" }>{session.activity}</span>
+            <span className="tag is-light is-dark ">{session.group}</span>
         </div>
     </a>;
-}
+});
 
 const timeStyle = css({
     display: 'flex',
@@ -89,7 +95,7 @@ type DayColumnProps = {
     daySessions: CourseSession[][]
 }
 
-const DayColumn = ({day, daySessions}: DayColumnProps) => {
+const DayColumn = (({day, daySessions}: DayColumnProps) => {
     const [timeHeader, ...timeColumn] = makeTimeElements(false);
     return <>
         {timeHeader}
@@ -98,11 +104,12 @@ const DayColumn = ({day, daySessions}: DayColumnProps) => {
             <React.Fragment key={h}>
                 {timeColumn[i]}
                 <div className={"td has-text-centered " + hourStyle}>
-                    {daySessions[h].map(s => <TimetableSession session={s}></TimetableSession>)}
+                    {daySessions[h].map(s => <TimetableSession key={makeSessionKey(s)} session={s}></TimetableSession>)}
                 </div>
-            </React.Fragment>)}
+            </React.Fragment>)
+        }
     </>;
-};
+});
 
 const Timetable: React.FC<Props> = ({selectedSessions}) => {
 

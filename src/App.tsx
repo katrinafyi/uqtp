@@ -23,7 +23,7 @@ const App: React.FC = () => {
   const onClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
     try {
-      const rows = await parseExcelFile(file!);
+      const rows = await parseExcelFile(file!); 
       const parsed = parseSheetRows(rows);
       if (!parsed) {
         setFileError("invalid timetable.");
