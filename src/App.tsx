@@ -66,7 +66,7 @@ const App: React.FC = () => {
 
   return <div className="container">
       <div className="section">
-        <h1 className="title">UQ Toilet Paper 🧻 <span className="tag is-link is-light">Beta</span></h1>
+        <h1 className="title">UQ Toilet Paper 🧻 <span className="tag is-light">Unofficial</span> <span className="tag is-link is-light">Beta</span></h1>
         <p className="block">Plan your timetable in peace, away from UQ's bureaucracy. Works on mobile!</p>
 
 
@@ -109,7 +109,7 @@ const App: React.FC = () => {
       </div>
       <footer className="footer">
         <div className="content has-text-centered">
-          <strong>UQ Toilet Paper 🧻</strong> is a timetable planner for UQ, built by&nbsp;
+          <strong>UQ Toilet Paper 🧻</strong> is a (unofficial) timetable planner for UQ, built by&nbsp;
           <a href="https://kentonlam.xyz">Kenton Lam</a>. 
           The source code is available on <a href="https://github.com/kentonlam/uqtp">GitHub</a>.
         </div>
