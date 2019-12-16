@@ -66,7 +66,7 @@ const App: React.FC = () => {
 
   return <div className="container">
       <div className="section">
-        <h1 className="title">UQ Toilet Paper 🧻</h1>
+        <h1 className="title">UQ Toilet Paper 🧻 <span className="tag is-link is-light">Beta</span></h1>
         <p className="block">Plan your timetable in peace, away from UQ's bureaucracy. Works on mobile!</p>
 
 
@@ -75,7 +75,10 @@ const App: React.FC = () => {
           <div className="field">
             <label className="label">Import Excel Timetable</label>
             <FileInput className="control" fileName={file && file.name} setFile={setFile}></FileInput>
+            <p className="help">Select your courses using the official&nbsp;
+            <a href="https://timetable.my.uq.edu.au/even/student">My Timetable</a> then export as Excel and load it here.</p>
             {fileError && <p className="help is-danger">Error: {fileError}</p>}
+
           </div>
           <div className="field">
             <div className="control">
@@ -87,6 +90,12 @@ const App: React.FC = () => {
         <hr></hr>
 
         <h4 className="title is-4">Courses</h4>
+        <div className="message is-warning">
+          <div className="message-body">
+            At present, any changes you make are <strong>not saved</strong> and will be lost 
+            when reloading the page.
+          </div>
+        </div>
         <SessionSelectors allActivities={activities} 
           selected={persistState.selectedGroups} 
           setSelected={setSelected}></SessionSelectors>
@@ -98,6 +107,13 @@ const App: React.FC = () => {
           <Timetable selectedSessions={selectedSessions}></Timetable>
         </HighlightContext.Provider>
       </div>
+      <footer className="footer">
+        <div className="content has-text-centered">
+          <strong>UQ Toilet Paper 🧻</strong> is a timetable planner for UQ, built by&nbsp;
+          <a href="https://kentonlam.xyz">Kenton Lam</a>. 
+          The source code is available on <a href="https://github.com/kentonlam/uqtp">GitHub</a>.
+        </div>
+      </footer>
     </div>;
   ;
 }
