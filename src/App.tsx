@@ -103,23 +103,23 @@ const App: React.FC = () => {
         <hr></hr>
 
         <h4 className="title is-4">Saved Timetables</h4>
+        <div className="message is-warning is-small"><div className="message-body">
+            Managing multiple timetables is currently <strong>not supported</strong>. The buttons below do nothing.
+        </div></div>
         <TimetableSelector {...{timetableNames}} current={persistState.current}></TimetableSelector>
         <hr></hr>
 
 
-        <h4 className="title is-4">Courses</h4>
-        <div className="message is-warning">
-          <div className="message-body">
-            At present, any changes you make are <strong>not saved</strong> and will be lost 
-            when reloading the page.
-          </div>
-        </div>
+        <h4 className="title is-4">Courses and Timetable</h4>
+        <div className="message is-info is-small"><div className="message-body">
+            Changes to your selected classes are saved automatically.
+        </div></div>
         <SessionSelectors allActivities={activities} 
           selected={timetable.selectedGroups} 
           setSelected={setSelected}></SessionSelectors>
 
 
-        <h4 className="title is-4">Timetable</h4>
+        {/* <h4 className="title is-4">Timetable</h4> */}
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
           <Timetable selectedSessions={selectedSessions}></Timetable>
         </HighlightContext.Provider>
