@@ -1,4 +1,4 @@
-import React, { useState, useReducer, useContext } from 'react';
+import React, { useState, useReducer, useContext, useEffect } from 'react';
 import logo from './logo.svg';
 import './App.scss';
 import _ from 'lodash';
@@ -11,20 +11,28 @@ import Timetable from './Timetable';
 
 import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
-import { TimetableState, DEFAULT_PERSIST, CourseEvent, CourseGroup, CourseActivity } from './logic/types';
+import { TimetableState, DEFAULT_PERSIST, CourseEvent, CourseGroup, CourseActivity, PersistState, EMPTY_TIMETABLE } from './logic/types';
 import SessionSelectors from './SessionSelectors';
 import { timetableStateReducer, TimetableStateAction } from './logic/reducers';
 import { HighlightContext } from './HightlightContext';
 import { isHighlighted } from './logic/functions';
+import produce from 'immer';
+import TimetableSelector from './TimetableSelector';
 
 const App: React.FC = () => {
   const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState<string>();
 
-  const [persistState, setPersistState] = useLocalStorage('timetableState', DEFAULT_PERSIST);
-  const dispatch = (action: TimetableStateAction) => {
-    setPersistState(timetableStateReducer(persistState, action));
+  const [persistState, setPersistState] = useLocalStorage<PersistState>('timetableState', DEFAULT_PERSIST);
+  
+  const savedTimetable = persistState?.timetables?.[persistState?.current];
+  const timetable = savedTimetable ?? EMPTY_TIMETABLE;
+  const dispatchTimetable = (action: TimetableStateAction) => {
+    setPersistState(produce(persistState, (draft) => {
+      draft.timetables[draft.current] = timetableStateReducer(timetable, action);
+    }));
   };
+
   console.log(persistState);
   const onClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
@@ -37,7 +45,7 @@ const App: React.FC = () => {
       }
 
       //console.log(JSON.stringify(parsed));
-      dispatch({type: 'setAllSessions', sessions: parsed});
+      dispatchTimetable({type: 'setAllSessions', sessions: parsed});
     } catch (e) {
       setFileError("error while importing: " + e.toString());
       return;
@@ -46,18 +54,16 @@ const App: React.FC = () => {
     setFileError(undefined);
   };
 
-  console.log(persistState.allSessions);
-  
-  const activities = _(persistState.allSessions)
+  const activities = _(timetable.allSessions)
     .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
     .uniqWith(_.isEqual).value();
 
   const setSelected = (course: string, activity: string, group: string | null) => {
-    dispatch({type: 'setActivityGroup', course, activity, group});
+    dispatchTimetable({type: 'setActivityGroup', course, activity, group});
   };
 
   const isSessionSelected = (x: CourseEvent) => 
-    _.get(persistState.selectedGroups, [x.course, x.activity], null) === x.group;
+    _.get(timetable.selectedGroups, [x.course, x.activity], null) === x.group;
     
   const [highlight, setHighlight] = useState<CourseActivity | null>(null);
   const setSelectedGroup = (group: string | null) => {
@@ -65,8 +71,11 @@ const App: React.FC = () => {
     setSelected(highlight.course, highlight.activity, group);
   }
 
-  const selectedSessions = persistState.allSessions
+  const selectedSessions = timetable.allSessions
     .filter(x => isSessionSelected(x) || isHighlighted(x, highlight));
+
+
+  const timetableNames = Object.keys(persistState.timetables).sort();
 
   return <div className="container">
       <div className="section">
@@ -80,7 +89,7 @@ const App: React.FC = () => {
             <label className="label">Import Excel Timetable</label>
             <FileInput className="control" fileName={file && file.name} setFile={setFile}></FileInput>
             <p className="help">Select your courses using the official&nbsp;
-            <a href="https://timetable.my.uq.edu.au/even/student">My Timetable</a> then export as Excel and load it here.</p>
+            <a href="https://timetable.my.uq.edu.au/even/student" target="_blank" rel="noopener noreferrer">My Timetable</a> then export as Excel and load it here.</p>
             {fileError && <p className="help is-danger">Error: {fileError}</p>}
 
           </div>
@@ -93,6 +102,11 @@ const App: React.FC = () => {
 
         <hr></hr>
 
+        <h4 className="title is-4">Saved Timetables</h4>
+        <TimetableSelector {...{timetableNames}} current={persistState.current}></TimetableSelector>
+        <hr></hr>
+
+
         <h4 className="title is-4">Courses</h4>
         <div className="message is-warning">
           <div className="message-body">
@@ -101,10 +115,9 @@ const App: React.FC = () => {
           </div>
         </div>
         <SessionSelectors allActivities={activities} 
-          selected={persistState.selectedGroups} 
+          selected={timetable.selectedGroups} 
           setSelected={setSelected}></SessionSelectors>
 
-        <hr></hr>
 
         <h4 className="title is-4">Timetable</h4>
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>

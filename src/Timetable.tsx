@@ -34,8 +34,9 @@ const sessionStyle = css({
     flexWrap: 'wrap',
 
 
-    marginLeft: '2px',
-    marginRight: '2px' ,
+    // marginLeft: '2px',
+    // marginRight: '2px' ,
+    marginRight: '-1px',
 
     borderRadius: '0px',
     borderLeft: '1px solid #dbdbdb',
@@ -101,8 +102,8 @@ const hourStyle = css({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'stretch',
-    marginLeft: '-2px',
-    marginRight: '-2px',
+    // marginLeft: '-2px',
+    // marginRight: '-2px',
 
     height: '3.9rem',
 });

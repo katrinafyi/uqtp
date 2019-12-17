@@ -1,4 +1,4 @@
-import { TimetableState, CourseEvent, SelectedActivities } from "./types";
+import { TimetableState, CourseEvent, SelectedActivities, PersistState } from "./types";
 import produce from 'immer';
 import _ from "lodash";
 
@@ -39,3 +39,22 @@ export const timetableStateReducer = (state: TimetableState, action: TimetableSt
             throw new Error('invalid dispatched action type');
     }
 });
+
+export type PersistStateAction = {
+    type: 'renameTimetable',
+    old: string,
+    new: string,
+} | {
+    type: 'copyTimetable',
+    old: string, 
+    new: string,
+} | {
+    type: 'deleteTimetable',
+    name: string,
+}
+
+export const persistStateReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
+    
+});
+
+export type PersistStateReducer = typeof persistStateReducer;
