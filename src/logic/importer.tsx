@@ -39,17 +39,23 @@ const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 export const parseSheetRows = (rows: string[][]) => {
     if (rows[0] && rows[0].length === 0)
         rows = rows.slice(1);
-    if (rows.length === 0)
+    if (rows.length === 0) {
+        console.error("spreadsheet has no rows.");
         return null;
+    }
 
     const expectedCols = 10;
 
-    if (!rows.every((r) => r.length === expectedCols))
+    if (!rows.every((r) => r.length === expectedCols)) {
+        console.error("spreadsheet has uneven columns.");
         return null;
+    }
 
     const headings = rows[0];
-    if (!_.isEqual(headings, oldColumns))
+    if (!_.isEqual(headings, oldColumns)) {
+        console.error("spreadsheet headings do not match expected.");
         return null;
+    }
 
     const parseRow = (row: string[]) =>
         Object.fromEntries(row.map((x, i) => [newColumns[i], x]));
