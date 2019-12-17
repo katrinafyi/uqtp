@@ -1,5 +1,5 @@
 import React, { useState, ButtonHTMLAttributes, DetailedHTMLProps } from "react"
-import { FaSave, FaPencilAlt, FaCopy } from "react-icons/fa";
+import { FaSave, FaPencilAlt, FaCopy, FaTimes } from "react-icons/fa";
 
 export type TimetableSelectorProps = {
     timetableNames: string[],
@@ -11,9 +11,10 @@ export const TimetableSelector = ({ timetableNames, current }: TimetableSelector
 
     const [isRenaming, setIsRenaming] = useState(false);
 
-    const makeTag = (x: string) => <><div key={x} className="tags has-addons are-medium">
-        <span className="is-link tag is-clickable">{x}</span> <span className="tag is-delete is-clickable"></span>
-    </div></>;
+    const makeTag = (x: string) => <div className="control"><div key={x} className="buttons has-addons">
+        <button className="button is-normal is-link">{x}</button>
+        <button className="button is-normal is-light"><FaTimes></FaTimes></button>
+    </div></div>;
 
     const onClickRename = (ev: React.MouseEvent<HTMLElement>) => {
         if (isRenaming) {
@@ -28,19 +29,20 @@ export const TimetableSelector = ({ timetableNames, current }: TimetableSelector
     }
 
     return <form className="form">
-        <div className={"field has-addons"}>
+        <div className={"field has-addons "}>
             <div className="control">
-                <input type="text" className="input" value={current}/>
+                <input type="text" className="input is-medium " value={current}/>
             </div>
             <div className="control">
-                <button className="button is-success" type="submit" onClick={onClickRename}><FaPencilAlt></FaPencilAlt></button>
+                <button className="button is-medium is-success" type="submit" onClick={onClickRename}><FaPencilAlt></FaPencilAlt></button>
             </div>
             <div className="control">
-                <button className="button is-link"><FaCopy></FaCopy></button>
+                <button className="button is-medium  is-link"><FaCopy></FaCopy></button>
             </div>
         </div>
 
-        <div className="tags are-medium">
+        <div className="field is-grouped is-grouped-multiline">
+            {makeTag("new timetable")}
             {timetableNames.map(makeTag)}
         </div>
         {!savedValid && <div className="message is-danger">
