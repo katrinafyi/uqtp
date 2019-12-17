@@ -2,6 +2,7 @@ import React, { useState, useReducer, useContext } from 'react';
 import logo from './logo.svg';
 import './App.scss';
 import _ from 'lodash';
+import {useLocalStorage} from 'react-use';
 
 
 import DayColumn from './DayColumn';
@@ -12,7 +13,7 @@ import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { TimetableState, DEFAULT_PERSIST, CourseEvent, CourseGroup, CourseActivity } from './logic/types';
 import SessionSelectors from './SessionSelectors';
-import { timetableStateReducer } from './logic/reducers';
+import { timetableStateReducer, TimetableStateAction } from './logic/reducers';
 import { HighlightContext } from './HightlightContext';
 import { isHighlighted } from './logic/functions';
 
@@ -20,7 +21,10 @@ const App: React.FC = () => {
   const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState<string>();
 
-  const [persistState, dispatch] = useReducer(timetableStateReducer, DEFAULT_PERSIST);
+  const [persistState, setPersistState] = useLocalStorage('timetableState', DEFAULT_PERSIST);
+  const dispatch = (action: TimetableStateAction) => {
+    setPersistState(timetableStateReducer(persistState, action));
+  };
   console.log(persistState);
   const onClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
     ev.preventDefault();
