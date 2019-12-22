@@ -1,6 +1,7 @@
-import { TimetableState, CourseEvent, SelectedActivities, PersistState } from "./types";
+import { TimetableState, CourseEvent, SelectedActivities } from "./types";
 import produce from 'immer';
 import _ from "lodash";
+import { PersistState } from "./schema";
 
 export type TimetableStateAction = {
     type: 'setAllSessions',

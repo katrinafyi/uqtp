@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { CourseGroup } from './logic/types';
+import { CourseGroup } from './state/types';
 import _ from 'lodash';
 
 interface CourseSessionSelectorProps {

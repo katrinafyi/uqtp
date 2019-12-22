@@ -1,5 +1,5 @@
 import React from 'react';
-import { CourseGroup, CourseActivity } from './logic/types';
+import { CourseGroup, CourseActivity } from './state/types';
 
 export type HightlightContextType = {
     highlight: CourseActivity | null,

@@ -11,14 +11,15 @@ import Timetable from './Timetable';
 
 import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
-import { TimetableState, DEFAULT_PERSIST, CourseEvent, CourseGroup, CourseActivity, PersistState, EMPTY_TIMETABLE } from './logic/types';
+import { TimetableState, CourseEvent, CourseGroup, CourseActivity, EMPTY_TIMETABLE } from './state/types';
 import SessionSelectors from './SessionSelectors';
-import { timetableStateReducer, TimetableStateAction } from './logic/reducers';
+import { timetableStateReducer, TimetableStateAction } from './state/reducers';
 import { HighlightContext } from './HightlightContext';
 import { isHighlighted } from './logic/functions';
 import produce from 'immer';
 import TimetableSelector from './TimetableSelector';
 import StateErrorBoundary from './StateErrorBoundary';
+import { PersistState, DEFAULT_PERSIST } from './state/schema';
 
 const Main: React.FC = () => {
   const [file, setFile] = useState<File>();

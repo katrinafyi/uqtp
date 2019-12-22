@@ -1,6 +1,6 @@
 import XLSX from 'xlsx';
 import _ from 'lodash';
-import { CourseEvent, DayOfWeek } from './types';
+import { CourseEvent, DayOfWeek } from '../state/types';
 import parse from 'date-fns/parse'
 import { minTime } from 'date-fns';
 

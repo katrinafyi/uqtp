@@ -1,6 +1,6 @@
 import React, { memo, useContext } from 'react';
 import _ from 'lodash';
-import { CourseEvent, DAY_NAMES } from './logic/types';
+import { CourseEvent, DAY_NAMES } from './state/types';
 import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted } from './logic/functions';
 
 import {css} from 'emotion';

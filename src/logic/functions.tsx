@@ -1,4 +1,4 @@
-import { CourseEvent, CourseActivity, CourseGroup } from "./types";
+import { CourseEvent, CourseActivity, CourseGroup } from "../state/types";
 import _ from "lodash";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
