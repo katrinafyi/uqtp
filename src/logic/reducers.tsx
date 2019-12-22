@@ -51,6 +51,9 @@ export type PersistStateAction = {
 } | {
     type: 'deleteTimetable',
     name: string,
+} | {
+    type: 'selectTimetable',
+    name: string
 }
 
 export const persistStateReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {

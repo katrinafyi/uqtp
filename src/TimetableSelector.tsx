@@ -34,7 +34,7 @@ export const TimetableSelector = ({ timetableNames, current }: TimetableSelector
             <div className="control">
                 <div className={"field has-addons "}>
                     <div className="control">
-                        <input type="text" className="input  " value={current}/>
+                        <input type="text" className="input  " defaultValue={current}/>
                     </div>
                     <div className="control">
                         <button className="button  is-success" type="submit" onClick={onClickRename}><FaPencilAlt></FaPencilAlt></button>
