@@ -19,13 +19,21 @@ import { isHighlighted } from './logic/functions';
 import produce from 'immer';
 import TimetableSelector from './TimetableSelector';
 import StateErrorBoundary from './StateErrorBoundary';
-import { PersistState, DEFAULT_PERSIST } from './state/schema';
+import { PersistState, DEFAULT_PERSIST, CURRENT_VERSION } from './state/schema';
+import { migratePeristState } from './state/migrations';
 
 const Main: React.FC = () => {
   const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState<string>();
 
   const [persistState, setPersistState] = useLocalStorage<PersistState>('timetableState', DEFAULT_PERSIST);
+  
+  useEffect(() => {
+    const migratedState = migratePeristState(persistState, CURRENT_VERSION);
+    if (migratedState !== null)
+      setPersistState(migratedState);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const savedTimetable = persistState?.timetables?.[persistState?.current];
   const timetable = savedTimetable ?? EMPTY_TIMETABLE;
