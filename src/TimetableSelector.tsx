@@ -1,19 +1,22 @@
 import React, { useState, ButtonHTMLAttributes, DetailedHTMLProps, createRef } from "react"
 import { FaSave, FaPencilAlt, FaCopy, FaTimes, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "emotion";
+import { PersistStateAction } from "./state/reducers";
 
 export type TimetableSelectorProps = {
     timetableNames: string[],
-    current: string
+    current: string,
+    dispatch: (action: PersistStateAction) => any
 }
 
 const inputStyle = css({
     width: '100%',
     border: 'none !important',
     outline: 'none !important',
+    lineHeight: 1,
 });
 
-export const TimetableSelector = ({ timetableNames, current }: TimetableSelectorProps) => {
+export const TimetableSelector = ({ timetableNames, current, dispatch }: TimetableSelectorProps) => {
     const savedValid = timetableNames.indexOf(current) !== -1;
     
     const renameRef = createRef<HTMLInputElement>();
@@ -29,12 +32,10 @@ export const TimetableSelector = ({ timetableNames, current }: TimetableSelector
         if (isRenaming) {
             // console.log('clicked while renaming');
             const newName = renameRef.current!.value;
-            if (newName !== current)
-                setInvalidName(newName);
-            else {
-                setIsRenaming(false);
-                setInvalidName(null);
-            }
+            // valid rename
+            dispatch({type: 'renameTimetable', old: current, new: newName});
+            setIsRenaming(false);
+            setInvalidName(null);
         } else {
             // console.log('entering renaming mode');
             renameRef.current!.focus();
@@ -80,7 +81,7 @@ export const TimetableSelector = ({ timetableNames, current }: TimetableSelector
             <label className="label">Saved Timetables</label>
             <div className="control">
                 <div className="field is-grouped is-grouped-multiline">
-                    {timetableNames.map(makeTag)}
+                    {timetableNames.sort().map(makeTag)}
                 </div>
             </div>
         </div>

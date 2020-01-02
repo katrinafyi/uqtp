@@ -10,7 +10,7 @@ import FileInput from './FileInput';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { CourseEvent, CourseGroup, CourseActivity, EMPTY_TIMETABLE } from './state/types';
 import SessionSelectors from './SessionSelectors';
-import { timetableStateReducer, TimetableStateAction } from './state/reducers';
+import { timetableStateReducer, TimetableStateAction, PersistStateAction, persistStateReducer } from './state/reducers';
 import { HighlightContext } from './HightlightContext';
 import { isHighlighted } from './logic/functions';
 import produce from 'immer';
@@ -37,6 +37,10 @@ const Main: React.FC = () => {
     setPersistState(produce(persistState, (draft) => {
       draft.timetables[draft.current] = timetableStateReducer(timetable, action);
     }));
+  };
+
+  const dispatchPersist = (action: PersistStateAction) => {
+    setPersistState(persistStateReducer(persistState, action));
   };
 
   console.log(persistState);
@@ -88,7 +92,8 @@ const Main: React.FC = () => {
         {/* <div className="message is-warning is-small"><div className="message-body">
             Managing multiple timetables is currently <strong>not supported</strong>. The buttons below do nothing.
         </div></div> */}
-        <TimetableSelector {...{timetableNames}} current={persistState.current}></TimetableSelector>
+        <TimetableSelector {...{timetableNames}} current={persistState.current}
+          dispatch={dispatchPersist}></TimetableSelector>
         <hr></hr>
 
         <div className="title is-4">Data</div>

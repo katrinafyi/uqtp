@@ -102,6 +102,7 @@ export const persistStateReducer = (state: PersistState, action: PersistStateAct
             copyTimetable(action.new, action.old);
             break;
         case 'renameTimetable':
+            if (action.new === action.old) break;
             copyTimetable(action.new, action.old);
             deleteTimetable(action.old);
             break;
