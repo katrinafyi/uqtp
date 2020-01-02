@@ -22,6 +22,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
     const renameRef = createRef<HTMLInputElement>();
     const [isRenaming, setIsRenaming] = useState(false);
     const [invalidName, setInvalidName] = useState<string | null>(null);
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     const onClickTag = (ev: React.MouseEvent<HTMLButtonElement>) => {
         dispatch({type: 'selectTimetable', name: (ev.target as HTMLButtonElement).value});
@@ -55,11 +56,20 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
     }
 
     const onClickDelete = (ev: React.MouseEvent<HTMLElement>) => {
-        dispatch({type: 'deleteTimetable', name: current});
+        if (confirmDelete) {
+            dispatch({type: 'deleteTimetable', name: current});
+            setConfirmDelete(false);
+        } else {
+            setConfirmDelete(true);
+        }
     }
 
     const onClickNew = (ev: React.MouseEvent<HTMLElement>) => {
         dispatch({type: 'newTimetable'});
+    }
+
+    const onClickCancel = () => {
+        setConfirmDelete(false);
     }
 
     return <form className="form">
@@ -67,7 +77,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
             <div className="control">
                 <input ref={renameRef} type="text" className={"title "+inputStyle} 
                     readOnly={!isRenaming} {...{[isRenaming ? 'defaultValue' : 'value']: current}}
-                    placeholder="Enter timetable name"/>
+                    placeholder="timetable name…"/>
             </div>
         </div>
         <div className="field is-grouped">
@@ -108,6 +118,25 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
                 <strong>Error:</strong> The selected timetable "{current}" could not be loaded.
             </div>
         </div>}
+        
+        <div className={"modal " + (confirmDelete ? 'is-active' : '')}>
+            <div className="modal-background"></div>
+            <div className="modal-card">
+                <header className="modal-card-head">
+                    <p className="modal-card-title">Delete timetable?</p>
+                    <button className="delete" aria-label="close" type="button" onClick={onClickCancel}></button>
+                </header>
+                <section className="modal-card-body">
+                    Are you sure you want to delete "{current}"?
+                </section>
+                <footer className="modal-card-foot">
+                    <button className="button is-danger" type="button" onClick={onClickDelete}>
+                        <span className="icon"><FaTrash></FaTrash></span><span> Delete</span>
+                    </button>
+                    <button className="button" type="button" onClick={onClickCancel}>Cancel</button>
+                </footer>
+            </div>
+        </div>
     </form>;
 }
 
