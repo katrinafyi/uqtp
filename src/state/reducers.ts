@@ -62,10 +62,17 @@ export type PersistStateAction = {
 const newUniqueName = (name: string, existing: string[]) => {
     if (!existing.includes(name))
         return name;
-    for (let i = 1; ; i++) {
+    const match = / \((\d+)\)$/.exec(name);
+    let i = 1;
+    if (match) {
+        i = parseInt(match[1]);
+        name = name.slice(0, -match[0].length);
+    }
+    while (true) {
         const newName = `${name} (${i})`;
         if (!existing.includes(newName)) 
             return newName;
+        i++;
     }
 }
 
@@ -82,8 +89,13 @@ export const persistStateReducer = (state: PersistState, action: PersistStateAct
     };
     const deleteTimetable = (name: string) => {
         delete draft.timetables[name];
-        if (Object.keys(draft.timetables).length === 0)
-            newTimetable('new timetable');
+        if (name === draft.current) {
+            const newCurrent = Object.keys(draft.timetables)[0];
+            if (newCurrent === undefined)
+                newTimetable('new timetable');
+            else 
+                selectTimetable(newCurrent);
+        }
     };
     const copyTimetable = (newName: string, oldName: string) => {
         const uniqName = newTimetable(newName);
