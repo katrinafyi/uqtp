@@ -1,4 +1,4 @@
-import { TimetableState, CourseEvent, SelectedActivities } from "./types";
+import { TimetableState, CourseEvent, SelectedActivities, EMPTY_TIMETABLE } from "./types";
 import produce from 'immer';
 import _ from "lodash";
 import { PersistState } from "./schema";
@@ -54,11 +54,63 @@ export type PersistStateAction = {
     name: string,
 } | {
     type: 'selectTimetable',
-    name: string
+    name: string,
+} | {
+    type: 'newTimetable',
+}
+
+const newUniqueName = (name: string, existing: string[]) => {
+    if (!existing.includes(name))
+        return name;
+    for (let i = 1; ; i++) {
+        const newName = `${name} (${i})`;
+        if (!existing.includes(newName)) 
+            return newName;
+    }
 }
 
 export const persistStateReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
-    
+
+    const selectTimetable = (name: string) => {
+        draft.current = name;
+    };
+    const newTimetable = (name: string) => {
+        const newName = newUniqueName(name, Object.keys(draft.timetables));
+        draft.timetables[newName] = EMPTY_TIMETABLE;
+        selectTimetable(newName);
+        return newName;
+    };
+    const deleteTimetable = (name: string) => {
+        delete draft.timetables[name];
+        if (Object.keys(draft.timetables).length === 0)
+            newTimetable('new timetable');
+    };
+    const copyTimetable = (newName: string, oldName: string) => {
+        const uniqName = newTimetable(newName);
+        draft.timetables[uniqName] = draft.timetables[oldName];
+        selectTimetable(uniqName);
+    };
+
+    switch (action.type) {
+        case 'deleteTimetable':
+            deleteTimetable(action.name);
+            break;
+        case 'newTimetable':
+            newTimetable('new timetable');
+            break;
+        case 'copyTimetable':
+            copyTimetable(action.new, action.old);
+            break;
+        case 'renameTimetable':
+            copyTimetable(action.new, action.old);
+            deleteTimetable(action.old);
+            break;
+        case 'selectTimetable':
+            selectTimetable(action.name)
+            break;
+        default:
+            throw new Error();
+    }
 });
 
 export type PersistStateReducer = typeof persistStateReducer;
