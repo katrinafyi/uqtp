@@ -12,6 +12,7 @@
     "@types/node": "^12.12.16",
     "@types/react": "^16.9.16",
     "@types/react-dom": "^16.9.4",
+    "a11y-react-emoji": "^1.1.1",
     "bulma": "^0.8.0",
     "date-fns": "^2.8.1",
     "emotion": "^10.0.23",
