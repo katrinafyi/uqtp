@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { CourseGroup } from './state/types';
 import _ from 'lodash';
+import { FaCross, FaTimes } from 'react-icons/fa';
 
 interface CourseSessionSelectorProps {
     activities: CourseGroup[],
@@ -42,10 +43,23 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
         </div></div>
     </div>;
 
-    return <div className="box">
-        <div className="title is-5 is-no-wrap">{activities[0].course.split('_')[0]}</div>
-        {Object.entries(actTypes).map(([type, options]) => 
-            makeActivitySelector(type, options.map(x => x.group)))}
+    return <div className="card">
+        <header className="card-header">
+            <p className="card-header-title is-no-wrap" title={activities[0].course}>
+                {activities[0].course}
+            </p>
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+            <a className="card-header-icon" type="button">
+                <span className="icon">
+                    <FaTimes></FaTimes>
+                </span>
+            </a>
+        </header>
+        <div className="card-content">
+            {Object.entries(actTypes).map(([type, options]) => 
+                makeActivitySelector(type, options.map(x => x.group)))}
+        </div>
+        
     </div>;
 }
 
