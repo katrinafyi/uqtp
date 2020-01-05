@@ -17,10 +17,13 @@ import produce from 'immer';
 import TimetableSelector from './TimetableSelector';
 import { PersistState, DEFAULT_PERSIST, CURRENT_VERSION } from './state/schema';
 import { migratePeristState } from './state/migrations';
+import { FaInfoCircle, FaQuestionCircle, FaTrash } from 'react-icons/fa';
+import Emoji from 'a11y-react-emoji';
+import { MyTimetableHelp } from './MyTimetableHelp';
 
 const Main: React.FC = () => {
-  const [file, setFile] = useState<File>();
   const [fileError, setFileError] = useState<string>();
+  const [showHelp, setShowHelp] = useState(false);
 
   const [persistState, setPersistState] = useLocalStorage<PersistState>('timetableState', DEFAULT_PERSIST);
   
@@ -43,9 +46,9 @@ const Main: React.FC = () => {
     setPersistState(persistStateReducer(persistState, action));
   };
 
-  console.log(persistState);
-  const onClick = async (ev: React.MouseEvent<HTMLButtonElement>) => {
-    ev.preventDefault();
+  // console.log(persistState);
+  const importFile = async (file: File | undefined) => {
+    // ev.preventDefault();
     try {
       const rows = await parseExcelFile(file!); 
       const parsed = parseSheetRows(rows);
@@ -60,7 +63,6 @@ const Main: React.FC = () => {
       setFileError("error while importing: " + e.toString());
       return;
     }
-
     setFileError(undefined);
   };
 
@@ -87,6 +89,9 @@ const Main: React.FC = () => {
 
   const timetableNames = Object.keys(persistState.timetables).sort();
 
+  
+  const onClickCancel = () => setShowHelp(false);
+
   return <>
       <div className="container">
         {/* <div className="message is-warning is-small"><div className="message-body">
@@ -96,23 +101,39 @@ const Main: React.FC = () => {
           dispatch={dispatchPersist}></TimetableSelector>
         <hr></hr>
 
-        <div className="title is-4">Data</div>
+        {/* <div className="title is-4">Data</div> */}
         <form className="form block">
-          <div className="field">
-            <label className="label">Import Excel Timetable</label>
-            <FileInput className="control" fileName={file && file.name} setFile={setFile}></FileInput>
-            <p className="help">
-              Select your courses using the official <a href="https://timetable.my.uq.edu.au/even/student" target="_blank" rel="noopener noreferrer">My Timetable</a> then export as Excel and load it here.
-            </p>
-            {fileError && <p className="help is-danger">Error: {fileError}</p>}
-
-          </div>
-          <div className="field">
+          <label className="label">Import courses from My Timetable</label>
+          <div className="field has-addons">
+            <FileInput className="control" fileName={""} setFile={importFile}></FileInput>
             <div className="control">
-              <button disabled={!file} className="button is-link" onClick={onClick}>Import</button>
+              <button className="button" type="button" onClick={() => setShowHelp(true)}>
+                <span className="icon"><FaQuestionCircle></FaQuestionCircle></span>
+              </button>
             </div>
           </div>
+          <div className="field">
+            <p className="help">
+              Export as Excel from <a href="https://timetable.my.uq.edu.au/even/timetable/#subjects" target="_blank" rel="noopener noreferrer">UQ Public Timetable</a>.
+            </p>
+          </div>
         </form>
+
+        <div className={"modal " + (showHelp ? 'is-active' : '')}>
+            <div className="modal-background" onClick={onClickCancel}></div>
+            <div className="modal-card">
+                <header className="modal-card-head">
+                    <p className="modal-card-title">Help</p>
+                    <button className="delete" aria-label="close" type="button" onClick={onClickCancel}></button>
+                </header>
+                <section className="modal-card-body">
+                    <MyTimetableHelp></MyTimetableHelp>
+                </section>
+                <footer className="modal-card-foot">
+                    <button className="button" type="button" onClick={onClickCancel}>Close</button>
+                </footer>
+            </div>
+        </div>
         <hr/>
 
 

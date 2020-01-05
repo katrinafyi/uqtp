@@ -12,11 +12,12 @@ export const FileInput = ({setFile, fileName, ...other}: Props) => {
         setFile(ev.target.files![0]);
     };
 
-    other.className = (other.className || '') + " file has-name";
+    other.className = (other.className || '') + " file";
 
     return <div {...other}>
         <label className="file-label">
-            <input className="file-input" type="file" onChange={onChange}/>
+            <input className="file-input" type="file" onChange={onChange} 
+                accept=".xls"/>
             <span className="file-cta">
                 <span className="file-icon">
                     <FaFileUpload></FaFileUpload>
@@ -25,9 +26,9 @@ export const FileInput = ({setFile, fileName, ...other}: Props) => {
                     Browse...
                 </span>
             </span>
-            <span className="file-name">
+            {/* <span className="file-name">
                 {!fileName ? "(none)" : fileName}
-            </span>
+            </span> */}
         </label>
     </div>;
 };
