@@ -20,19 +20,22 @@ import { migratePeristState } from './state/migrations';
 import { FaInfoCircle, FaQuestionCircle, FaTrash } from 'react-icons/fa';
 import Emoji from 'a11y-react-emoji';
 import { MyTimetableHelp } from './MyTimetableHelp';
+import { rootReducer } from './state/store';
+import { createStore } from 'redux';
 
 const Main: React.FC = () => {
   const [fileError, setFileError] = useState<string>();
   const [showHelp, setShowHelp] = useState(false);
 
-  const [persistState, setPersistState] = useLocalStorage<PersistState>('timetableState', DEFAULT_PERSIST);
-  
   useEffect(() => {
     const migratedState = migratePeristState(persistState, CURRENT_VERSION);
     if (migratedState !== null)
       setPersistState(migratedState);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  rootStore.subscribe(() => {
+    setPersistState(rootStore.getState());
+  });
   
   const savedTimetable = persistState?.timetables?.[persistState?.current];
   const timetable = savedTimetable ?? EMPTY_TIMETABLE;

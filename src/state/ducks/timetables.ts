@@ -26,7 +26,7 @@ const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, session
         }
     });
 
-const reducer = (state: TimetableState, action: TimetableStateAction) => produce(state, (draft) => {
+const timetableReducer = (state: TimetableState, action: TimetableStateAction) => produce(state, (draft) => {
     // console.log('producing new state for action:');
     // console.log(action);
     
@@ -43,8 +43,8 @@ const reducer = (state: TimetableState, action: TimetableStateAction) => produce
             }
             break;
         default:
-            throw new Error('invalid dispatched action type');
+            return;
     }
 });
 
-export default reducer;
+export default timetableReducer;

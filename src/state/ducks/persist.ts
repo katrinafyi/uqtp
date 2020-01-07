@@ -48,7 +48,7 @@ const newUniqueName = (name: string, existing: string[]) => {
     }
 }
 
-const reducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
+const persistReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
 
     const selectTimetable = (name: string) => {
         draft.current = name;
@@ -94,9 +94,9 @@ const reducer = (state: PersistState, action: PersistStateAction) => produce(sta
             selectTimetable(action.name)
             break;
         default:
-            throw new Error();
+            return;
     }
 });
 
 // export type PersistStateReducer = typeof persistStateReducer;
-export default reducer;
+export default persistReducer;
