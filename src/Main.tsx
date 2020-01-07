@@ -109,7 +109,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetableNames, 
         <h4 className="title is-4">Courses and Timetable</h4>
         <div className="message is-info is-small"><div className="message-body">
             Changes to your selected classes are saved automatically. 
-            Your timetables are saved in <em>browser storage</em> and 
+            Your timetables are saved in <em>local browser storage</em> and 
             may be lost if you clear your cookies / site data.
         </div></div>
         <SessionSelectors allActivities={activities} 

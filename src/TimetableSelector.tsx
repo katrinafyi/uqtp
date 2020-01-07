@@ -21,7 +21,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
     
     const renameRef = createRef<HTMLInputElement>();
     const [isRenaming, setIsRenaming] = useState(false);
-    const [invalidName, setInvalidName] = useState<string | null>(null);
+    const [name, setName] = useState<string>(current);
     const [confirmDelete, setConfirmDelete] = useState(false);
 
     const onClickTag = (ev: React.MouseEvent<HTMLButtonElement>) => {
@@ -41,7 +41,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
             // valid rename
             dispatch({type: 'renameTimetable', old: current, new: newName});
             setIsRenaming(false);
-            setInvalidName(null);
+            setName(newName);
         } else {
             // console.log('entering renaming mode');
             renameRef.current!.focus();
@@ -76,7 +76,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
         <div className="field">
             <div className="control">
                 <input ref={renameRef} type="text" className={"title "+inputStyle} 
-                    readOnly={!isRenaming} {...{[isRenaming ? 'defaultValue' : 'value']: current}}
+                    readOnly={!isRenaming} value={name} onChange={(ev) => setName(ev.target.value)}
                     placeholder="timetable name…"/>
             </div>
         </div>
@@ -102,7 +102,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
                     <span className="icon"><FaPlus></FaPlus></span><span> New</span>
                 </button>
             </div>}
-            {invalidName !== null && <p className="help is-danger">Timetable "{invalidName}" already exists.</p>}
+            {/* {name !== null && <p className="help is-danger">Timetable "{name}" already exists.</p>} */}
         </div>
         <div className="field">
             <label className="label">Saved Timetables</label>
