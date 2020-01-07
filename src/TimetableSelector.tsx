@@ -37,11 +37,9 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
     const onClickRename = (ev: React.MouseEvent<HTMLElement>) => {
         if (isRenaming) {
             // console.log('clicked while renaming');
-            const newName = renameRef.current!.value;
             // valid rename
-            dispatch({type: 'renameTimetable', old: current, new: newName});
+            dispatch({type: 'renameTimetable', old: current, new: name});
             setIsRenaming(false);
-            setName(newName);
         } else {
             // console.log('entering renaming mode');
             renameRef.current!.focus();
