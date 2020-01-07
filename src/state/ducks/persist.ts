@@ -1,45 +1,6 @@
-import { TimetableState, CourseEvent, SelectedActivities, EMPTY_TIMETABLE } from "./types";
-import produce from 'immer';
-import _ from "lodash";
-import { PersistState } from "./schema";
-
-export type TimetableStateAction = {
-    type: 'setAllSessions',
-    sessions: CourseEvent[]
-} | {
-    type: 'setActivityGroup',
-    course: string,
-    activity: string,
-    group: string | null,
-}
-
-export const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, sessions: CourseEvent[]) => 
-    sessions.forEach(sess => {
-        if (selectedGroups?.[sess.course]?.[sess.activity] === undefined) {
-            _.set(selectedGroups, [sess.course, sess.activity], sess.group);
-        }
-    });
-
-export const timetableStateReducer = (state: TimetableState, action: TimetableStateAction) => produce(state, (draft) => {
-    // console.log('producing new state for action:');
-    // console.log(action);
-    
-    switch (action.type) {
-        case 'setAllSessions':
-            draft.allSessions = action.sessions;
-            setDefaultGroupsForSessions(draft.selectedGroups, action.sessions);
-            break;
-        case 'setActivityGroup':
-            if (action.group === null) {
-                _.unset(draft.selectedGroups, [action.course, action.activity]);
-            } else {
-                _.set(draft.selectedGroups, [action.course, action.activity], action.group);
-            }
-            break;
-        default:
-            throw new Error('invalid dispatched action type');
-    }
-});
+import { PersistState } from "../schema";
+import produce from "immer";
+import { EMPTY_TIMETABLE } from "../types";
 
 export type PersistStateAction = {
     type: 'renameTimetable',
@@ -59,6 +20,17 @@ export type PersistStateAction = {
     type: 'newTimetable',
 }
 
+export const renameTimetable = (oldName: string, newName: string): PersistStateAction  =>
+    ({ type: 'renameTimetable', old: oldName, new: newName });
+export const copyTimetable = (oldName: string, newName: string): PersistStateAction => 
+    ({ type: 'copyTimetable', old: oldName, new: newName });
+export const deleteTimetable = (name: string): PersistStateAction => 
+    ({ type: 'deleteTimetable', name })
+export const selectTimetable = (name: string): PersistStateAction => 
+    ({ type: 'selectTimetable', name })
+export const newTimetable = (): PersistStateAction => 
+    ({ type: 'newTimetable' })
+
 const newUniqueName = (name: string, existing: string[]) => {
     if (!existing.includes(name))
         return name;
@@ -76,7 +48,7 @@ const newUniqueName = (name: string, existing: string[]) => {
     }
 }
 
-export const persistStateReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
+const reducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
 
     const selectTimetable = (name: string) => {
         draft.current = name;
@@ -126,4 +98,5 @@ export const persistStateReducer = (state: PersistState, action: PersistStateAct
     }
 });
 
-export type PersistStateReducer = typeof persistStateReducer;
+// export type PersistStateReducer = typeof persistStateReducer;
+export default reducer;
