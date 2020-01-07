@@ -1,55 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import './App.scss';
 import _ from 'lodash';
-import {useLocalStorage} from 'react-use';
-
-
-import Timetable from './Timetable';
-
+import React, { Dispatch, useState } from 'react';
+import { FaQuestionCircle } from 'react-icons/fa';
+import { connect } from 'react-redux';
+import './App.scss';
 import FileInput from './FileInput';
-import { parseExcelFile, parseSheetRows } from './logic/importer';
-import { CourseEvent, CourseGroup, CourseActivity, EMPTY_TIMETABLE } from './state/types';
-import SessionSelectors from './SessionSelectors';
-import { timetableStateReducer, TimetableStateAction, PersistStateAction, persistStateReducer } from './state/reducers';
 import { HighlightContext } from './HightlightContext';
 import { isHighlighted } from './logic/functions';
-import produce from 'immer';
-import TimetableSelector from './TimetableSelector';
-import { PersistState, DEFAULT_PERSIST, CURRENT_VERSION } from './state/schema';
-import { migratePeristState } from './state/migrations';
-import { FaInfoCircle, FaQuestionCircle, FaTrash } from 'react-icons/fa';
-import Emoji from 'a11y-react-emoji';
+import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
-import { rootReducer } from './state/store';
-import { createStore } from 'redux';
+import SessionSelectors from './SessionSelectors';
+import { setActivityGroup, setAllSessions } from './state/ducks/timetables';
+import { PersistState } from './state/schema';
+import { RootAction } from './state/store';
+import { CourseActivity, CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
+import Timetable from './Timetable';
+import TimetableSelector from './TimetableSelector';
 
-const Main: React.FC = () => {
+
+type Props = ReturnType<typeof mapStateToProps>
+  & ReturnType<typeof mapDispatchToProps>;
+
+const Main: React.FC<Props> = ({timetable, activities, current, timetableNames, dispatch}) => {
   const [fileError, setFileError] = useState<string>();
   const [showHelp, setShowHelp] = useState(false);
 
-  useEffect(() => {
-    const migratedState = migratePeristState(persistState, CURRENT_VERSION);
-    if (migratedState !== null)
-      setPersistState(migratedState);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  rootStore.subscribe(() => {
-    setPersistState(rootStore.getState());
-  });
   
-  const savedTimetable = persistState?.timetables?.[persistState?.current];
-  const timetable = savedTimetable ?? EMPTY_TIMETABLE;
-  const dispatchTimetable = (action: TimetableStateAction) => {
-    setPersistState(produce(persistState, (draft) => {
-      draft.timetables[draft.current] = timetableStateReducer(timetable, action);
-    }));
-  };
-
-  const dispatchPersist = (action: PersistStateAction) => {
-    setPersistState(persistStateReducer(persistState, action));
-  };
-
-  // console.log(persistState);
   const importFile = async (file: File | undefined) => {
     // ev.preventDefault();
     try {
@@ -61,7 +36,7 @@ const Main: React.FC = () => {
       }
 
       //console.log(JSON.stringify(parsed));
-      dispatchTimetable({type: 'setAllSessions', sessions: parsed});
+      dispatch(setAllSessions(parsed));
     } catch (e) {
       setFileError("error while importing: " + e.toString());
       return;
@@ -69,30 +44,21 @@ const Main: React.FC = () => {
     setFileError(undefined);
   };
 
-  const activities = _(timetable.allSessions)
-    .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
-    .uniqWith(_.isEqual).value();
-
   const setSelected = (course: string, activity: string, group: string | null) => {
-    dispatchTimetable({type: 'setActivityGroup', course, activity, group});
+    dispatch(setActivityGroup(course, activity, group));
   };
 
-  const isSessionSelected = (x: CourseEvent) => 
-    _.get(timetable.selectedGroups, [x.course, x.activity], null) === x.group;
-    
   const [highlight, setHighlight] = useState<CourseActivity | null>(null);
   const setSelectedGroup = (group: string | null) => {
     if (highlight == null) throw new Error('setting highlight group but nothing is highlighted.');
     setSelected(highlight.course, highlight.activity, group);
   }
 
-  const selectedSessions = timetable.allSessions
+  const isSessionSelected = (x: CourseEvent) => 
+    _.get(timetable.selectedGroups, [x.course, x.activity], null) === x.group;
+  const visibleSessions = timetable.allSessions
     .filter(x => isSessionSelected(x) || isHighlighted(x, highlight));
 
-
-  const timetableNames = Object.keys(persistState.timetables).sort();
-
-  
   const onClickCancel = () => setShowHelp(false);
 
   return <>
@@ -100,8 +66,8 @@ const Main: React.FC = () => {
         {/* <div className="message is-warning is-small"><div className="message-body">
             Managing multiple timetables is currently <strong>not supported</strong>. The buttons below do nothing.
         </div></div> */}
-        <TimetableSelector {...{timetableNames}} current={persistState.current}
-          dispatch={dispatchPersist}></TimetableSelector>
+        <TimetableSelector {...{timetableNames}} current={current}
+          dispatch={dispatch}></TimetableSelector>
         <hr></hr>
 
         {/* <div className="title is-4">Data</div> */}
@@ -153,11 +119,27 @@ const Main: React.FC = () => {
 
         {/* <h4 className="title is-4">Timetable</h4> */}
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
-          <Timetable selectedSessions={selectedSessions}></Timetable>
+          <Timetable selectedSessions={visibleSessions}></Timetable>
         </HighlightContext.Provider>
       </div>
     </>;
   ;
 }
 
-export default Main;
+const mapStateToProps = (state: PersistState) => {
+  const timetable = state.timetables[state.current] ?? EMPTY_TIMETABLE;
+
+  return {
+    timetable,
+    current: state.current,
+    timetableNames: Object.keys(state.timetables).sort(),
+    activities: _(timetable.allSessions)
+      .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
+      .uniqWith(_.isEqual).value(),
+  }
+};
+
+const mapDispatchToProps = (dispatch: Dispatch<RootAction>) =>
+  ({ dispatch });
+
+export default connect(mapStateToProps, mapDispatchToProps)(Main);

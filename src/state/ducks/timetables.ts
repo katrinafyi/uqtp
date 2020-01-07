@@ -12,10 +12,10 @@ export type TimetableStateAction = {
     group: string | null,
 }
 
-export const setAllSessions = (sessions: CourseEvent[]) => 
+export const setAllSessions = (sessions: CourseEvent[]): TimetableStateAction => 
     ({ type: 'setAllSessions', sessions });
 
-export const setActivityGroup = (course: string, activity: string, group: string | null) =>
+export const setActivityGroup = (course: string, activity: string, group: string | null): TimetableStateAction =>
     ({ type: 'setActivityGroup', course, activity, group });
 
 
