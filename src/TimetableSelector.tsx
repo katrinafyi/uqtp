@@ -119,7 +119,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
         </div>}
         
         <div className={"modal " + (confirmDelete ? 'is-active' : '')}>
-            <div className="modal-background"></div>
+            <div className="modal-background" onClick={onClickCancel}></div>
             <div className="modal-card">
                 <header className="modal-card-head">
                     <p className="modal-card-title">Delete timetable?</p>
