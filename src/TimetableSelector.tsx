@@ -42,6 +42,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
             setIsRenaming(false);
         } else {
             // console.log('entering renaming mode');
+            setName(current);
             renameRef.current!.focus();
             setIsRenaming(true);
         }
@@ -74,7 +75,8 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
         <div className="field">
             <div className="control">
                 <input ref={renameRef} type="text" className={"title "+inputStyle} 
-                    readOnly={!isRenaming} value={name} onChange={(ev) => setName(ev.target.value)}
+                    readOnly={!isRenaming} value={isRenaming ? name : current} 
+                    onChange={(ev) => setName(ev.target.value)}
                     placeholder="timetable name…"/>
             </div>
         </div>
