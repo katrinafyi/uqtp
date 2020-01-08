@@ -1,6 +1,9 @@
 import { PersistState } from "../schema";
 import produce from "immer";
 import { EMPTY_TIMETABLE } from "../types";
+import { RootAction } from "../store";
+import { Dispatch } from "redux";
+import { database } from "firebase";
 
 export type PersistStateAction = {
     type: 'renameTimetable',
@@ -27,7 +30,10 @@ export const copyTimetable = (oldName: string, newName: string): PersistStateAct
 export const deleteTimetable = (name: string): PersistStateAction => 
     ({ type: 'deleteTimetable', name })
 export const selectTimetable = (name: string): PersistStateAction => 
-    ({ type: 'selectTimetable', name })
+    ({ type: 'selectTimetable', name });
+export const selectTimetableFirestore = (name: string) => (dispatch: Dispatch<RootAction>) => {
+    dispatch(selectTimetable(name));
+}
 export const newTimetable = (): PersistStateAction => 
     ({ type: 'newTimetable' })
 

@@ -1,13 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { firestore } from './state/firebase';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { rootReducer } from './state/store';
 import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
-import { createStore } from 'redux';
-import { Provider } from 'react-redux'
+import { createStore, applyMiddleware } from 'redux';
+import { Provider } from 'react-redux';
 import { migratePeristState } from './state/migrations';
+import thunk from 'redux-thunk';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -23,7 +26,8 @@ if (migratedState) {
     saveState(migratedState);
 }
 
-const rootStore = createStore(rootReducer, migratedState ?? previousState);
+const rootStore = createStore(rootReducer, migratedState ?? previousState,
+    applyMiddleware(thunk));
 rootStore.subscribe(() => {
     saveState(rootStore.getState());
 });

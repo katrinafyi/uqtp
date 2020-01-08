@@ -1,7 +1,7 @@
 import React, { useState, ButtonHTMLAttributes, DetailedHTMLProps, createRef } from "react"
 import { FaSave, FaPencilAlt, FaCopy, FaTimes, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "emotion";
-import { PersistStateAction } from "./state/reducers";
+import { PersistStateAction } from "./state/ducks/persist";
 
 export type TimetableSelectorProps = {
     timetableNames: string[],
