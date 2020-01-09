@@ -6,22 +6,14 @@ import StateErrorBoundary from './StateErrorBoundary';
 import Main from './Main';
 import { SignInModal } from './SignInModal';
 import firebase from 'firebase';
+import { PersistState } from './state/schema';
+import { connect } from 'react-redux';
 
-const App: React.FC = () => {
+const App = ({ name, photo }: ReturnType<typeof mapStateToProps>) => {
   const [signIn, setSignIn] = useState(false);
 
-  const onSignIn = (authResult: any) => {
-    const auth = firebase.auth();
-    console.log(auth);
-
-    firebase.firestore().collection('users').doc(auth.currentUser?.uid).set({
-      asdf: 'a',
-      d: {xd: {'a': 'b'}},
-    }).then(() => console.log('write done')).catch(() => console.error('firebase error'));
-  };
-
   return <>
-    {signIn && <SignInModal visible={signIn} setVisible={setSignIn} success={onSignIn}></SignInModal>}
+    {signIn && <SignInModal visible={signIn} setVisible={setSignIn}></SignInModal>}
     <div className="hero" style={{backgroundColor: '#fafafa'}}>
       <div className="hero-body">
         <div className="container">
@@ -50,4 +42,11 @@ const App: React.FC = () => {
   ;
 }
 
-export default App;
+const mapStateToProps = (state: PersistState) => {
+  return {
+    name: state.user?.name,
+    photo: state.user?.photo,
+  }
+}
+
+export default connect(mapStateToProps)(App);

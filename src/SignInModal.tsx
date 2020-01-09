@@ -7,7 +7,7 @@ import { Modal } from "./components/Modal";
 type Props = {
     visible: boolean,
     setVisible: (visible: boolean) => any,
-    success: (authResult: any) => any,
+    success?: (authResult: any) => any,
 }
 
 export const SignInModal = ({ visible, setVisible, success }: Props) => {
@@ -21,7 +21,7 @@ export const SignInModal = ({ visible, setVisible, success }: Props) => {
         callbacks: {
             // Avoid redirects after sign-in.
             // eslint-disable-next-line no-sequences
-            signInSuccessWithAuthResult: (authResult: any) => (success(authResult), false)
+            signInSuccessWithAuthResult: (authResult: any) => (success?.(authResult), false)
         }
     };
 

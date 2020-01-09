@@ -21,6 +21,9 @@ export type PersistStateAction = {
     name: string,
 } | {
     type: 'newTimetable',
+} | {
+    type: 'setPersistState',
+    state: PersistState,
 };
 
 export const renameTimetable = (oldName: string, newName: string): PersistStateAction  =>
@@ -95,6 +98,11 @@ const persistReducer = (state: PersistState, action: PersistStateAction) => prod
             break;
         case 'selectTimetable':
             selectTimetable(action.name)
+            break;
+        case 'setPersistState':
+            draft.timetables = action.state.timetables;
+            draft.current = action.state.current;
+            draft._meta = action.state._meta;
             break;
         default:
             return;

@@ -14,17 +14,11 @@ export const rootReducer = (state: PersistState = DEFAULT_PERSIST, action: RootA
         case 'setAllSessions':
             draft.timetables[draft.current] = currentTimetableReducer(draft.timetables[draft.current], action);
             break;
-        case 'copyTimetable':
-        case 'deleteTimetable':
-        case 'renameTimetable':
-        case 'newTimetable':
-        case 'selectTimetable':
-            return persistReducer(draft, action);
         case 'setUser':
             draft.user = userReducer(draft.user, action);
             break;
         default:
-            return draft;
+            return persistReducer(draft, action);
     }
 });
 

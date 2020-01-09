@@ -12,6 +12,7 @@ import { Provider } from 'react-redux';
 import { migratePeristState } from './state/migrations';
 import thunk from 'redux-thunk';
 import { setUser } from './state/ducks/user';
+import { firebaseMiddleware } from './state/firebaseMiddleware';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -33,12 +34,22 @@ const rootStore = createStore(rootReducer, migratedState ?? previousState,
 const unsubscribe = rootStore.subscribe(() => {
     const state = rootStore.getState()
     saveState(state);
-    
+
     if (auth.currentUser)
         firestore.collection('users').doc(auth.currentUser.uid).set(state);
 });
 
 auth.onAuthStateChanged((user) => {
+    if (user) {
+        firestore.collection('users').doc(user.uid).get().then((doc) => {
+            if (doc.exists) {
+                console.log('got data from firestore:')
+                console.log(doc.data());
+                rootStore.dispatch({ type: 'setPersistState', state: doc.data()! as PersistState });
+            }
+        })
+    }
+
     rootStore.dispatch(setUser(user));
 });
 
