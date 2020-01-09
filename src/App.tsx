@@ -8,7 +8,7 @@ import { SignInModal } from './SignInModal';
 import firebase from 'firebase';
 import { PersistState } from './state/schema';
 import { connect } from 'react-redux';
-import { FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
+import { FaSignInAlt, FaSignOutAlt, FaCoffee } from 'react-icons/fa';
 import { auth } from './state/firebase';
 
 const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
@@ -20,7 +20,7 @@ const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
 
   return <>
     {signIn && <SignInModal visible={signIn} setVisible={setSignIn} success={() => setSignIn(false)}></SignInModal>}
-    <div className="hero" style={{backgroundColor: '#fafafa'}}>
+    <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
         <div className="container">
           <div className="columns">
@@ -30,18 +30,18 @@ const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
             </div>
             <div className="column is-narrow">
               {name ?
-              <div className="buttons">
-                <div className="button">
-                  <span className="icon"><img src={photo!} alt={name}/></span> <span>{name}</span>
+                <div className="buttons">
+                  <div className="button">
+                    <span className="icon"><img src={photo!} alt={name} /></span> <span>{name}</span>
+                  </div>
+                  <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
+                    <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
+                  </div>
                 </div>
-                <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
-                  <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
-                </div>
-              </div>
-              :
-              <button className="button is-link" type="button" onClick={() => setSignIn(true)}>
-                <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in / Sign up</span>
-              </button>}
+                :
+                <button className="button is-link" type="button" onClick={() => setSignIn(true)}>
+                  <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in / Sign up</span>
+                </button>}
 
             </div>
           </div>
@@ -53,10 +53,15 @@ const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
     </section>
     <footer className="footer">
       <div className="content has-text-centered">
-        <strong>UQ Toilet Paper</strong> is a (unofficial) timetable planner for UQ, built by&nbsp;
+        <p>
+          <strong>UQ Toilet Paper</strong> is a (unofficial) timetable planner for UQ, built by&nbsp;
           <a href="https://kentonlam.xyz">Kenton Lam</a>.
           The source code is available on <a href="https://github.com/kentonlam/uqtp">GitHub</a>.
-        </div>
+        </p>
+        <a href="https://paypal.me/kentonlam" className="button is-text">
+          <span className="icon"><FaCoffee></FaCoffee></span> <span>Buy me a coffee!</span>
+        </a>
+      </div>
     </footer></>;
   ;
 }
