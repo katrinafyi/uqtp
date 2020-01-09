@@ -8,7 +8,7 @@ type Props = {
     footer?: ReactNode,
 }
 
-export const Modal = ({ visible, setVisible, title, children, footer }: Props) => {
+export const ModalCard = ({ visible, setVisible, title, children, footer }: Props) => {
     const hideModal = () => setVisible(false);
 
     return <div className={"modal " + (visible ? 'is-active' : '')}>
@@ -25,5 +25,17 @@ export const Modal = ({ visible, setVisible, title, children, footer }: Props) =
                 {footer}
             </footer>
         </div>
+    </div>;
+}
+
+export const Modal = ({ visible, setVisible, children }: Props) => {
+    const hideModal = () => setVisible(false);
+
+    return <div className={"modal " + (visible ? 'is-active' : '')}>
+        <div className="modal-background" onClick={hideModal}></div>
+        <div className="modal-content">
+            {children}
+        </div>
+        <button className="modal-close is-large" aria-label="close" onClick={hideModal}></button>
     </div>;
 }

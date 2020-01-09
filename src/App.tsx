@@ -8,12 +8,18 @@ import { SignInModal } from './SignInModal';
 import firebase from 'firebase';
 import { PersistState } from './state/schema';
 import { connect } from 'react-redux';
+import { FaSignInAlt, FaSignOutAlt } from 'react-icons/fa';
+import { auth } from './state/firebase';
 
-const App = ({ name, photo }: ReturnType<typeof mapStateToProps>) => {
+const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
   const [signIn, setSignIn] = useState(false);
 
+  const signOut = () => {
+    auth.signOut();
+  }
+
   return <>
-    {signIn && <SignInModal visible={signIn} setVisible={setSignIn}></SignInModal>}
+    {signIn && <SignInModal visible={signIn} setVisible={setSignIn} success={() => setSignIn(false)}></SignInModal>}
     <div className="hero" style={{backgroundColor: '#fafafa'}}>
       <div className="hero-body">
         <div className="container">
@@ -23,7 +29,20 @@ const App = ({ name, photo }: ReturnType<typeof mapStateToProps>) => {
               <p className="block">Plan your timetable where Allocate+®™ can't hurt you. Works on mobile!</p>
             </div>
             <div className="column is-narrow">
-              <button className="button is-link" type="button" onClick={() => setSignIn(true)}>Sign in</button>
+              {name ?
+              <div className="buttons">
+                <div className="button">
+                  <span className="icon"><img src={photo!} alt={name}/></span> <span>{name}</span>
+                </div>
+                <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
+                  <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
+                </div>
+              </div>
+              :
+              <button className="button is-link" type="button" onClick={() => setSignIn(true)}>
+                <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in / Sign up</span>
+              </button>}
+
             </div>
           </div>
         </div>
@@ -44,6 +63,7 @@ const App = ({ name, photo }: ReturnType<typeof mapStateToProps>) => {
 
 const mapStateToProps = (state: PersistState) => {
   return {
+    email: state.user?.email,
     name: state.user?.name,
     photo: state.user?.photo,
   }

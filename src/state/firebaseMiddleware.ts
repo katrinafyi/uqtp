@@ -9,14 +9,16 @@ export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootA
         // console.log(action);
 
         const state = api.getState();
-        if (state.user?.uid && action.type !== 'setPersistState' && action.type !== 'setUser') {
-            console.log('connected. redirecting via firebase.');
-            // console.log(action);
+        if (action.type !== 'setPersistState' && action.type !== 'setUser') {
+            if (state.user?.uid) {
+                console.log('connected. redirecting via firebase.');
+                // console.log(action);
 
-            const newState = rootReducer(state, action);
-            if (newState !== state)
-                firestore.collection('users').doc(state.user.uid).set(newState);
-            return;
+                const newState = rootReducer(state, action);
+                if (newState !== state)
+                    firestore.collection('users').doc(state.user.uid).set(newState);
+                return;
+            }
         }
         return next(action);
     };

@@ -1,8 +1,8 @@
 import React from "react";
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 import firebase from "firebase";
 import { auth } from "./state/firebase";
 import { Modal } from "./components/Modal";
+import { FirebaseAuth } from "react-firebaseui";
 
 type Props = {
     visible: boolean,
@@ -12,23 +12,22 @@ type Props = {
 
 export const SignInModal = ({ visible, setVisible, success }: Props) => {
 
-    const uiConfig = {
+    const uiConfig: firebaseui.auth.Config = {
         signInFlow: 'popup',
         signInOptions: [
             firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-            firebase.auth.EmailAuthProvider.PROVIDER_ID
+            firebase.auth.EmailAuthProvider.PROVIDER_ID,
         ],
         callbacks: {
             // Avoid redirects after sign-in.
             // eslint-disable-next-line no-sequences
-            signInSuccessWithAuthResult: (authResult: any) => (success?.(authResult), false)
+            signInSuccessWithAuthResult: (authResult: any) => (success?.(authResult), false),
         }
     };
 
     return <>
-        <Modal visible={visible} setVisible={setVisible} 
-            title="Sign in">
-            <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth}></StyledFirebaseAuth>
+        <Modal visible={visible} setVisible={setVisible}>
+            <FirebaseAuth uiConfig={uiConfig} firebaseAuth={auth}></FirebaseAuth>
         </Modal>
     </>;
 }
