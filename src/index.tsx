@@ -48,17 +48,19 @@ auth.onAuthStateChanged((user) => {
 
   if (user) {
     const docRef = firestore.collection('users').doc(user.uid);
+    let firstSynced = false;
 
-    unsubFirebase = rootStore.subscribe(() => {
-      if (auth.currentUser)
-        docRef.set(rootStore.getState());
-    });
     unsubSnapshot = docRef.onSnapshot(doc => {
       if (doc.exists) {
         console.log('got data from firestore:')
         console.log(doc.metadata.hasPendingWrites);
         rootStore.dispatch({ type: 'setPersistState', state: doc.data()! as PersistState });
+        firstSynced = true;
       }
+    });
+    unsubFirebase = rootStore.subscribe(() => {
+      if (auth.currentUser && firstSynced)
+        docRef.set(rootStore.getState());
     });
   }
 
