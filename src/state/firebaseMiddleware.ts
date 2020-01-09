@@ -13,9 +13,9 @@ export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootA
             console.log('connected. redirecting via firebase.');
             // console.log(action);
 
-            const newState = rootReducer(api.getState(), action);
-
-            firestore.collection('users').doc(state.user.uid).set(newState);
+            const newState = rootReducer(state, action);
+            if (newState !== state)
+                firestore.collection('users').doc(state.user.uid).set(newState);
             return;
         }
         return next(action);
