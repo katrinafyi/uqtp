@@ -4,8 +4,9 @@ import currentTimetableReducer, { TimetableStateAction } from './ducks/timetable
 import { PersistStateAction } from './ducks/persist'
 import { PersistState, DEFAULT_PERSIST } from './schema'
 import produce from 'immer'
+import userReducer, { UserStateAction } from './ducks/user'
 
-export type RootAction = PersistStateAction | TimetableStateAction;
+export type RootAction = PersistStateAction | TimetableStateAction | UserStateAction;
 
 export const rootReducer = (state: PersistState = DEFAULT_PERSIST, action: RootAction): PersistState => produce(state, draft => {
     switch (action.type) {
@@ -19,6 +20,9 @@ export const rootReducer = (state: PersistState = DEFAULT_PERSIST, action: RootA
         case 'newTimetable':
         case 'selectTimetable':
             return persistReducer(draft, action);
+        case 'setUser':
+            draft.user = userReducer(draft.user, action);
+            break;
         default:
             return draft;
     }

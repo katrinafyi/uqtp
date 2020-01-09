@@ -5,12 +5,23 @@ import './App.scss';
 import StateErrorBoundary from './StateErrorBoundary';
 import Main from './Main';
 import { SignInModal } from './SignInModal';
+import firebase from 'firebase';
 
 const App: React.FC = () => {
   const [signIn, setSignIn] = useState(false);
 
+  const onSignIn = (authResult: any) => {
+    const auth = firebase.auth();
+    console.log(auth);
+
+    firebase.firestore().collection('users').doc(auth.currentUser?.uid).set({
+      asdf: 'a',
+      d: {xd: {'a': 'b'}},
+    }).then(() => console.log('write done')).catch(() => console.error('firebase error'));
+  };
+
   return <>
-    {signIn && <SignInModal visible={signIn} setVisible={setSignIn}></SignInModal>}
+    {signIn && <SignInModal visible={signIn} setVisible={setSignIn} success={onSignIn}></SignInModal>}
     <div className="hero" style={{backgroundColor: '#fafafa'}}>
       <div className="hero-body">
         <div className="container">

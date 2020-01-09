@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { firestore } from './state/firebase';
+import { firestore, auth } from './state/firebase';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -11,6 +11,7 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import { migratePeristState } from './state/migrations';
 import thunk from 'redux-thunk';
+import { setUser } from './state/ducks/user';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -28,8 +29,17 @@ if (migratedState) {
 
 const rootStore = createStore(rootReducer, migratedState ?? previousState,
     applyMiddleware(thunk));
-rootStore.subscribe(() => {
-    saveState(rootStore.getState());
+
+const unsubscribe = rootStore.subscribe(() => {
+    const state = rootStore.getState()
+    saveState(state);
+    
+    if (auth.currentUser)
+        firestore.collection('users').doc(auth.currentUser.uid).set(state);
+});
+
+auth.onAuthStateChanged((user) => {
+    rootStore.dispatch(setUser(user));
 });
 
 ReactDOM.render(

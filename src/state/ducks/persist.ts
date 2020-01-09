@@ -21,7 +21,7 @@ export type PersistStateAction = {
     name: string,
 } | {
     type: 'newTimetable',
-}
+};
 
 export const renameTimetable = (oldName: string, newName: string): PersistStateAction  =>
     ({ type: 'renameTimetable', old: oldName, new: newName });
@@ -31,9 +31,6 @@ export const deleteTimetable = (name: string): PersistStateAction =>
     ({ type: 'deleteTimetable', name })
 export const selectTimetable = (name: string): PersistStateAction => 
     ({ type: 'selectTimetable', name });
-export const selectTimetableFirestore = (name: string) => (dispatch: Dispatch<RootAction>) => {
-    dispatch(selectTimetable(name));
-}
 export const newTimetable = (): PersistStateAction => 
     ({ type: 'newTimetable' })
 

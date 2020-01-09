@@ -7,9 +7,10 @@ import { Modal } from "./components/Modal";
 type Props = {
     visible: boolean,
     setVisible: (visible: boolean) => any,
+    success: (authResult: any) => any,
 }
 
-export const SignInModal = ({ visible, setVisible }: Props) => {
+export const SignInModal = ({ visible, setVisible, success }: Props) => {
 
     const uiConfig = {
         signInFlow: 'popup',
@@ -19,7 +20,8 @@ export const SignInModal = ({ visible, setVisible }: Props) => {
         ],
         callbacks: {
             // Avoid redirects after sign-in.
-            signInSuccessWithAuthResult: (authResult: any) => (console.log(authResult), false)
+            // eslint-disable-next-line no-sequences
+            signInSuccessWithAuthResult: (authResult: any) => (success(authResult), false)
         }
     };
 
