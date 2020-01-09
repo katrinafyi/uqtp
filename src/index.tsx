@@ -13,6 +13,7 @@ import { migratePeristState } from './state/migrations';
 import thunk from 'redux-thunk';
 import { setUser } from './state/ducks/user';
 import { firebaseMiddleware } from './state/firebaseMiddleware';
+import { Unsubscribe } from 'firebase';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -22,40 +23,51 @@ const previousState = previousJSON !== null ? JSON.parse(previousJSON) : DEFAULT
 const migratedState = migratePeristState(previousState, CURRENT_VERSION);
 
 const saveState = (s: PersistState) =>
-    localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(s));
+  localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(s));
 
 if (migratedState) {
-    saveState(migratedState);
+  saveState(migratedState);
 }
 
 const rootStore = createStore(rootReducer, migratedState ?? previousState,
-    applyMiddleware(thunk));
+  applyMiddleware(firebaseMiddleware, thunk));
 
-const unsubscribe = rootStore.subscribe(() => {
-    const state = rootStore.getState()
-    saveState(state);
+rootStore.subscribe(() => {
+  const state = rootStore.getState();
+  saveState(state);
+})
 
-    if (auth.currentUser)
-        firestore.collection('users').doc(auth.currentUser.uid).set(state);
-});
+let unsubFirebase: Unsubscribe | null = null;
+let unsubSnapshot: Unsubscribe | null = null;
 
 auth.onAuthStateChanged((user) => {
-    if (user) {
-        firestore.collection('users').doc(user.uid).get().then((doc) => {
-            if (doc.exists) {
-                console.log('got data from firestore:')
-                console.log(doc.data());
-                rootStore.dispatch({ type: 'setPersistState', state: doc.data()! as PersistState });
-            }
-        })
-    }
+  unsubFirebase?.();
+  unsubSnapshot?.();
+  unsubFirebase = null;
+  unsubSnapshot = null;
 
-    rootStore.dispatch(setUser(user));
+  if (user) {
+    const docRef = firestore.collection('users').doc(user.uid);
+
+    unsubFirebase = rootStore.subscribe(() => {
+      if (auth.currentUser)
+        docRef.set(rootStore.getState());
+    });
+    unsubSnapshot = docRef.onSnapshot(doc => {
+      if (doc.exists) {
+        console.log('got data from firestore:')
+        console.log(doc.metadata.hasPendingWrites);
+        rootStore.dispatch({ type: 'setPersistState', state: doc.data()! as PersistState });
+      }
+    });
+  }
+
+  rootStore.dispatch(setUser(user));
 });
 
 ReactDOM.render(
-    <Provider store={rootStore}><App/></Provider>, 
-    document.getElementById('root'));
+  <Provider store={rootStore}><App /></Provider>,
+  document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

@@ -1,15 +1,18 @@
 import { Dispatch, Middleware, MiddlewareAPI } from "redux";
 import { PersistState } from "./schema";
-import { RootAction } from "./store";
+import { RootAction, rootReducer } from "./store";
+import { firestore } from "./firebase";
 
 
 export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootAction>, PersistState>) =>
     (next: Dispatch<RootAction>) => <A extends RootAction>(action: A): any => {
-        if (api.getState().user) {
-            console.log('connected');
-            switch (action.type) {
-                default: throw new Error('unknown firebase action type: ' + action.type);
-            }
+        const state = api.getState();
+        if (state.user?.uid && action.type !== 'setPersistState') {
+            console.log('connected. redirecting via firebase.');
+
+            const newState = rootReducer(api.getState(), action);
+
+            firestore.collection('users').doc(state.user.uid).set(newState);
             return;
         }
         return next(action);
