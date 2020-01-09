@@ -1,7 +1,7 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { CourseGroup } from './state/types';
 import _ from 'lodash';
-import { FaCross, FaTimes } from 'react-icons/fa';
+import { FaCross, FaTimes, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
 
 interface CourseSessionSelectorProps {
     activities: CourseGroup[],
@@ -16,6 +16,8 @@ export interface Props {
 };
 
 const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessionSelectorProps) => {
+    const [enabled, setEnabled] = useState(true);
+
     // console.log(activities);
     const actTypes = _.groupBy(activities, x => x.activity);
 
@@ -49,9 +51,9 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
                 {activities[0].course}
             </p>
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="card-header-icon" type="button">
+            <a className="card-header-icon" type="button" onClick={() => setEnabled(!enabled)}>
                 <span className="icon">
-                    <FaTimes></FaTimes>
+                    {enabled ? <FaCheckSquare></FaCheckSquare> : <FaRegSquare></FaRegSquare>}
                 </span>
             </a>
         </header>
