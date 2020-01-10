@@ -23,7 +23,7 @@ type Props = ReturnType<typeof mapStateToProps>
 const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
   const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
 
-  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(auth.isSignInWithEmailLink(window.location.href));
 
   const [copied, setCopied] = useState(false);
   const [clipboardState, copyToClipboard] = useCopyToClipboard();
@@ -48,8 +48,7 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
   }
 
 
-  const displayName = name
-    ?? <>(anonymous <span className="is-family-monospace">{uid?.substr(0, 4)}</span>)</>;
+  const displayName = name ?? email;
 
   return <>
     <Modal visible={showSignIn} setVisible={setShowSignIn}>
@@ -67,11 +66,12 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
               {uid && <div className="buttons">
                 <div className="button" title="Click to copy user ID" onClick={copyUID}>
                   <span className="icon">
-                    {photo && typeof displayName == 'string'
+                    {photo && displayName
                       ? <img src={photo} alt={displayName} />
                       : <FaUser></FaUser>}
                   </span>
-                  <span>{copied ? 'Copied!' : displayName}</span>
+                  <span>{copied ? 'Copied!' 
+                    : (displayName ?? <>(anonymous <span className="is-family-monospace">{uid?.substr(0, 4)}</span>)</>)}</span>
                 </div>
                 {!isAnon
                   ? <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>

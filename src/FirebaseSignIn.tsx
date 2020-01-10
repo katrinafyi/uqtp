@@ -1,8 +1,8 @@
 import { auth } from "./state/firebase";
-import firebase from "firebase";
 import * as firebaseui from "firebaseui";
 import { FirebaseAuth } from "react-firebaseui";
 import React from "react";
+import firebase from "firebase";
 
 export const FirebaseSignIn = () => {
   const uiConfig: firebaseui.auth.Config = {
@@ -38,5 +38,9 @@ export const FirebaseSignIn = () => {
     }
   };
 
-  return <FirebaseAuth uiConfig={uiConfig} firebaseAuth={auth}></FirebaseAuth>;
+  const uiCallback = (ui: firebaseui.auth.AuthUI) => {
+    console.log('is pending redirect: ' + ui.isPendingRedirect());
+  }
+
+  return <FirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} uiCallback={uiCallback}></FirebaseAuth>;
 }

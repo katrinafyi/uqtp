@@ -15,6 +15,7 @@ import { setUser } from './state/ducks/user';
 import { firebaseMiddleware } from './state/firebaseMiddleware';
 import { Unsubscribe } from 'firebase';
 import { setPersistState } from './state/ducks/persist';
+import firebase from 'firebase';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -40,6 +41,11 @@ rootStore.subscribe(() => {
 
 let unsubFirebase: Unsubscribe | null = null;
 let unsubSnapshot: Unsubscribe | null = null;
+
+// if (auth.isSignInWithEmailLink(window.location.href)) {
+//   const email = window.prompt('Please provide your email for confirmation');
+//   auth.signInWithEmailLink(email!, window.location.href);
+// }
 
 auth.onAuthStateChanged((user) => {
   unsubFirebase?.();
