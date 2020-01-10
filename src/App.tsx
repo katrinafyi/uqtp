@@ -1,24 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, Dispatch } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
+import { setPersistState } from './state/ducks/persist';
 import StateErrorBoundary from './StateErrorBoundary';
 import Main from './Main';
-import { SignInModal } from './SignInModal';
-import { PersistState } from './state/schema';
+import { PersistState, DEFAULT_PERSIST } from './state/schema';
 import { connect } from 'react-redux';
-import { FaSignInAlt, FaSignOutAlt, FaCoffee } from 'react-icons/fa';
+import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth } from './state/firebase';
+import { FirebaseAuth } from 'react-firebaseui';
+import firebase from 'firebase';
+import * as firebaseui from 'firebaseui';
+import { useCopyToClipboard } from 'react-use';
+import { RootAction } from './state/store';
 
-const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
-  const [signIn, setSignIn] = useState(false);
+type Props = ReturnType<typeof mapStateToProps>
+  & typeof dispatchProps;
+
+const App = ({ uid, name, email, photo, setPersistState }: Props) => {
+  const [copied, setCopied] = useState(false);
+  const [clipboardState, copyToClipboard] = useCopyToClipboard();
+
+  const copyUID = () => {
+    copyToClipboard(uid ?? '(no uid)');
+    setCopied(true);
+  }
+
+  useEffect(() => {
+    if (copied) {
+      const timer = setTimeout(() => {
+        setCopied(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [copied]);
+
+
+  const uiConfig: firebaseui.auth.Config = {
+    signInFlow: 'popup',
+    signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.EmailAuthProvider.PROVIDER_ID,
+        firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
+    ],
+    credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
+    callbacks: {
+        // Avoid redirects after sign-in.
+        // eslint-disable-next-line no-sequences
+        signInSuccessWithAuthResult: (authResult: any) => (false),
+    }
+};
 
   const signOut = () => {
+    setPersistState(DEFAULT_PERSIST);
     auth.signOut();
   }
 
+  const displayName = (name ?? '(anonymous)');
+
   return <>
-    {signIn && <SignInModal visible={signIn} setVisible={setSignIn} success={() => setSignIn(false)}></SignInModal>}
     <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
         <div className="container">
@@ -28,27 +69,35 @@ const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
               <p className="block">Plan your timetable where Allocate+®™ can't hurt you. Works on mobile!</p>
             </div>
             <div className="column is-narrow">
-              {name ?
+              {uid ?
                 <div className="buttons">
-                  <div className="button">
-                    <span className="icon"><img src={photo!} alt={name} /></span> <span>{name}</span>
+                  <div className="button" title="Click to copy user ID" onClick={copyUID}>
+                    <span className="icon">
+                      {photo ? <img src={photo!} alt={displayName} />
+                      : <FaUser></FaUser>}
+                    </span>
+                    <span>{copied ? 'Copied!' : displayName}</span>
                   </div>
                   <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
                     <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
                   </div>
                 </div>
                 :
-                <button className="button is-link" type="button" onClick={() => setSignIn(true)}>
-                  <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in / Sign up</span>
-                </button>}
-
+                null
+                // <button className="button is-link" type="button" onClick={() => setSignIn(true)}>
+                //   <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in / Sign up</span>
+                // </button>
+              }
             </div>
           </div>
         </div>
       </div>
     </div>
     <section className="section">
-      <StateErrorBoundary><Main></Main></StateErrorBoundary>
+      <StateErrorBoundary>
+        {uid ? <Main></Main>
+        : <FirebaseAuth uiConfig={uiConfig} firebaseAuth={auth}></FirebaseAuth>}
+      </StateErrorBoundary>
     </section>
     <footer className="footer">
       <div className="content has-text-centered">
@@ -67,10 +116,15 @@ const App = ({ name, email, photo }: ReturnType<typeof mapStateToProps>) => {
 
 const mapStateToProps = (state: PersistState) => {
   return {
+    uid: state.user?.uid,
     email: state.user?.email,
     name: state.user?.name,
     photo: state.user?.photo,
   }
 }
 
-export default connect(mapStateToProps)(App);
+const dispatchProps = ({
+  setPersistState,
+});
+
+export default connect(mapStateToProps, dispatchProps)(App);

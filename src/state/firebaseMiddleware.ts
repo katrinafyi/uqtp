@@ -11,7 +11,7 @@ export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootA
         const state = api.getState();
         if (action.type !== 'setPersistState' && action.type !== 'setUser') {
             if (state.user?.uid) {
-                console.log('connected. redirecting via firebase.');
+                console.log('connected. redirecting via firebase: ' + action.type);
                 // console.log(action);
 
                 const newState = rootReducer(state, action);

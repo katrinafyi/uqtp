@@ -10,6 +10,8 @@ export type UserState = {
     name: string | null,
     email: string | null,
     photo: string | null,
+    provider: string | null,
+    isAnon: boolean,
 } | null;
 
 export type UserStateAction = {
@@ -28,7 +30,9 @@ const userReducer = (state: UserState, action: UserStateAction) => {
                 uid: action.user.uid,
                 name: action.user.displayName,
                 email: action.user.email,
-                photo: action.user.photoURL
+                photo: action.user.photoURL,
+                provider: action.user.providerId,
+                isAnon: action.user.isAnonymous,
             };
         default: 
             return state;

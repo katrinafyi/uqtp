@@ -35,7 +35,9 @@ export const deleteTimetable = (name: string): PersistStateAction =>
 export const selectTimetable = (name: string): PersistStateAction => 
     ({ type: 'selectTimetable', name });
 export const newTimetable = (): PersistStateAction => 
-    ({ type: 'newTimetable' })
+    ({ type: 'newTimetable' });
+export const setPersistState = (state: PersistState): PersistStateAction => 
+    ({ type: 'setPersistState', state });
 
 const newUniqueName = (name: string, existing: string[]) => {
     if (!existing.includes(name))
