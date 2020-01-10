@@ -46,27 +46,26 @@ rootStore.subscribe(() => {
 
 type DatabaseCallback = (a: firebase.database.DataSnapshot, b?: string | null) => any;
 let unsubFirebase: Unsubscribe | null = null;
-let unsubSnapshot: DatabaseCallback | null = null;
-let docRef: firebase.database.Reference | null = null;
+let unsubSnapshot: Function | null = null;
 let firstUser = true;
 
 auth.onAuthStateChanged((user) => {
   unsubFirebase?.();
-  if (unsubSnapshot && docRef) {
-    docRef.off('value', unsubSnapshot);
-  }
+  // if (unsubSnapshot && docRef) {
+  //   docRef.off('value', unsubSnapshot);
+  // }
+  unsubSnapshot?.();
 
   unsubFirebase = null;
   unsubSnapshot = null;
   console.log('auth state changed: ' + user?.uid);
   if (user) {
-    if (!docRef)
-      docRef = database.ref('users/'+user.uid);
-    unsubSnapshot = docRef.on('value', (doc) => {
+    const docRef = firestore.collection('users').doc(user.uid);
+    unsubSnapshot = docRef.onSnapshot((doc) => {
       console.log('got snapshot from firebase');
-      if (doc && doc.exists()) {
+      if (doc?.exists) {
         // previous data exists. load from online.
-        const data = doc.val()! as PersistState;
+        const data = doc.data()! as PersistState;
         rootStore.dispatch(setPersistState(data));
       } else {
         // no previous data exists. upload our data.
@@ -75,8 +74,8 @@ auth.onAuthStateChanged((user) => {
 
       if (!unsubFirebase) {
         unsubFirebase = rootStore.subscribe(() => {
-          console.log('uploading to firestore:');
-          console.log(rootStore.getState());
+          console.log('uploading to firebase.');
+          // console.log(rootStore.getState());
           docRef?.set(rootStore.getState());
         });
       }
