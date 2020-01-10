@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch, createRef } from 'react';
+import React, { useState, useEffect, createRef } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -9,11 +9,8 @@ import { PersistState, DEFAULT_PERSIST } from './state/schema';
 import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth } from './state/firebase';
-import { FirebaseAuth } from 'react-firebaseui';
-import firebase from 'firebase';
 import * as firebaseui from 'firebaseui';
 import { useCopyToClipboard } from 'react-use';
-import { RootAction } from './state/store';
 import { FirebaseSignIn, firebaseUIConfig } from './FirebaseSignIn';
 import { Modal } from './components/Modal';
 
@@ -75,7 +72,7 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
               {uid && <div className="buttons">
                 <div className="button" title="Click to copy user ID" onClick={copyUID}>
                   <span className="icon">
-                    {photo && displayName
+                    {(photo && displayName)
                       ? <img src={photo} alt={displayName} />
                       : <FaUser></FaUser>}
                   </span>

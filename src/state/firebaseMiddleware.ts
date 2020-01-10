@@ -1,7 +1,7 @@
 import { Dispatch, Middleware, MiddlewareAPI } from "redux";
 import { PersistState } from "./schema";
 import { RootAction, rootReducer } from "./store";
-import { firestore, database } from "./firebase";
+import { firestore } from "./firebase";
 
 
 export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootAction>, PersistState>) =>

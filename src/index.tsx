@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { firestore, auth, database } from './state/firebase';
+import { firestore, auth } from './state/firebase';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -15,9 +15,7 @@ import { setUser } from './state/ducks/user';
 import { firebaseMiddleware } from './state/firebaseMiddleware';
 import { Unsubscribe } from 'firebase';
 import { setPersistState } from './state/ducks/persist';
-import firebase from 'firebase';
-import * as firebaseui from 'firebaseui';
-import { firebaseUIConfig } from './FirebaseSignIn';
+import firebase from 'firebase/app';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 

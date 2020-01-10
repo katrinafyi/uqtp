@@ -2,7 +2,8 @@ import { auth } from "./state/firebase";
 import * as firebaseui from "firebaseui";
 import { FirebaseAuth } from "react-firebaseui";
 import React from "react";
-import firebase from "firebase";
+import firebase from "firebase/app";
+import 'firebase/auth';
 
 export const firebaseUIConfig = (allowAnon: boolean) => ({
   signInFlow: 'popup',
