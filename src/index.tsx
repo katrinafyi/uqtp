@@ -16,6 +16,8 @@ import { firebaseMiddleware } from './state/firebaseMiddleware';
 import { Unsubscribe } from 'firebase';
 import { setPersistState } from './state/ducks/persist';
 import firebase from 'firebase';
+import * as firebaseui from 'firebaseui';
+import { firebaseUIConfig } from './FirebaseSignIn';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -42,11 +44,6 @@ rootStore.subscribe(() => {
 let unsubFirebase: Unsubscribe | null = null;
 let unsubSnapshot: Unsubscribe | null = null;
 
-// if (auth.isSignInWithEmailLink(window.location.href)) {
-//   const email = window.prompt('Please provide your email for confirmation');
-//   auth.signInWithEmailLink(email!, window.location.href);
-// }
-
 auth.onAuthStateChanged((user) => {
   unsubFirebase?.();
   unsubSnapshot?.();
@@ -55,7 +52,6 @@ auth.onAuthStateChanged((user) => {
   console.log('auth state changed: ' + user?.uid);
   if (user) {
     const docRef = firestore.collection('users').doc(user.uid);
-
     unsubSnapshot = docRef.onSnapshot(doc => {
       if (doc.exists) {
         const data = doc.data()! as PersistState;
@@ -75,13 +71,18 @@ auth.onAuthStateChanged((user) => {
   } else {
     rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
   }
-
   rootStore.dispatch(setUser(user));
 });
+
+
+// if (auth.isSignInWithEmailLink(window.location.href)) {
+//   new firebaseui.auth.AuthUI(auth).start('#root', firebaseUIConfig);
+// } else 
 
 ReactDOM.render(
   <Provider store={rootStore}><App /></Provider>,
   document.getElementById('root'));
+
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.

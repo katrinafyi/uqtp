@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch } from 'react';
+import React, { useState, useEffect, Dispatch, createRef } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -14,7 +14,7 @@ import firebase from 'firebase';
 import * as firebaseui from 'firebaseui';
 import { useCopyToClipboard } from 'react-use';
 import { RootAction } from './state/store';
-import { FirebaseSignIn } from './FirebaseSignIn';
+import { FirebaseSignIn, firebaseUIConfig } from './FirebaseSignIn';
 import { Modal } from './components/Modal';
 
 type Props = ReturnType<typeof mapStateToProps>
@@ -23,7 +23,8 @@ type Props = ReturnType<typeof mapStateToProps>
 const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
   const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
 
-  const [showSignIn, setShowSignIn] = useState(auth.isSignInWithEmailLink(window.location.href));
+  const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
+  const [showSignIn, setShowSignIn] = useState(false);
 
   const [copied, setCopied] = useState(false);
   const [clipboardState, copyToClipboard] = useCopyToClipboard();
@@ -47,12 +48,17 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
     firebaseui.auth.AuthUI.getInstance()?.reset();
   }
 
-
   const displayName = name ?? email;
+
+  const firebaseRef = createRef<HTMLDivElement>();
+  useEffect(() => {
+    if (isEmailLink)
+      new firebaseui.auth.AuthUI(auth).start(firebaseRef.current!, firebaseUIConfig);
+  }, [isEmailLink])
 
   return <>
     <Modal visible={showSignIn} setVisible={setShowSignIn}>
-      {showSignIn && <FirebaseSignIn></FirebaseSignIn>}
+      {showSignIn && !isEmailLink && <FirebaseSignIn></FirebaseSignIn>}
     </Modal>
     <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
@@ -88,8 +94,9 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
     </div>
     <section className="section">
       <StateErrorBoundary>
+        <div id="firebaseui-email" ref={firebaseRef}></div>
         {uid ? <Main></Main>
-          : <FirebaseSignIn></FirebaseSignIn>}
+          : (!showSignIn && !isEmailLink && <FirebaseSignIn></FirebaseSignIn>)}
       </StateErrorBoundary>
     </section>
     <footer className="footer">
