@@ -8,10 +8,12 @@ export const firebaseUIConfig = (allowAnon: boolean) => ({
   signInFlow: 'popup',
   signInOptions: [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+    firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+    firebase.auth.GithubAuthProvider.PROVIDER_ID,
     {
-        provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-    },
+      provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
+      signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
+  },
   ].concat(allowAnon ? [firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID] : []),
   autoUpgradeAnonymousUsers: true,
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
