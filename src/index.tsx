@@ -26,8 +26,10 @@ const previousJSON = localStorage.getItem(LOCALSTORAGE_KEY);
 const previousState = previousJSON !== null ? JSON.parse(previousJSON) : DEFAULT_PERSIST;
 const migratedState = migratePeristState(previousState, CURRENT_VERSION);
 
-const saveState = (s: PersistState) =>
+const saveState = (s: PersistState) => {
+  console.log('saving to localStorage');
   localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(s));
+}
 
 if (migratedState) {
   saveState(migratedState);
@@ -44,6 +46,8 @@ rootStore.subscribe(() => {
 let unsubFirebase: Unsubscribe | null = null;
 let unsubSnapshot: Unsubscribe | null = null;
 
+let firstUser = true;
+
 auth.onAuthStateChanged((user) => {
   unsubFirebase?.();
   unsubSnapshot?.();
@@ -53,24 +57,29 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     const docRef = firestore.collection('users').doc(user.uid);
     unsubSnapshot = docRef.onSnapshot(doc => {
+      console.log('got snapshot, exists: ' + doc.exists)
       if (doc.exists) {
+        // previous data exists. load from online.
         const data = doc.data()! as PersistState;
-        console.log('got data from firestore:');
-        console.log(data);
         rootStore.dispatch(setPersistState(data));
+      } else {
+        // no previous data exists. upload our data.
+        docRef.set(rootStore.getState());
+      }
 
-        if (!unsubFirebase) {
-          unsubFirebase = rootStore.subscribe(() => {
-            console.log('uploading to firestore:');
-            console.log(rootStore.getState());
-            docRef.set(rootStore.getState());
-          });
-        }
+      if (!unsubFirebase) {
+        unsubFirebase = rootStore.subscribe(() => {
+          console.log('uploading to firestore:');
+          console.log(rootStore.getState());
+          docRef.set(rootStore.getState());
+        });
       }
     });
   } else {
-    rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
+    if (!firstUser)
+      rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
   }
+  firstUser = false;
   rootStore.dispatch(setUser(user));
 });
 

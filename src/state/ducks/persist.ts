@@ -24,6 +24,7 @@ export type PersistStateAction = {
 } | {
     type: 'setPersistState',
     state: PersistState,
+    localOnly: true,
 };
 
 export const renameTimetable = (oldName: string, newName: string): PersistStateAction  =>
@@ -37,7 +38,7 @@ export const selectTimetable = (name: string): PersistStateAction =>
 export const newTimetable = (): PersistStateAction => 
     ({ type: 'newTimetable' });
 export const setPersistState = (state: PersistState): PersistStateAction => 
-    ({ type: 'setPersistState', state });
+    ({ type: 'setPersistState', state, localOnly: true });
 
 const newUniqueName = (name: string, existing: string[]) => {
     if (!existing.includes(name))

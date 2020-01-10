@@ -16,11 +16,12 @@ export type UserState = {
 
 export type UserStateAction = {
     type: 'setUser',
-    user: User | null
+    user: User | null,
+    localOnly: true,
 };
 
 export const setUser = (user: User | null): UserStateAction  =>
-    ({ type: 'setUser', user });
+    ({ type: 'setUser', user , localOnly: true });
 
 const userReducer = (state: UserState, action: UserStateAction) => {
     switch (action.type) {

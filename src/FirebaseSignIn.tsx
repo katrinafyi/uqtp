@@ -4,16 +4,15 @@ import { FirebaseAuth } from "react-firebaseui";
 import React from "react";
 import firebase from "firebase";
 
-export const firebaseUIConfig: firebaseui.auth.Config = {
+export const firebaseUIConfig = (allowAnon: boolean) => ({
   signInFlow: 'popup',
   signInOptions: [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
     {
         provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
         signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-    },      
-    firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID,
-  ],
+    },
+  ].concat(allowAnon ? [firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID] : []),
   autoUpgradeAnonymousUsers: true,
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
   callbacks: {
@@ -35,14 +34,18 @@ export const firebaseUIConfig: firebaseui.auth.Config = {
       return firebase.auth().signInWithCredential(cred);
     }
   }
-};
+} as firebaseui.auth.Config);
 
-export const FirebaseSignIn = () => {
+type Props = {
+  allowAnonymous: boolean
+}
+
+export const FirebaseSignIn = ({ allowAnonymous }: Props) => {
 
   const uiCallback = (ui: firebaseui.auth.AuthUI) => {
     console.log('is email: ' + auth.isSignInWithEmailLink(window.location.href));
     console.log('is pending redirect: ' + ui.isPendingRedirect());
   }
 
-  return <FirebaseAuth uiConfig={firebaseUIConfig} firebaseAuth={auth} uiCallback={uiCallback}></FirebaseAuth>;
+  return <FirebaseAuth uiConfig={firebaseUIConfig(allowAnonymous)} firebaseAuth={auth} uiCallback={uiCallback}></FirebaseAuth>;
 }

@@ -6,7 +6,9 @@ import { PersistState, DEFAULT_PERSIST } from './schema'
 import produce from 'immer'
 import userReducer, { UserStateAction } from './ducks/user'
 
-export type RootAction = PersistStateAction | TimetableStateAction | UserStateAction;
+export type RootAction = (PersistStateAction | TimetableStateAction | UserStateAction) & {
+    localOnly?: boolean,
+};
 
 export const rootReducer = (state: PersistState = DEFAULT_PERSIST, action: RootAction): PersistState => produce(state, draft => {
     switch (action.type) {

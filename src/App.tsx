@@ -23,7 +23,6 @@ type Props = ReturnType<typeof mapStateToProps>
 const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
   const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
 
-  const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
   const [showSignIn, setShowSignIn] = useState(false);
 
   const [copied, setCopied] = useState(false);
@@ -44,21 +43,25 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
   }, [copied]);  
 
   const signOut = () => {
+    
+
     auth.signOut();
-    firebaseui.auth.AuthUI.getInstance()?.reset();
   }
 
   const displayName = name ?? email;
 
+  const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
   const firebaseRef = createRef<HTMLDivElement>();
   useEffect(() => {
     if (isEmailLink)
-      new firebaseui.auth.AuthUI(auth).start(firebaseRef.current!, firebaseUIConfig);
-  }, [isEmailLink])
+      new firebaseui.auth.AuthUI(auth).start(firebaseRef.current!, firebaseUIConfig(true));
+  // We only want to run this once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return <>
     <Modal visible={showSignIn} setVisible={setShowSignIn}>
-      {showSignIn && !isEmailLink && <FirebaseSignIn></FirebaseSignIn>}
+      {showSignIn && !isEmailLink && <FirebaseSignIn allowAnonymous={false}></FirebaseSignIn>}
     </Modal>
     <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
@@ -79,13 +82,12 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
                   <span>{copied ? 'Copied!' 
                     : (displayName ?? <>(anonymous <span className="is-family-monospace">{uid?.substr(0, 4)}</span>)</>)}</span>
                 </div>
-                {!isAnon
-                  ? <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
-                    <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
-                  </div>
-                  : <button className="button is-link" type="button" onClick={() => setShowSignIn(true)}>
-                    <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in</span>
-                  </button>}
+                {isAnon && <button className="button is-link" type="button" onClick={() => setShowSignIn(true)}>
+                  <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in</span>
+                </button>}
+                <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
+                  <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
+                </div>
               </div>}
             </div>
           </div>
@@ -96,7 +98,7 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
       <StateErrorBoundary>
         <div id="firebaseui-email" ref={firebaseRef}></div>
         {uid ? <Main></Main>
-          : (!showSignIn && !isEmailLink && <FirebaseSignIn></FirebaseSignIn>)}
+          : (!showSignIn && !isEmailLink && <FirebaseSignIn allowAnonymous={true}></FirebaseSignIn>)}
       </StateErrorBoundary>
     </section>
     <footer className="footer">
