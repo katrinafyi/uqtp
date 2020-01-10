@@ -81,8 +81,9 @@ auth.onAuthStateChanged((user) => {
       }
     });
   } else {
-    if (!firstUser)
-      rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
+    if (!firstUser) {
+      // rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
+    }
   }
   firstUser = false;
   rootStore.dispatch(setUser(user));
