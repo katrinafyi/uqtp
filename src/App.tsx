@@ -14,11 +14,17 @@ import firebase from 'firebase';
 import * as firebaseui from 'firebaseui';
 import { useCopyToClipboard } from 'react-use';
 import { RootAction } from './state/store';
+import { FirebaseSignIn } from './FirebaseSignIn';
+import { Modal } from './components/Modal';
 
 type Props = ReturnType<typeof mapStateToProps>
   & typeof dispatchProps;
 
-const App = ({ uid, name, email, photo, setPersistState }: Props) => {
+const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
+  const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
+
+  const [showSignIn, setShowSignIn] = useState(false);
+
   const [copied, setCopied] = useState(false);
   const [clipboardState, copyToClipboard] = useCopyToClipboard();
 
@@ -34,32 +40,21 @@ const App = ({ uid, name, email, photo, setPersistState }: Props) => {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [copied]);
-
-
-  const uiConfig: firebaseui.auth.Config = {
-    signInFlow: 'popup',
-    signInOptions: [
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.EmailAuthProvider.PROVIDER_ID,
-        firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
-    ],
-    credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
-    callbacks: {
-        // Avoid redirects after sign-in.
-        // eslint-disable-next-line no-sequences
-        signInSuccessWithAuthResult: (authResult: any) => (false),
-    }
-};
+  }, [copied]);  
 
   const signOut = () => {
-    setPersistState(DEFAULT_PERSIST);
     auth.signOut();
+    firebaseui.auth.AuthUI.getInstance()?.reset();
   }
 
-  const displayName = (name ?? '(anonymous)');
+
+  const displayName = name
+    ?? <>(anonymous <span className="is-family-monospace">{uid?.substr(0, 4)}</span>)</>;
 
   return <>
+    <Modal visible={showSignIn} setVisible={setShowSignIn}>
+      {showSignIn && <FirebaseSignIn></FirebaseSignIn>}
+    </Modal>
     <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
         <div className="container">
@@ -69,25 +64,23 @@ const App = ({ uid, name, email, photo, setPersistState }: Props) => {
               <p className="block">Plan your timetable where Allocate+®™ can't hurt you. Works on mobile!</p>
             </div>
             <div className="column is-narrow">
-              {uid ?
-                <div className="buttons">
-                  <div className="button" title="Click to copy user ID" onClick={copyUID}>
-                    <span className="icon">
-                      {photo ? <img src={photo!} alt={displayName} />
+              {uid && <div className="buttons">
+                <div className="button" title="Click to copy user ID" onClick={copyUID}>
+                  <span className="icon">
+                    {photo && typeof displayName == 'string'
+                      ? <img src={photo} alt={displayName} />
                       : <FaUser></FaUser>}
-                    </span>
-                    <span>{copied ? 'Copied!' : displayName}</span>
-                  </div>
-                  <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
+                  </span>
+                  <span>{copied ? 'Copied!' : displayName}</span>
+                </div>
+                {!isAnon
+                  ? <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
                     <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
                   </div>
-                </div>
-                :
-                null
-                // <button className="button is-link" type="button" onClick={() => setSignIn(true)}>
-                //   <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in / Sign up</span>
-                // </button>
-              }
+                  : <button className="button is-link" type="button" onClick={() => setShowSignIn(true)}>
+                    <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in</span>
+                  </button>}
+              </div>}
             </div>
           </div>
         </div>
@@ -96,7 +89,7 @@ const App = ({ uid, name, email, photo, setPersistState }: Props) => {
     <section className="section">
       <StateErrorBoundary>
         {uid ? <Main></Main>
-        : <FirebaseAuth uiConfig={uiConfig} firebaseAuth={auth}></FirebaseAuth>}
+          : <FirebaseSignIn></FirebaseSignIn>}
       </StateErrorBoundary>
     </section>
     <footer className="footer">
@@ -116,6 +109,7 @@ const App = ({ uid, name, email, photo, setPersistState }: Props) => {
 
 const mapStateToProps = (state: PersistState) => {
   return {
+    isAnon: state.user?.isAnon,
     uid: state.user?.uid,
     email: state.user?.email,
     name: state.user?.name,

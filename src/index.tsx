@@ -14,6 +14,7 @@ import thunk from 'redux-thunk';
 import { setUser } from './state/ducks/user';
 import { firebaseMiddleware } from './state/firebaseMiddleware';
 import { Unsubscribe } from 'firebase';
+import { setPersistState } from './state/ducks/persist';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -54,7 +55,7 @@ auth.onAuthStateChanged((user) => {
         const data = doc.data()! as PersistState;
         console.log('got data from firestore:');
         console.log(data);
-        rootStore.dispatch({ type: 'setPersistState', state: data });
+        rootStore.dispatch(setPersistState(data));
 
         if (!unsubFirebase) {
           unsubFirebase = rootStore.subscribe(() => {
@@ -65,7 +66,8 @@ auth.onAuthStateChanged((user) => {
         }
       }
     });
-    
+  } else {
+    rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
   }
 
   rootStore.dispatch(setUser(user));
