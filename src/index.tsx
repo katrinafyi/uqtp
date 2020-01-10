@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { firestore, auth } from './state/firebase';
+import { firestore, auth, database } from './state/firebase';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -41,37 +41,43 @@ const rootStore = createStore(rootReducer, migratedState ?? previousState,
 rootStore.subscribe(() => {
   const state = rootStore.getState();
   saveState(state);
-})
+});
 
+
+type DatabaseCallback = (a: firebase.database.DataSnapshot, b?: string | null) => any;
 let unsubFirebase: Unsubscribe | null = null;
-let unsubSnapshot: Unsubscribe | null = null;
-
+let unsubSnapshot: DatabaseCallback | null = null;
+let docRef: firebase.database.Reference | null = null;
 let firstUser = true;
 
 auth.onAuthStateChanged((user) => {
   unsubFirebase?.();
-  unsubSnapshot?.();
+  if (unsubSnapshot && docRef) {
+    docRef.off('value', unsubSnapshot);
+  }
+
   unsubFirebase = null;
   unsubSnapshot = null;
   console.log('auth state changed: ' + user?.uid);
   if (user) {
-    const docRef = firestore.collection('users').doc(user.uid);
-    unsubSnapshot = docRef.onSnapshot(doc => {
-      console.log('got snapshot, exists: ' + doc.exists)
-      if (doc.exists) {
+    if (!docRef)
+      docRef = database.ref('users/'+user.uid);
+    unsubSnapshot = docRef.on('value', (doc) => {
+      console.log('got snapshot from firebase');
+      if (doc && doc.exists()) {
         // previous data exists. load from online.
-        const data = doc.data()! as PersistState;
+        const data = doc.val()! as PersistState;
         rootStore.dispatch(setPersistState(data));
       } else {
         // no previous data exists. upload our data.
-        docRef.set(rootStore.getState());
+        docRef?.set(rootStore.getState());
       }
 
       if (!unsubFirebase) {
         unsubFirebase = rootStore.subscribe(() => {
           console.log('uploading to firestore:');
           console.log(rootStore.getState());
-          docRef.set(rootStore.getState());
+          docRef?.set(rootStore.getState());
         });
       }
     });

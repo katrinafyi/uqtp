@@ -1,7 +1,7 @@
 import { Dispatch, Middleware, MiddlewareAPI } from "redux";
 import { PersistState } from "./schema";
 import { RootAction, rootReducer } from "./store";
-import { firestore } from "./firebase";
+import { firestore, database } from "./firebase";
 
 
 export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootAction>, PersistState>) =>
@@ -16,7 +16,7 @@ export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootA
 
                 const newState = rootReducer(state, action);
                 if (newState !== state)
-                    firestore.collection('users').doc(state.user.uid).set(newState);
+                    database.ref('users/'+state.user.uid).set(newState);
                 return;
             }
         }
