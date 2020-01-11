@@ -12,7 +12,8 @@ import { auth } from './state/firebase';
 import * as firebaseui from 'firebaseui';
 import { useCopyToClipboard } from 'react-use';
 import { FirebaseSignIn, firebaseUIConfig } from './FirebaseSignIn';
-import { Modal } from './components/Modal';
+import { Modal, ModalCard } from './components/Modal';
+import { UserInfoView } from './UserInfoView';
 
 type Props = ReturnType<typeof mapStateToProps>
   & typeof dispatchProps;
@@ -22,26 +23,11 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
 
   const [showSignIn, setShowSignIn] = useState(false);
 
-  const [copied, setCopied] = useState(false);
-  const [clipboardState, copyToClipboard] = useCopyToClipboard();
-
-  const copyUID = () => {
-    copyToClipboard(uid ?? '(no uid)');
-    setCopied(true);
-  }
-
-  useEffect(() => {
-    if (copied) {
-      const timer = setTimeout(() => {
-        setCopied(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [copied]);  
+  const [showUserInfo, setShowUserInfo] = useState(false);
 
   const signOut = () => {
-    
-
+    setShowUserInfo(false);
+    setShowSignIn(false);
     auth.signOut();
   }
 
@@ -60,6 +46,19 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
     <Modal visible={showSignIn} setVisible={setShowSignIn}>
       {showSignIn && !isEmailLink && <FirebaseSignIn allowAnonymous={false}></FirebaseSignIn>}
     </Modal>
+    <ModalCard visible={showUserInfo} setVisible={setShowUserInfo}
+      title={"User Info"}
+      footer={<div className="level" style={{width: '100%'}}>
+        <div className="level-left"><div className="level-item">
+          <button className="button" onClick={() => setShowUserInfo(false)}>Close</button>
+        </div></div>
+        <div className="level-right"><div className="level-item">
+          <button className="button is-danger" onClick={signOut}>
+          <span className="icon"><FaSignOutAlt></FaSignOutAlt></span> <span>Log out</span></button>
+        </div></div>
+      </div>}>
+      <UserInfoView></UserInfoView>
+    </ModalCard>
     <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
         <div className="container">
@@ -70,14 +69,13 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
             </div>
             <div className="column is-narrow">
               {uid && <div className="buttons">
-                <div className="button" title="Click to copy user ID" onClick={copyUID}>
+                <div className="button" title="Click to view user details" onClick={() => setShowUserInfo(true)}>
                   <span className="icon">
                     {(photo && displayName)
                       ? <img src={photo} alt={displayName} />
                       : <FaUser></FaUser>}
                   </span>
-                  <span>{copied ? 'Copied!' 
-                    : (displayName ?? <>(anonymous <span className="is-family-monospace">{uid?.substr(0, 4)}</span>)</>)}</span>
+                  <span>{displayName ?? <>(anonymous <span className="is-family-monospace">{uid?.substr(0, 4)}</span>)</>}</span>
                 </div>
                 {isAnon && <button className="button is-link" type="button" onClick={() => setShowSignIn(true)}>
                   <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in</span>
