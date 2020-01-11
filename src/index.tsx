@@ -71,16 +71,17 @@ auth.onAuthStateChanged((user) => {
       }
 
       if (!unsubFirebase) {
-        unsubFirebase = rootStore.subscribe(() => {
-          console.log('uploading to firebase.');
-          // console.log(rootStore.getState());
-          docRef?.set(rootStore.getState());
-        });
+        // unsubFirebase = rootStore.subscribe(() => {
+        //   console.log('uploading to firebase.');
+        //   // console.log(rootStore.getState());
+        //   docRef?.set(rootStore.getState());
+        // });
       }
     });
   } else {
-    if (!firstUser) {
-      // rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
+    // new user is signed out.
+    if (rootStore.getState().user != null) {
+      rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
     }
   }
   firstUser = false;

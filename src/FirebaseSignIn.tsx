@@ -18,13 +18,19 @@ export const firebaseUIConfig = (allowAnon: boolean) => ({
   ].concat(allowAnon ? [firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID] : []),
   autoUpgradeAnonymousUsers: true,
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
+  privacyPolicyUrl: 'https://kentonlam.xyz/uqtp-privacy/',
   callbacks: {
     // Avoid redirects after sign-in.
     // eslint-disable-next-line no-sequences
-    signInSuccessWithAuthResult: (authResult: any) => (false),
+    signInSuccessWithAuthResult: (userCredential: firebase.auth.UserCredential) => {
+      console.log(userCredential);
+      return true;
+    },
     signInFailure: (error) => {
       // For merge conflicts, the error.code will be
       // 'firebaseui/anonymous-upgrade-merge-conflict'.
+      console.log('error signing in: ' +error.code);
+      console.log('error uid: ' + error.credential?.uid);
       if (error.code !== 'firebaseui/anonymous-upgrade-merge-conflict') {
         return Promise.resolve(error.credential);
       }
