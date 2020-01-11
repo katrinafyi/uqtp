@@ -37,13 +37,18 @@ export type SelectedActivities = {
     [course: string]: { [activity: string]: string }
 }
 
-export type TimetableState = {
+export type Timetable = {
+    name: string,
     allSessions: CourseEvent[],
     selectedGroups: SelectedActivities,
 }
 
-export const EMPTY_TIMETABLE: TimetableState = {
+export const EMPTY_TIMETABLE: Timetable = {
+    name: 'empty timetable',
     allSessions: [],
     selectedGroups: {},
 }
 
+export type TimetablesState = {
+    [id: string]: Timetable,
+}

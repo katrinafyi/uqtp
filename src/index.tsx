@@ -64,7 +64,11 @@ auth.onAuthStateChanged((user) => {
       if (doc?.exists) {
         // previous data exists. load from online.
         const data = doc.data()! as PersistState;
-        rootStore.dispatch(setPersistState(data));
+        const migrated = migratePeristState(data);
+        if (migrated)
+          docRef?.set(migrated);
+        else
+          rootStore.dispatch(setPersistState(data));
       } else {
         // no previous data exists. upload our data.
         docRef?.set(rootStore.getState());

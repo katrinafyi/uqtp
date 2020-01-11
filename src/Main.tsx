@@ -20,7 +20,7 @@ import TimetableSelector from './TimetableSelector';
 type Props = ReturnType<typeof mapStateToProps>
   & ReturnType<typeof mapDispatchToProps>;
 
-const Main: React.FC<Props> = ({timetable, activities, current, timetableNames, dispatch}) => {
+const Main: React.FC<Props> = ({timetable, activities, current, timetables, dispatch}) => {
   const [fileError, setFileError] = useState<string>();
   const [showHelp, setShowHelp] = useState(false);
 
@@ -66,7 +66,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetableNames, 
         {/* <div className="message is-warning is-small"><div className="message-body">
             Managing multiple timetables is currently <strong>not supported</strong>. The buttons below do nothing.
         </div></div> */}
-        <TimetableSelector {...{timetableNames}} current={current}
+        <TimetableSelector timetables={timetables} current={current}
           dispatch={dispatch}></TimetableSelector>
         <hr></hr>
 
@@ -131,7 +131,7 @@ const mapStateToProps = (state: PersistState) => {
   return {
     timetable,
     current: state.current,
-    timetableNames: Object.keys(state.timetables).sort(),
+    timetables: state.timetables,
     activities: _(timetable.allSessions)
       .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
       .uniqWith(_.isEqual).value(),

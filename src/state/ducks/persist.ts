@@ -4,21 +4,21 @@ import { EMPTY_TIMETABLE } from "../types";
 import { RootAction } from "../store";
 import { Dispatch } from "redux";
 import { database } from "firebase";
+import uuidv4 from 'uuid/v4';
 
 export type PersistStateAction = {
     type: 'renameTimetable',
-    old: string,
+    id: string,
     new: string,
 } | {
     type: 'copyTimetable',
-    old: string, 
-    new: string,
+    id: string, 
 } | {
     type: 'deleteTimetable',
-    name: string,
+    id: string,
 } | {
     type: 'selectTimetable',
-    name: string,
+    id: string,
 } | {
     type: 'newTimetable',
 } | {
@@ -27,50 +27,35 @@ export type PersistStateAction = {
     localOnly: true,
 };
 
-export const renameTimetable = (oldName: string, newName: string): PersistStateAction  =>
-    ({ type: 'renameTimetable', old: oldName, new: newName });
-export const copyTimetable = (oldName: string, newName: string): PersistStateAction => 
-    ({ type: 'copyTimetable', old: oldName, new: newName });
-export const deleteTimetable = (name: string): PersistStateAction => 
-    ({ type: 'deleteTimetable', name })
-export const selectTimetable = (name: string): PersistStateAction => 
-    ({ type: 'selectTimetable', name });
+export const renameTimetable = (id: string, newName: string): PersistStateAction  =>
+    ({ type: 'renameTimetable', id, new: newName });
+export const copyTimetable = (id: string): PersistStateAction => 
+    ({ type: 'copyTimetable', id: id });
+export const deleteTimetable = (id: string): PersistStateAction => 
+    ({ type: 'deleteTimetable', id: id })
+export const selectTimetable = (id: string): PersistStateAction => 
+    ({ type: 'selectTimetable', id: id });
 export const newTimetable = (): PersistStateAction => 
     ({ type: 'newTimetable' });
 export const setPersistState = (state: PersistState): PersistStateAction => 
     ({ type: 'setPersistState', state, localOnly: true });
 
-const newUniqueName = (name: string, existing: string[]) => {
-    if (!existing.includes(name))
-        return name;
-    const match = / \((\d+)\)$/.exec(name);
-    let i = 1;
-    if (match) {
-        i = parseInt(match[1]);
-        name = name.slice(0, -match[0].length);
-    }
-    while (true) {
-        const newName = `${name} (${i})`;
-        if (!existing.includes(newName)) 
-            return newName;
-        i++;
-    }
-}
-
 const persistReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
 
-    const selectTimetable = (name: string) => {
-        draft.current = name;
+    const getNames = () => Object.values(draft.timetables).map(x => x.name);
+
+    const selectTimetable = (id: string) => {
+        draft.current = id;
     };
     const newTimetable = (name: string) => {
-        const newName = newUniqueName(name, Object.keys(draft.timetables));
-        draft.timetables[newName] = EMPTY_TIMETABLE;
-        selectTimetable(newName);
-        return newName;
+        const newID = uuidv4();
+        draft.timetables[newID] = EMPTY_TIMETABLE;
+        selectTimetable(newID);
+        return newID;
     };
-    const deleteTimetable = (name: string) => {
-        delete draft.timetables[name];
-        if (name === draft.current) {
+    const deleteTimetable = (id: string) => {
+        delete draft.timetables[id];
+        if (id === draft.current) {
             const newCurrent = Object.keys(draft.timetables)[0];
             if (newCurrent === undefined)
                 newTimetable('new timetable');
@@ -78,29 +63,27 @@ const persistReducer = (state: PersistState, action: PersistStateAction) => prod
                 selectTimetable(newCurrent);
         }
     };
-    const copyTimetable = (newName: string, oldName: string) => {
-        const uniqName = newTimetable(newName);
-        draft.timetables[uniqName] = draft.timetables[oldName];
-        selectTimetable(uniqName);
+    const dupeTimetable = (id: string) => {
+        const newID = uuidv4();
+        draft.timetables[newID] = draft.timetables[id];
+        selectTimetable(newID);
     };
 
     switch (action.type) {
         case 'deleteTimetable':
-            deleteTimetable(action.name);
+            deleteTimetable(action.id);
             break;
         case 'newTimetable':
             newTimetable('new timetable');
             break;
         case 'copyTimetable':
-            copyTimetable(action.new, action.old);
+            dupeTimetable(action.id);
             break;
         case 'renameTimetable':
-            if (action.new === action.old) break;
-            copyTimetable(action.new, action.old);
-            deleteTimetable(action.old);
+            draft.timetables[action.id].name = action.new;
             break;
         case 'selectTimetable':
-            selectTimetable(action.name)
+            selectTimetable(action.id);
             break;
         case 'setPersistState':
             draft.timetables = action.state.timetables;

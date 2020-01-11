@@ -2,9 +2,11 @@ import React, { useState, ButtonHTMLAttributes, DetailedHTMLProps, createRef } f
 import { FaSave, FaPencilAlt, FaCopy, FaTimes, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "emotion";
 import { PersistStateAction } from "./state/ducks/persist";
+import { Timetable, TimetablesState } from "./state/types";
+import _ from "lodash";
 
 export type TimetableSelectorProps = {
-    timetableNames: string[],
+    timetables: TimetablesState,
     current: string,
     dispatch: (action: PersistStateAction) => any
 }
@@ -16,32 +18,34 @@ const inputStyle = css({
     lineHeight: 1,
 });
 
-export const TimetableSelector = ({ timetableNames, current, dispatch }: TimetableSelectorProps) => {
-    const savedValid = timetableNames.indexOf(current) !== -1;
+export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSelectorProps) => {
+    const savedValid = !!timetables[current];
     
     const renameRef = createRef<HTMLInputElement>();
     const [isRenaming, setIsRenaming] = useState(false);
-    const [name, setName] = useState<string>(current);
+    const currentName = timetables[current].name;
+    const [name, setName] = useState<string>(currentName);
     const [confirmDelete, setConfirmDelete] = useState(false);
 
     const onClickTag = (ev: React.MouseEvent<HTMLButtonElement>) => {
-        dispatch({type: 'selectTimetable', name: (ev.target as HTMLButtonElement).value});
+        dispatch({type: 'selectTimetable', id: (ev.target as HTMLButtonElement).value});
     }
 
-    const makeTag = (x: string) => <div className="control" key={x}><div key={x} className="buttons has-addons">
-        <button className={"button  is-small " + (current === x ? 'is-link' : 'is-dark')}
-            value={x} onClick={onClickTag} type="button">{x}</button>
+    const makeTag = ([id, timetable]: [string, Timetable]) => 
+    <div className="control" key={id}><div key={id} className="buttons has-addons">
+        <button className={"button  is-small " + (current === id ? 'is-link' : 'is-dark')}
+            value={id} onClick={onClickTag} type="button">{timetable.name}</button>
         {/* <button className="button  is-small is-outlined"><span className="icon"><FaTimes></FaTimes></span></button> */}
     </div></div>;
 
     const onClickRename = (ev: React.MouseEvent<HTMLElement>) => {
         if (isRenaming) {
             // console.log('clicked while renaming');
-            dispatch({type: 'renameTimetable', old: current, new: name});
+            dispatch({type: 'renameTimetable', id: current, new: name});
             setIsRenaming(false);
         } else {
             // console.log('entering renaming mode');
-            setName(current);
+            setName(currentName);
             renameRef.current!.focus();
             setIsRenaming(true);
         }
@@ -50,12 +54,12 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
     }
 
     const onClickDuplicate = (ev: React.MouseEvent<HTMLElement>) => {
-        dispatch({type: 'copyTimetable', new: current, old: current});
+        dispatch({type: 'copyTimetable', id: current});
     }
 
     const onClickDelete = (ev: React.MouseEvent<HTMLElement>) => {
         if (confirmDelete) {
-            dispatch({type: 'deleteTimetable', name: current});
+            dispatch({type: 'deleteTimetable', id: current});
             setConfirmDelete(false);
         } else {
             setConfirmDelete(true);
@@ -74,7 +78,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
         <div className="field">
             <div className="control">
                 <input ref={renameRef} type="text" className={"title "+inputStyle} 
-                    readOnly={!isRenaming} value={isRenaming ? name : current} 
+                    readOnly={!isRenaming} value={isRenaming ? name : currentName} 
                     onChange={(ev) => setName(ev.target.value)}
                     placeholder="timetable name…"/>
             </div>
@@ -107,14 +111,14 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
             <label className="label">Saved Timetables</label>
             <div className="control">
                 <div className="field is-grouped is-grouped-multiline">
-                    {timetableNames.sort().map(makeTag)}
+                    {_.sortBy(Object.entries(timetables), ([k,v]) => v.name).map(makeTag)}
                 </div>
             </div>
         </div>
         
         {!savedValid && <div className="message is-danger">
             <div className="message-body">
-                <strong>Error:</strong> The selected timetable "{current}" could not be loaded.
+                <strong>Error:</strong> The selected timetable "{currentName}" could not be loaded.
             </div>
         </div>}
         
@@ -126,7 +130,7 @@ export const TimetableSelector = ({ timetableNames, current, dispatch }: Timetab
                     <button className="delete" aria-label="close" type="button" onClick={onClickCancel}></button>
                 </header>
                 <section className="modal-card-body">
-                    Are you sure you want to delete "{current}"?
+                    Are you sure you want to delete "{currentName}"?
                 </section>
                 <footer className="modal-card-foot">
                     <button className="button is-danger" type="button" onClick={onClickDelete}>

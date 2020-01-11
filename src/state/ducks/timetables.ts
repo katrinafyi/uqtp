@@ -1,4 +1,4 @@
-import { CourseEvent, SelectedActivities, TimetableState } from "../types";
+import { CourseEvent, SelectedActivities, Timetable } from "../types";
 import produce from "immer";
 import _ from "lodash";
 
@@ -26,7 +26,7 @@ const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, session
         }
     });
 
-const timetableReducer = (state: TimetableState, action: TimetableStateAction) => produce(state, (draft) => {
+const timetableReducer = (state: Timetable, action: TimetableStateAction) => produce(state, (draft) => {
     // console.log('producing new state for action:');
     // console.log(action);
     
