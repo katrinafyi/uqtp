@@ -57,6 +57,7 @@ auth.onAuthStateChanged((user) => {
   unsubFirebase = null;
   unsubSnapshot = null;
   console.log('auth state changed: ' + user?.uid);
+  console.log(user);
   if (user) {
     const docRef = firestore.collection('users').doc(user.uid);
     unsubSnapshot = docRef.onSnapshot((doc) => {

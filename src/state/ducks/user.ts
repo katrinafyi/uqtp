@@ -10,6 +10,7 @@ export type UserState = {
     name: string | null,
     email: string | null,
     photo: string | null,
+    phone: string | null,
     providers: string[] | null,
     isAnon: boolean,
 } | null;
@@ -32,6 +33,7 @@ const userReducer = (state: UserState, action: UserStateAction): UserState => {
                 name: action.user.displayName,
                 email: action.user.email,
                 photo: action.user.photoURL,
+                phone: action.user.phoneNumber,
                 providers: action.user.providerData?.map(x => x?.providerId ?? JSON.stringify(x)),
                 isAnon: action.user.isAnonymous,
             };

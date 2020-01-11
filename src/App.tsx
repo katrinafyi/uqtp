@@ -18,7 +18,7 @@ import { UserInfoView } from './UserInfoView';
 type Props = ReturnType<typeof mapStateToProps>
   & typeof dispatchProps;
 
-const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
+const App = ({ uid, name, email, photo, phone, isAnon, setPersistState }: Props) => {
   const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
 
   const [showSignIn, setShowSignIn] = useState(false);
@@ -31,7 +31,7 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
     auth.signOut();
   }
 
-  const displayName = name ?? email;
+  const displayName = name ?? email ?? phone;
 
   const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
   const firebaseRef = createRef<HTMLDivElement>();
@@ -49,13 +49,16 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
     <ModalCard visible={showUserInfo} setVisible={setShowUserInfo}
       title={"User Info"}
       footer={<div className="level" style={{width: '100%'}}>
-        <div className="level-left"><div className="level-item">
+        <div className="level-left is-hidden-mobile"><div className="level-item">
           <button className="button" onClick={() => setShowUserInfo(false)}>Close</button>
         </div></div>
-        <div className="level-right"><div className="level-item">
-          <button className="button is-danger" onClick={signOut}>
-          <span className="icon"><FaSignOutAlt></FaSignOutAlt></span> <span>Log out</span></button>
-        </div></div>
+        <div className="level-right">
+          {isAnon && <div className="level-item has-text-danger">Anonymous data is deleted on log out.</div>}
+          <div className="level-item">
+            <button className="button is-danger" onClick={signOut}>
+            <span className="icon"><FaSignOutAlt></FaSignOutAlt></span> <span>Log out</span></button>
+          </div>
+        </div>
       </div>}>
       <UserInfoView></UserInfoView>
     </ModalCard>
@@ -80,9 +83,6 @@ const App = ({ uid, name, email, photo, isAnon, setPersistState }: Props) => {
                 {isAnon && <button className="button is-link" type="button" onClick={() => setShowSignIn(true)}>
                   <span className="icon"><FaSignInAlt></FaSignInAlt></span><span> Log in</span>
                 </button>}
-                <div className="button is-danger is-outlined" title="Sign out" onClick={signOut}>
-                  <span className="icon"><FaSignOutAlt></FaSignOutAlt></span>
-                </div>
               </div>}
             </div>
           </div>
@@ -118,6 +118,7 @@ const mapStateToProps = (state: PersistState) => {
     email: state.user?.email,
     name: state.user?.name,
     photo: state.user?.photo,
+    phone: state.user?.phone,
   }
 }
 

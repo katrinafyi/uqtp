@@ -14,7 +14,11 @@ export const firebaseUIConfig = (allowAnon: boolean) => ({
     {
       provider: firebase.auth.EmailAuthProvider.PROVIDER_ID,
       signInMethod: firebase.auth.EmailAuthProvider.EMAIL_LINK_SIGN_IN_METHOD,
-  },
+    },
+    {
+      provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
+      defaultCountry: 'AU',
+    }
   ].concat(allowAnon ? [firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID] : []),
   autoUpgradeAnonymousUsers: true,
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
