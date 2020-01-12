@@ -10,13 +10,19 @@ export type TimetableStateAction = {
     course: string,
     activity: string,
     group: string | null,
-}
+} | {
+    type: 'deleteCourse',
+    course: string
+};
 
 export const setAllSessions = (sessions: CourseEvent[]): TimetableStateAction => 
     ({ type: 'setAllSessions', sessions });
 
 export const setActivityGroup = (course: string, activity: string, group: string | null): TimetableStateAction =>
     ({ type: 'setActivityGroup', course, activity, group });
+
+export const deleteCourse = (course: string): TimetableStateAction =>
+    ({ type: 'deleteCourse', course });
 
 
 const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, sessions: CourseEvent[]) => 
@@ -41,6 +47,10 @@ const timetableReducer = (state: Timetable, action: TimetableStateAction) => pro
             } else {
                 _.set(draft.selectedGroups, [action.course, action.activity], action.group);
             }
+            break;
+        case 'deleteCourse':
+            draft.allSessions = state.allSessions.filter(x => x.course !== action.course);
+            delete draft.selectedGroups[action.course];
             break;
         default:
             return;

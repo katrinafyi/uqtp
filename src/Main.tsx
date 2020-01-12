@@ -9,7 +9,7 @@ import { isHighlighted } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
 import SessionSelectors from './SessionSelectors';
-import { setActivityGroup, setAllSessions } from './state/ducks/timetables';
+import { setActivityGroup, setAllSessions, deleteCourse } from './state/ducks/timetables';
 import { PersistState } from './state/schema';
 import { RootAction } from './state/store';
 import { CourseActivity, CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
@@ -113,8 +113,8 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
             may be lost if you clear your cookies / site data. */}
         </div></div>
         <SessionSelectors allActivities={activities} 
-          selected={timetable.selectedGroups} 
-          setSelected={setSelected}></SessionSelectors>
+          selected={timetable.selectedGroups} setSelected={setSelected}
+          deleteCourse={(c) => dispatch(deleteCourse(c))}></SessionSelectors>
 
         {/* <h4 className="title is-4">Timetable</h4> */}
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>

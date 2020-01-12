@@ -7,15 +7,17 @@ interface CourseSessionSelectorProps {
     activities: CourseGroup[],
     selected: {[activity: string]: string},
     setSelected: (activity: string, group: string | null) => any,
+    deleteCourse: () => any,
 }
 
 export interface Props {
     allActivities: CourseGroup[],
     selected: {[course: string]: {[activity: string]: string}},
     setSelected: (course: string, activity: string, group: string | null) => any,
+    deleteCourse: (course: string) => any,
 };
 
-const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessionSelectorProps) => {
+const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse}: CourseSessionSelectorProps) => {
     const [enabled, setEnabled] = useState(true);
 
     // console.log(activities);
@@ -51,9 +53,9 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
                 {activities[0].course}
             </p>
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="card-header-icon" type="button" onClick={() => setEnabled(!enabled)}>
+            <a className="card-header-icon" type="button" onClick={deleteCourse}>
                 <span className="icon">
-                    {enabled ? <FaCheckSquare></FaCheckSquare> : <FaRegSquare></FaRegSquare>}
+                    <FaTimes></FaTimes>
                 </span>
             </a>
         </header>
@@ -67,7 +69,7 @@ const CourseSessionSelector = ({activities, selected, setSelected}: CourseSessio
 
 const MemoCourseSessionSelector = memo(CourseSessionSelector);
 
-const SessionSelectors = ({ allActivities, selected, setSelected }: Props) => {
+const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse }: Props) => {
     const byCourse = _.groupBy(allActivities, (x) => x.course);
     
     const courses = _(allActivities).map(x => x.course).uniq().value();
@@ -76,7 +78,8 @@ const SessionSelectors = ({ allActivities, selected, setSelected }: Props) => {
         <div className="columns is-multiline is-mobile">
             {courses.map(c => <div key={c} className="column is-6-mobile is-narrow">
                 <MemoCourseSessionSelector activities={byCourse[c]} 
-                    selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}></MemoCourseSessionSelector>
+                    selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}
+                    deleteCourse={() => deleteCourse(c)}></MemoCourseSessionSelector>
             </div>)}
             <div className="column is-3 is-hidden-touch"></div>
         </div>
