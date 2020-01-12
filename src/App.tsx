@@ -21,7 +21,7 @@ import { FirebaseAuth } from 'react-firebaseui';
 type Props = ReturnType<typeof mapStateToProps>
   & typeof dispatchProps;
 
-const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser }: Props) => {
+const App = ({ uid, name, email, photo, phone, isAnon, providers, setPersistState, setUser }: Props) => {
   const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
 
   const [showSignIn, setShowSignIn] = useState(false);
@@ -46,7 +46,6 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
       setUser(cred.user);
     return false;
   };
-  
   config.callbacks!.signInFailure = (error) => {
     // For merge conflicts, the error.code will be
     // 'firebaseui/anonymous-upgrade-merge-conflict'.
@@ -64,8 +63,8 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
     return firestore.collection('users').doc(oldUser.uid).get()
       .then(doc => doc.data() as PersistState)
       .then(oldData => firebase.auth().signInWithCredential(newCred)
-        .then((cred) => {
-          const newDocRef = firestore.collection('users').doc(cred.user!.uid);
+        .then((newUser) => {
+          const newDocRef = firestore.collection('users').doc(newUser.user!.uid);
           newDocRef.get().then(newDoc => {
             setShowSignIn(false);
             setShowUserInfo(false);
@@ -79,13 +78,16 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
         })
       );
   };
+  const linkedProviders = new Set(providers ?? []);
+  config.signInOptions = config.signInOptions!
+    .filter(x => !linkedProviders.has(typeof x == 'string' ? x : x.provider));
 
-  const [authUI, setAuthUI] = useState<JSX.Element | null>(null);
+  const [authElement, setAuthElement] = useState<JSX.Element | null>(null);
   useEffect(() => {
-    if (!authUI)
-      setAuthUI(<FirebaseAuth uiConfig={config} firebaseAuth={auth}></FirebaseAuth>)
+    if (!authElement)
+      setAuthElement(<FirebaseAuth uiConfig={config} firebaseAuth={auth}></FirebaseAuth>)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authUI]);
+  }, [authElement]);
 
   const firebaseRef = createRef<HTMLDivElement>();
   const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
@@ -98,7 +100,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
 
   return <>
     <Modal visible={showSignIn} setVisible={setShowSignIn}>
-      {showSignIn && !isEmailLink && authUI}
+      {showSignIn && !isEmailLink && authElement}
     </Modal>
     <ModalCard visible={showUserInfo} setVisible={setShowUserInfo}
       title={"User Info"}
@@ -114,7 +116,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
           </div>
         </div>
       </div>}>
-      <UserInfoView></UserInfoView>
+      <UserInfoView firebaseUI={showUserInfo ? authElement! : undefined}></UserInfoView>
     </ModalCard>
     <div className="hero" style={{ backgroundColor: '#fafafa' }}>
       <div className="hero-body">
@@ -147,7 +149,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
       <StateErrorBoundary>
         <div id="firebaseui-email" ref={firebaseRef}></div>
         {uid ? <Main></Main>
-          : (!showSignIn && !isEmailLink && authUI)}
+          : (!showSignIn && !isEmailLink && authElement)}
       </StateErrorBoundary>
     </section>
     <footer className="footer">
@@ -173,6 +175,7 @@ const mapStateToProps = (state: PersistState) => {
     name: state.user?.name,
     photo: state.user?.photo,
     phone: state.user?.phone,
+    providers: state.user?.providers,
   }
 }
 

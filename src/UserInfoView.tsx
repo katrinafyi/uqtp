@@ -2,9 +2,11 @@ import React from "react"
 import { PersistState } from "./state/schema";
 import { connect } from "react-redux";
 
-type Props = ReturnType<typeof mapStateToProps>;
+type Props = ReturnType<typeof mapStateToProps> & {
+  firebaseUI?: JSX.Element
+};
 
-const _UserInfoView = ({ user, state }: Props) => {
+const _UserInfoView = ({ user, state, firebaseUI }: Props) => {
   if (!user)
     return <></>;
   return <>
@@ -28,6 +30,10 @@ const _UserInfoView = ({ user, state }: Props) => {
       <label className="label">Export Timetable Data</label>
       <input type="text" className="input is-small" value={JSON.stringify(state)} readOnly/>
     </div>
+    {/* {firebaseUI && <div className="field">
+      <label className="label">Link Accounts</label>
+      <div className="control">{firebaseUI}</div>
+    </div>} */}
   </>;
 };
 
