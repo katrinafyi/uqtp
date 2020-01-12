@@ -1,11 +1,13 @@
 import { auth } from "./state/firebase";
 import * as firebaseui from "firebaseui";
 import { FirebaseAuth } from "react-firebaseui";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import firebase from "firebase/app";
 import 'firebase/auth';
+import { setUser } from './state/ducks/user'; 
+import { connect } from "react-redux";
 
-export const firebaseUIConfig = (allowAnon: boolean) => ({
+export const getFirebaseUIConfig = () => ({
   signInFlow: 'popup',
   signInOptions: [
     firebase.auth.GoogleAuthProvider.PROVIDER_ID,
@@ -19,7 +21,7 @@ export const firebaseUIConfig = (allowAnon: boolean) => ({
       provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
       defaultCountry: 'AU',
     }
-  ].concat(allowAnon ? [firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID] : []),
+  ].concat([firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID]),
   autoUpgradeAnonymousUsers: true,
   credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
   privacyPolicyUrl: 'https://kentonlam.xyz/uqtp-privacy/',
@@ -28,37 +30,36 @@ export const firebaseUIConfig = (allowAnon: boolean) => ({
     // eslint-disable-next-line no-sequences
     signInSuccessWithAuthResult: (userCredential: firebase.auth.UserCredential) => {
       console.log(userCredential);
-      return true;
+      return false;
     },
-    signInFailure: (error) => {
-      // For merge conflicts, the error.code will be
-      // 'firebaseui/anonymous-upgrade-merge-conflict'.
-      console.log('error signing in: ' +error.code);
-      console.log('error uid: ' + error.credential?.uid);
-      if (error.code !== 'firebaseui/anonymous-upgrade-merge-conflict') {
-        return Promise.resolve(error.credential);
-      }
-      // The credential the user tried to sign in with.
-      var cred = error.credential;
-      // Copy data from anonymous user to permanent user and delete anonymous
-      // user.
-      // ...
-      // Finish sign-in after data is copied.
-      return firebase.auth().signInWithCredential(cred);
-    }
   }
 } as firebaseui.auth.Config);
 
-type Props = {
-  allowAnonymous: boolean
-}
+const mapDispatchToProps = {
+  setUser
+};
 
-export const FirebaseSignIn = ({ allowAnonymous }: Props) => {
+type Props = typeof mapDispatchToProps;
+const _FirebaseSignIn = ({ setUser }: Props) => {
+  const config = getFirebaseUIConfig();
 
-  const uiCallback = (ui: firebaseui.auth.AuthUI) => {
-    console.log('is email: ' + auth.isSignInWithEmailLink(window.location.href));
-    console.log('is pending redirect: ' + ui.isPendingRedirect());
+  config.callbacks!.signInSuccessWithAuthResult = (cred: firebase.auth.UserCredential) => {
+    console.log('signInSuccessWithAuthResult');
+    console.log(cred);
+    // if (cred.operationType === 'link')
+    //   setUser(cred.user);
+    return false;
   }
 
-  return <FirebaseAuth uiConfig={firebaseUIConfig(allowAnonymous)} firebaseAuth={auth} uiCallback={uiCallback}></FirebaseAuth>;
+  const [element, setElement] = useState<JSX.Element | null>(null);
+  
+  useEffect(() => {
+    if (!element)
+      setElement(<FirebaseAuth uiConfig={config} firebaseAuth={auth}></FirebaseAuth>)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [element]);
+
+  return element;
 }
+
+export const FirebaseSignIn = connect(null, mapDispatchToProps)(_FirebaseSignIn);

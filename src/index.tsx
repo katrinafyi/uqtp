@@ -45,7 +45,6 @@ rootStore.subscribe(() => {
 type DatabaseCallback = (a: firebase.database.DataSnapshot, b?: string | null) => any;
 let unsubFirebase: Unsubscribe | null = null;
 let unsubSnapshot: Function | null = null;
-let firstUser = true;
 
 auth.onAuthStateChanged((user) => {
   unsubFirebase?.();
@@ -89,7 +88,6 @@ auth.onAuthStateChanged((user) => {
       rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
     }
   }
-  firstUser = false;
   rootStore.dispatch(setUser(user));
 });
 
