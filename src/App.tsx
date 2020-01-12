@@ -38,7 +38,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
 
   const config = getFirebaseUIConfig();
   config.callbacks!.signInSuccessWithAuthResult = (cred: firebase.auth.UserCredential) => {
-    console.log('signInSuccessWithAuthResult');
+    console.log('signInSuccessWithAuthResult:');
     console.log(cred);
     setShowUserInfo(false);
     setShowSignIn(false);
@@ -57,36 +57,27 @@ const App = ({ uid, name, email, photo, phone, isAnon, setPersistState, setUser 
     }
     // The credential the user tried to sign in with.
     const newCred = error.credential;
-    console.log(newCred);
-
+    // The user currently signed in.
     const oldUser = auth.currentUser!;
-    console.log('old user');
 
-    // read old data
+    // read old data and merge.
     return firestore.collection('users').doc(oldUser.uid).get()
       .then(doc => doc.data() as PersistState)
       .then(oldData => firebase.auth().signInWithCredential(newCred)
-        .then((cred) => firestore.collection('users').doc(cred.user!.uid).get())
-        .then(newDoc => {
-          const newData = newDoc.data() as PersistState | undefined;
-          if (newData) {
-            newData.timetables = { ...newData.timetables, ...oldData.timetables };
-            setPersistState(newData);
-          } else {
-            setPersistState(oldData);
-          }
-          setShowSignIn(false);
-          setShowUserInfo(false);
+        .then((cred) => {
+          const newDocRef = firestore.collection('users').doc(cred.user!.uid);
+          newDocRef.get().then(newDoc => {
+            setShowSignIn(false);
+            setShowUserInfo(false);
+
+            const newData = newDoc.data() as PersistState | undefined;
+            if (newData) {
+              newData.timetables = { ...newData.timetables, ...oldData.timetables };
+            }
+            return newDocRef.set(newData ?? oldData);
+          })
         })
       );
-    console.log('new user');
-    console.log(firestore.collection('users').doc(newCred.uid).get());
-
-    // Copy data from anonymous user to permanent user and delete anonymous
-    // user.
-    // ...
-    // Finish sign-in after data is copied.
-    return firebase.auth().signInWithCredential(newCred);
   };
 
   const [authUI, setAuthUI] = useState<JSX.Element | null>(null);
