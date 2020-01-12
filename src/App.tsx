@@ -2,7 +2,6 @@ import React, { useState, useEffect, createRef } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
-import firebase from 'firebase';
 import { setPersistState } from './state/ducks/persist';
 import { setUser } from './state/ducks/user';
 import StateErrorBoundary from './StateErrorBoundary';
@@ -62,7 +61,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setPersistStat
     // read old data and merge.
     return firestore.collection('users').doc(oldUser.uid).get()
       .then(doc => doc.data() as PersistState)
-      .then(oldData => firebase.auth().signInWithCredential(newCred)
+      .then(oldData => auth.signInWithCredential(newCred)
         .then((newUser) => {
           const newDocRef = firestore.collection('users').doc(newUser.user!.uid);
           newDocRef.get().then(newDoc => {

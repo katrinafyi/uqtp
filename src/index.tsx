@@ -13,7 +13,6 @@ import { migratePeristState } from './state/migrations';
 import thunk from 'redux-thunk';
 import { setUser } from './state/ducks/user';
 import { firebaseMiddleware } from './state/firebaseMiddleware';
-import { Unsubscribe } from 'firebase';
 import { setPersistState } from './state/ducks/persist';
 import firebase from 'firebase/app';
 
@@ -43,7 +42,7 @@ rootStore.subscribe(() => {
 
 
 type DatabaseCallback = (a: firebase.database.DataSnapshot, b?: string | null) => any;
-let unsubFirebase: Unsubscribe | null = null;
+let unsubFirebase: Function | null = null;
 let unsubSnapshot: Function | null = null;
 
 auth.onAuthStateChanged((user) => {
