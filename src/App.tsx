@@ -79,8 +79,8 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setPersistStat
       );
   };
   const linkedProviders = new Set(providers ?? []);
-  config.signInOptions = config.signInOptions!
-    .filter(x => !linkedProviders.has(typeof x == 'string' ? x : x.provider));
+  // config.signInOptions = config.signInOptions!
+  //   .filter(x => !linkedProviders.has(typeof x == 'string' ? x : x.provider));
 
   const [authElement, setAuthElement] = useState<JSX.Element | null>(null);
   useEffect(() => {
