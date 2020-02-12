@@ -18,9 +18,10 @@ The built site is in build/ and can be hosted on a static web server of your cho
 
 ## Screenshots
 
-<details><summary>Show / Hide </summary>
-  
+### Main view  
 ![uqtp1](https://user-images.githubusercontent.com/39479354/74299152-87aec600-4d97-11ea-873d-8f83849b0a0b.PNG)
+
+### Timetable
 ![uqtp2](https://user-images.githubusercontent.com/39479354/74299154-8a112000-4d97-11ea-9597-b7139dd81471.PNG)
 
-</details>
+
