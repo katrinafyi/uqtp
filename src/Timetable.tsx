@@ -47,14 +47,18 @@ const sessionStyle = css({
     '&.highlighted': {
         background: 'none', //'hsl(0, 0%, 99.9%)',
     },
+    '&.clash': {
+        background: 'hsl(48, 100%, 96%)',
+    },
     color: 'black',
 });
 
 type TimetableSessionProps = {
-    session: CourseEvent
+    session: CourseEvent,
+    clash?: boolean
 }
 
-const TimetableSession = (({session}: TimetableSessionProps) => {
+const TimetableSession = (({session, clash}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'has-text-info',
         'TUT': 'has-text-success',
@@ -78,7 +82,8 @@ const TimetableSession = (({session}: TimetableSessionProps) => {
 
     const locked = (session.numGroups ?? 10) <= 1;
     let highlightClass = locked ? 'locked ' : '';
-    highlightClass += thisHighlighted ? 'highlighted ' : ' ';
+    highlightClass += (clash && !thisHighlighted) ? 'clash ' : '';
+    highlightClass += thisHighlighted ? 'highlighted ' : '';
 
     return <a className={highlightClass + sessionStyle} onClick={onClick}>
         <span className={!thisHighlighted ? "has-text-weight-bold" : 'is-italic	'}>
@@ -132,7 +137,9 @@ const DayColumn = (({day, daySessions}: DayColumnProps) => {
             <React.Fragment key={h}>
                 {timeColumn[i]}
                 <div className={"td has-text-centered " + hourStyle}>
-                    {daySessions[h].map(s => <TimetableSession key={makeSessionKey(s)} session={s}></TimetableSession>)}
+                    {daySessions[h].map(s => 
+                        <TimetableSession key={makeSessionKey(s)} session={s} clash={daySessions[h].length > 1}></TimetableSession>
+                    )}
                 </div>
             </React.Fragment>)
         }
