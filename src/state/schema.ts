@@ -20,6 +20,7 @@ const testData = [{"course":"MATH3401_S1_STLUC_IN","description":"Complex Analys
 
 const DEFAULT_CURRENT = uuidv4();
 export const DEFAULT_PERSIST: PersistState = {
+    // @ts-ignore
     timetables: {
         [DEFAULT_CURRENT]: {
             name: 'default',

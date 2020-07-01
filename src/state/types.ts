@@ -14,6 +14,7 @@ export type CourseActivity = {
     course: string,
     activity: string,
     activityType?: string,
+    numGroups?: number
 }
 
 export type CourseGroup = CourseActivity & {

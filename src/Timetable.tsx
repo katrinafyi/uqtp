@@ -5,6 +5,7 @@ import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted } fr
 
 import {css} from 'emotion';
 import { HighlightContext } from './HightlightContext';
+import { FaLock } from 'react-icons/fa';
 
 export type Props = {
     selectedSessions: CourseEvent[],
@@ -18,7 +19,7 @@ const typeTagStyle = css({
 });
 
 const sessionStyle = css({
-
+    padding: '0.5em 0',
 
     flexGrow: 1,
     flexBasis: 0,
@@ -44,9 +45,8 @@ const sessionStyle = css({
     
     backgroundColor: 'hsl(0, 0%, 98%)',
     '&.highlighted': {
-        backgroundColor: 'hsl(0, 0%, 90%)',
+        background: 'none', //'hsl(0, 0%, 99.9%)',
     },
-
     color: 'black',
 });
 
@@ -56,10 +56,14 @@ type TimetableSessionProps = {
 
 const TimetableSession = (({session}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
-        'LEC': 'is-info',
-        'TUT': 'is-success',
-        'PRA': 'is-warning',
+        'LEC': 'has-text-info',
+        'TUT': 'has-text-success',
+        'PRA': 'has-text-danger',
+        'STU': 'has-text-primary',
     };
+    const defaultCSS = 'has-text-dark';
+    const activityClass = (activityCSS[session.activityType!]) ?? defaultCSS;
+
 
     const {highlight, setHighlight, setSelectedGroup} = useContext(HighlightContext);
     const thisHighlighted = isHighlighted(session, highlight);
@@ -72,14 +76,19 @@ const TimetableSession = (({session}: TimetableSessionProps) => {
         }
     };
 
-    const highlightClass = thisHighlighted ? 'highlighted ' : ' ';
+    const locked = (session.numGroups ?? 10) <= 1;
+    let highlightClass = locked ? 'locked ' : '';
+    highlightClass += thisHighlighted ? 'highlighted ' : ' ';
 
     return <a className={highlightClass + sessionStyle} onClick={onClick}>
-        <span className="is-family-monospace has-text-weight-bold">{getCourseCode(session.course)}</span>
-        <div className={"tags has-addons has-text-weight-semibold " + typeTagStyle}>
-            <span className={"tag  " + (activityCSS[session.activityType!]) ?? "" }>{session.activity}</span>
-            <span className="tag is-light is-dark ">{session.group}</span>
-        </div>
+        <span className={!thisHighlighted ? "has-text-weight-bold" : 'is-italic	'}>
+            {getCourseCode(session.course)}
+        </span>
+        <span>
+            <span className={"has-text-weight-semibold " + activityClass}>{session.activity}</span>
+            &thinsp;
+            <span className={locked ? 'has-text-grey' : ''}>{locked ? <FaLock size="12px"></FaLock> : session.group}</span>
+        </span>
     </a>;
 });
 
@@ -98,6 +107,7 @@ const makeTimeElements = (desktop: boolean) => [
 const hourStyle = css({
     paddingTop: 0,
     paddingBottom: 0,
+    lineHeight: 1,
 
     display: 'flex',
     justifyContent: 'space-between',
@@ -105,7 +115,7 @@ const hourStyle = css({
     // marginLeft: '-2px',
     // marginRight: '-2px',
 
-    height: '3.9rem',
+    // height: '3.9rem',
 });
 
 type DayColumnProps = {
@@ -131,7 +141,7 @@ const DayColumn = (({day, daySessions}: DayColumnProps) => {
 
 const Timetable: React.FC<Props> = ({selectedSessions}) => {
 
-    const byDayTime = computeDayTimeArrays(selectedSessions);    
+    const byDayTime = computeDayTimeArrays(selectedSessions); 
 
     return <div className="table timetable">
         {makeTimeElements(true)}

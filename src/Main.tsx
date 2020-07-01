@@ -15,6 +15,7 @@ import { RootAction } from './state/store';
 import { CourseActivity, CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
 import Timetable from './Timetable';
 import TimetableSelector from './TimetableSelector';
+import CourseSearcher from './CourseSearcher';
 
 
 type Props = ReturnType<typeof mapStateToProps>
@@ -56,8 +57,16 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
 
   const isSessionSelected = (x: CourseEvent) => 
     _.get(timetable.selectedGroups, [x.course, x.activity], null) === x.group;
+
+  // returns a string like CSSE2310|PRA1
+  const getActivityKey = (s: CourseEvent) => s.course + '|' + s.activity;
+  // @ts-ignore
+  const activityGroups = _.groupBy(timetable.allSessions, getActivityKey);
+
   const visibleSessions = timetable.allSessions
-    .filter(x => isSessionSelected(x) || isHighlighted(x, highlight));
+    .filter(x => isSessionSelected(x) || isHighlighted(x, highlight))
+    .map(x => ({...x, numGroups: activityGroups[getActivityKey(x)].length}));
+    console.log(visibleSessions);
 
   const onClickCancel = () => setShowHelp(false);
 
@@ -88,6 +97,8 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
           </div>
         </form>
 
+        {/* <CourseSearcher></CourseSearcher> */}
+
         <div className={"modal " + (showHelp ? 'is-active' : '')}>
             <div className="modal-background" onClick={onClickCancel}></div>
             <div className="modal-card">
@@ -112,12 +123,13 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
             {/* Your timetables are saved in <em>local browser storage</em> and 
             may be lost if you clear your cookies / site data. */}
         </div></div>
-        <SessionSelectors allActivities={activities} 
-          selected={timetable.selectedGroups} setSelected={setSelected}
-          deleteCourse={(c) => dispatch(deleteCourse(c))}></SessionSelectors>
 
-        {/* <h4 className="title is-4">Timetable</h4> */}
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
+          <SessionSelectors allActivities={activities} 
+            selected={timetable.selectedGroups} setSelected={setSelected}
+            deleteCourse={(c) => dispatch(deleteCourse(c))}></SessionSelectors>
+
+          {/* <h4 className="title is-4">Timetable</h4> */}
           <Timetable selectedSessions={visibleSessions}></Timetable>
         </HighlightContext.Provider>
       </div>
