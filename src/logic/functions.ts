@@ -35,4 +35,4 @@ export const isHighlighted = (session: CourseGroup, highlight: CourseActivity | 
     session.course === highlight?.course && session.activity === highlight.activity;
 
 export const coerceToArray = <T>(arg: T | T[]) => 
-    Array.isArray(arg) ? arg : [arg];
+    arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);

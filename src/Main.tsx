@@ -45,14 +45,14 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
     setFileError(undefined);
   };
 
-  const setSelected = (course: string, activity: string, group: string | null) => {
+  const setSelected = (course: string, activity: string, group: string[]) => {
     dispatch(setActivityGroup(course, activity, group));
   };
 
   const [highlight, setHighlight] = useState<CourseActivity | null>(null);
   const setSelectedGroup = (group: string | null) => {
     if (highlight == null) throw new Error('setting highlight group but nothing is highlighted.');
-    setSelected(highlight.course, highlight.activity, group);
+    setSelected(highlight.course, highlight.activity, group ? [group] : []);
   }
 
   const isSessionSelected = (x: CourseEvent) => 

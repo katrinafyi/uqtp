@@ -1,7 +1,7 @@
 import { CourseEvent, SelectedActivities, Timetable } from "../types";
 import produce from "immer";
 import _ from "lodash";
-import { makeActivityKey } from "../../logic/functions";
+import { makeActivityKey, coerceToArray } from "../../logic/functions";
 
 export type TimetableStateAction = {
     type: 'setAllSessions',
@@ -10,7 +10,7 @@ export type TimetableStateAction = {
     type: 'setActivityGroup',
     course: string,
     activity: string,
-    group: string | null,
+    group: string | null | string[],
 } | {
     type: 'deleteCourse',
     course: string
@@ -19,7 +19,7 @@ export type TimetableStateAction = {
 export const setAllSessions = (sessions: CourseEvent[]): TimetableStateAction => 
     ({ type: 'setAllSessions', sessions });
 
-export const setActivityGroup = (course: string, activity: string, group: string | null): TimetableStateAction =>
+export const setActivityGroup = (course: string, activity: string, group: string[]): TimetableStateAction =>
     ({ type: 'setActivityGroup', course, activity, group });
 
 export const deleteCourse = (course: string): TimetableStateAction =>
@@ -34,8 +34,8 @@ const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, session
     });
 
 const timetableReducer = (state: Timetable, action: TimetableStateAction) => produce(state, (draft) => {
-    // console.log('producing new state for action:');
-    // console.log(action);
+    console.log('producing new state for action:');
+    console.log(action);
     
     switch (action.type) {
         case 'setAllSessions':
@@ -46,15 +46,11 @@ const timetableReducer = (state: Timetable, action: TimetableStateAction) => pro
             setDefaultGroupsForSessions(draft.selectedGroups, sessions);
             break;
         case 'setActivityGroup':
-            if (action.group === null) {
-                _.unset(draft.selectedGroups, [action.course, action.activity]);
-            } else {
-                _.set(draft.selectedGroups, [action.course, action.activity], action.group);
-            }
+            _.set(draft.selectedGroups, [action.course, action.activity], coerceToArray(action.group ?? []));
             break;
         case 'deleteCourse':
             draft.allSessions = state.allSessions.filter(x => x.course !== action.course);
-            delete draft.selectedGroups[action.course];
+            // delete draft.selectedGroups[action.course];
             break;
         default:
             return;
