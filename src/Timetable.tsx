@@ -113,7 +113,7 @@ const Timetable: React.FC<Props> = ({selectedSessions}) => {
 
     const byDayTime = computeDayTimeArrays(selectedSessions); 
 
-    const timeCells = makeTimeElements()
+    const timeCells = makeTimeElements();
     // dayCells[d][h]
     const dayCells = _.range(5).map(i => makeDayCells(i, byDayTime[i]));
 

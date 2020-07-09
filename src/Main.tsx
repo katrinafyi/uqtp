@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { Dispatch, useState } from 'react';
+import React, { Dispatch, useState, useEffect } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
 import { connect } from 'react-redux';
 import './App.scss';
@@ -50,23 +50,32 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
   };
 
   const [highlight, setHighlight] = useState<CourseActivity | null>(null);
+  const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
+  const [activityGroups, setActivityGroups] = useState<{[s: string]: CourseEvent[]}>({});
+
+  useEffect(() => {
+    setActivityGroups(_.groupBy(timetable.allSessions, getActivityKey));
+  }, [timetable.allSessions]);
+
+  useEffect(() => {
+    const isSessionSelected = (x: CourseEvent) => 
+      coerceToArray(_.get(timetable.selectedGroups, [x.course, x.activity], null)).includes(x.group);
+
+    setVisibleSessions(timetable.allSessions
+    .filter(x => isSessionSelected(x) || isHighlighted(x, highlight))
+    .map(x => ({...x, numGroups: activityGroups[getActivityKey(x)]?.length ?? 0})));
+
+  }, [highlight, activityGroups, timetable.selectedGroups, timetable.allSessions]);
+
   const setSelectedGroup = (group: string | null) => {
     if (highlight == null) throw new Error('setting highlight group but nothing is highlighted.');
     setSelected(highlight.course, highlight.activity, group ? [group] : []);
   }
 
-  const isSessionSelected = (x: CourseEvent) => 
-    coerceToArray(_.get(timetable.selectedGroups, [x.course, x.activity], null)).includes(x.group);
-
   // returns a string like CSSE2310|PRA1
   const getActivityKey = (s: CourseEvent) => s.course + '|' + s.activity;
-  // @ts-ignore
-  const activityGroups = _.groupBy(timetable.allSessions, getActivityKey);
 
-  const visibleSessions = timetable.allSessions
-    .filter(x => isSessionSelected(x) || isHighlighted(x, highlight))
-    .map(x => ({...x, numGroups: activityGroups[getActivityKey(x)].length}));
-    console.log(visibleSessions);
+  // console.log(visibleSessions);
 
   const onClickCancel = () => setShowHelp(false);
 
