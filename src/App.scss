@@ -106,13 +106,18 @@
   align-content: center;
   flex-wrap: wrap;
 
+  cursor: pointer;
 
   // margin-left: 2px;
   // margin-right: 2px ;
   margin-right: -1px;
 
-  margin-top: 1px;
-  margin-bottom: 1px;
+  &.start {
+    margin-top: 1px;
+  }
+  &.end {
+    margin-bottom: 1px;
+  }
 
   border-radius: 0px;
   border-left: 2px solid #dbdbdb;
@@ -123,7 +128,7 @@
   color: black;
 
   &.highlighted {
-    background: none; //hsl(0; 0%; 99.9%);
+    background-color: white; //hsl(0; 0%; 99.9%);
   }
 
   &.clash {

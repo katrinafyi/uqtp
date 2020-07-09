@@ -14,11 +14,12 @@ const START_HOUR = 8;
 const END_HOUR = 18;
 
 type TimetableSessionProps = {
+    hour: number,
     session: CourseEvent,
     clash?: boolean
 }
 
-const TimetableSession = (({session, clash}: TimetableSessionProps) => {
+const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'has-text-info',
         'TUT': 'has-text-success',
@@ -45,7 +46,13 @@ const TimetableSession = (({session, clash}: TimetableSessionProps) => {
     highlightClass += (clash && !thisHighlighted) ? 'clash ' : '';
     highlightClass += thisHighlighted ? 'highlighted ' : '';
 
-    return <a className={highlightClass + " session"} onClick={onClick}>
+    let positionClass = '';
+    if (session.time.hour === hour)
+        positionClass += 'start ';
+    if ((hour - session.time.hour + 1) * 60 >= session.duration)
+        positionClass += 'end ';
+
+    return <div className={highlightClass + " session " + positionClass} onClick={onClick}>
         <span className={!thisHighlighted ? "has-text-weight-bold" : ''}>
             {getCourseCode(session.course)}
         </span>
@@ -54,7 +61,7 @@ const TimetableSession = (({session, clash}: TimetableSessionProps) => {
             &thinsp;
             <span className={locked ? 'has-text-grey' : ''}>{locked ? <FaLock size="12px"></FaLock> : session.group}</span>
         </span>
-    </a>;
+    </div>;
 });
 
 const makeTimeElements = (desktop: boolean) => [
@@ -78,7 +85,7 @@ const DayColumn = (({day, daySessions}: DayColumnProps) => {
                 {timeColumn[i]}
                 <div className={"td has-text-centered hour"}>
                     {daySessions[h].map(s => 
-                        <TimetableSession key={makeSessionKey(s)} session={s} clash={daySessions[h].length > 1}></TimetableSession>
+                        <TimetableSession key={makeSessionKey(s)} hour={h} session={s} clash={daySessions[h].length > 1}></TimetableSession>
                     )}
                 </div>
             </React.Fragment>)
