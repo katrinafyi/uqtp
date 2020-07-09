@@ -66,18 +66,18 @@ const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
 
 const makeHeaderCells = () => {
     return [
-        <th key="ht" className={"th thead has-text-right"}></th>,
-        ...DAY_NAMES.slice(0, 5).map(d => <th key={d} className="th thead has-text-centered is-size-5 ">{d}</th>)
+        <th key="ht" className={"th thead has-text-right col-time"}></th>,
+        ...DAY_NAMES.slice(0, 5).map(d => <th key={d} className="th is-size-5 col-day">{d}</th>)
     ];
 }
 
 const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
-    h => <th key={"t"+h} className={`th has-text-right is-size-5 time`}>{h}</th>
+    h => <th key={"t"+h} className={`th has-text-right is-size-5 col-time`}>{h}</th>
 );
 
 const makeDayCells = (day: number, daySessions: CourseEvent[][]) => {
     return _.range(START_HOUR, END_HOUR+1).map((h, i) =>
-    <td className={"td has-text-centered py-0"} key={`day:${day},hour:${h}`}>
+    <td className={"td has-text-centered py-0 col-day"} key={`day:${day},hour:${h}`}>
         <div className="hour">
         {daySessions[h].map(s => 
             <TimetableSession key={makeSessionKey(s)} hour={h} session={s} clash={daySessions[h].length > 1}></TimetableSession>
