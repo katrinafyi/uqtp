@@ -147,25 +147,27 @@ $border-light: #e8e8e8;
   // margin-right: 2px ;
   // margin-right: -1px;
 
-  &.start {
+  &.top {
     border-top: 1px solid $border;
   }
-  &.end {
+  &.bottom {
     border-bottom: 1px solid $border;
   }
 
   border-radius: 0px;
-  &:last-child {
+  &.right {
     border-right: 2px solid $border;
   }
-  border-left: 1px solid $border;
+  &:not(.empty) {
+    border-left: 1px solid $border;
+  }
   
   background-color: hsl(0, 0%, 98%);
   
   // color: black;
 
   &.highlighted {
-    background-color: transparent; //hsl(0; 0%; 99.9%);
+    background-color: white; //hsl(0; 0%; 99.9%);
   }
 
   &.clash {
@@ -174,5 +176,6 @@ $border-light: #e8e8e8;
 
   &.empty {
     background-color: transparent;
+    border-left: 1px solid transparent;
   }
 }

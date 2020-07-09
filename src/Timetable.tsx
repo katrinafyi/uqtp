@@ -16,10 +16,12 @@ const END_HOUR = 18;
 type TimetableSessionProps = {
     hour: number,
     session: CourseEvent,
-    clash?: boolean
+    clash?: boolean,
+    left: boolean,
+    right: boolean
 }
 
-const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
+const TimetableSession = (({hour, session, clash, left, right}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'has-text-info',
         'TUT': 'has-text-success',
@@ -49,20 +51,25 @@ const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
     let positionClass = '';
     let topPercent = 0;
     let heightPercent = 100;
-    if (session.time.hour === hour) {
-        positionClass += 'start ';
+    const top = session.time.hour === hour;
+    const bottom = (hour - session.time.hour + 1) * 60 >= session.duration;
+    if (top) {
+        positionClass += 'top ';
         topPercent = session.time.minute * 100 / 60;
     }
-    if ((hour - session.time.hour + 1) * 60 >= session.duration) {
-        positionClass += 'end ';
+    if (bottom) {
+        positionClass += 'bottom ';
         const endMinutes = (session.duration + session.time.minute);
         if (endMinutes % 60 !== 0)
             heightPercent = endMinutes % 60 * 100 / 60;
     }
+    if (left) positionClass += 'left ';
+    if (right) positionClass += 'right ';
 
     return (
     <div className={highlightClass + " session " + positionClass}
             style={{height: `${heightPercent}%`, top: `${topPercent}%`}} onClick={onClick}>
+        {top && <>
         <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
         </span>
@@ -71,6 +78,7 @@ const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
             &thinsp;
             <span className={locked ? 'has-text-grey' : ''}>{locked ? <FaLock size="12px"></FaLock> : session.group}</span>
         </span>
+        </>}
     </div>);
 });
 
@@ -85,12 +93,17 @@ const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
     h => <th key={"t"+h} className={`th has-text-right is-size-5 col-time`}>{h}</th>
 );
 
-const makeDayCells = (day: number, daySessions: CourseEvent[][]) => {
+const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
     return _.range(START_HOUR, END_HOUR+1).map((h, i) =>
     <td className={"td has-text-centered py-0 col-day"} key={`day:${day},hour:${h}`}>
         <div className="hour">
-        {daySessions[h].map(s => 
-            <TimetableSession key={makeSessionKey(s)} hour={h} session={s} clash={daySessions[h].length > 1}></TimetableSession>
+        {daySessions[h].map((s, i) => 
+            s == null 
+            ? <div className="session empty" key={"empty-" + i}></div>
+            : <TimetableSession key={makeSessionKey(s)} 
+                    hour={h} session={s} clash={daySessions[h].length > 1}
+                    left={true} 
+                    right={daySessions[h][i+1] == null}/>
         )}
         </div>
     </td>);
