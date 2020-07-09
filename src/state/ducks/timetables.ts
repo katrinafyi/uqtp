@@ -14,6 +14,12 @@ export type TimetableStateAction = {
 } | {
     type: 'deleteCourse',
     course: string
+} | {
+    type: 'replaceActivityGroup',
+    course: string,
+    activity: string,
+    oldGroup: string,
+    newGroup: string
 };
 
 export const setAllSessions = (sessions: CourseEvent[]): TimetableStateAction => 
@@ -21,6 +27,9 @@ export const setAllSessions = (sessions: CourseEvent[]): TimetableStateAction =>
 
 export const setActivityGroup = (course: string, activity: string, group: string[]): TimetableStateAction =>
     ({ type: 'setActivityGroup', course, activity, group });
+
+export const replaceActivityGroup = (course: string, activity: string, oldGroup: string, newGroup: string): TimetableStateAction =>
+    ({ type: 'replaceActivityGroup', course, activity, oldGroup, newGroup });
 
 export const deleteCourse = (course: string): TimetableStateAction =>
     ({ type: 'deleteCourse', course });
@@ -48,6 +57,11 @@ const timetableReducer = (state: Timetable, action: TimetableStateAction) => pro
             break;
         case 'setActivityGroup':
             _.set(draft.selectedGroups, [action.course, action.activity], coerceToArray(action.group ?? []));
+            break;
+        case 'replaceActivityGroup':
+            const oldGroups = coerceToArray(state.selectedGroups?.[action.course]?.[action.activity]);
+            _.set(draft.selectedGroups, [action.course, action.activity],
+                oldGroups.map(x => x === action.oldGroup ? action.newGroup : x));
             break;
         case 'deleteCourse':
             draft.allSessions = state.allSessions.filter(x => x.course !== action.course);

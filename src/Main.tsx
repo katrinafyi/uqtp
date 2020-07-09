@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { Dispatch, useState, useEffect } from 'react';
+import React, { Dispatch, useState, useEffect, useCallback } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
 import { connect } from 'react-redux';
 import './App.scss';
@@ -9,7 +9,7 @@ import { isHighlighted, coerceToArray } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
 import SessionSelectors from './SessionSelectors';
-import { setActivityGroup, setAllSessions, deleteCourse } from './state/ducks/timetables';
+import { setActivityGroup, setAllSessions, deleteCourse, replaceActivityGroup } from './state/ducks/timetables';
 import { PersistState } from './state/schema';
 import { RootAction } from './state/store';
 import { CourseActivity, CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
@@ -45,11 +45,11 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
     setFileError(undefined);
   };
 
-  const setSelected = (course: string, activity: string, group: string[]) => {
+  const setSelected = useCallback((course: string, activity: string, group: string[]) => {
     dispatch(setActivityGroup(course, activity, group));
-  };
+  }, [dispatch]);
 
-  const [highlight, setHighlight] = useState<CourseActivity | null>(null);
+  const [highlight, setHighlight] = useState<CourseGroup | null>(null);
   const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
   const [activityGroups, setActivityGroups] = useState<{[s: string]: CourseEvent[]}>({});
 
@@ -67,10 +67,11 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
 
   }, [highlight, activityGroups, timetable.selectedGroups, timetable.allSessions]);
 
-  const setSelectedGroup = (group: string | null) => {
+  const setSelectedGroup = useCallback((group: string | null) => {
     if (highlight == null) throw new Error('setting highlight group but nothing is highlighted.');
-    setSelected(highlight.course, highlight.activity, group ? [group] : []);
-  }
+    if (group != null)
+      dispatch(replaceActivityGroup(highlight.course, highlight.activity, highlight.group, group));
+  }, [highlight, dispatch]);
 
   // returns a string like CSSE2310|PRA1
   const getActivityKey = (s: CourseEvent) => s.course + '|' + s.activity;
