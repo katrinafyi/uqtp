@@ -102,7 +102,7 @@ const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
             ? <div className="session empty" key={"empty-" + i}></div>
             : <TimetableSession key={makeSessionKey(s)} 
                     hour={h} session={s} clash={daySessions[h].length > 1}
-                    left={true} 
+                    left={daySessions[h][i-1] == null} 
                     right={daySessions[h][i+1] == null}/>
         )}
         </div>
