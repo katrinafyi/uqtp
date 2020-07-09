@@ -64,45 +64,49 @@ const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
     </div>;
 });
 
-const makeTimeElements = (desktop: boolean) => [
-    <div key="ht" className={"th thead has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}></div>,
-    ..._.range(START_HOUR, END_HOUR+1).map(h =>
-        <div key={"t"+h} className={`th has-text-right is-size-5 time ${!desktop ? "is-hidden-tablet" : "is-hidden-mobile"}`}>{h}</div>)
-];
-
-type DayColumnProps = {
-    day: number,
-    daySessions: CourseEvent[][]
+const makeHeaderCells = () => {
+    return [
+        <th key="ht" className={"th thead has-text-right"}></th>,
+        ...DAY_NAMES.slice(0, 5).map(d => <th key={d} className="th thead has-text-centered is-size-5 ">{d}</th>)
+    ];
 }
 
-const DayColumn = (({day, daySessions}: DayColumnProps) => {
-    const [timeHeader, ...timeColumn] = makeTimeElements(false);
-    return <>
-        {timeHeader}
-        <div className="th thead has-text-centered is-size-5 ">{DAY_NAMES[day]}</div>
-        {_.range(START_HOUR, END_HOUR+1).map((h, i) =>
-            <React.Fragment key={h}>
-                {timeColumn[i]}
-                <div className={"td has-text-centered hour"}>
-                    {daySessions[h].map(s => 
-                        <TimetableSession key={makeSessionKey(s)} hour={h} session={s} clash={daySessions[h].length > 1}></TimetableSession>
-                    )}
-                </div>
-            </React.Fragment>)
-        }
-    </>;
-});
+const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
+    h => <th key={"t"+h} className={`th has-text-right is-size-5 time`}>{h}</th>
+);
+
+const makeDayCells = (day: number, daySessions: CourseEvent[][]) => {
+    return _.range(START_HOUR, END_HOUR+1).map((h, i) =>
+    <td className={"td has-text-centered py-0"} key={`day:${day},hour:${h}`}>
+        <div className="hour">
+        {daySessions[h].map(s => 
+            <TimetableSession key={makeSessionKey(s)} hour={h} session={s} clash={daySessions[h].length > 1}></TimetableSession>
+        )}
+        </div>
+    </td>);
+};
 
 const Timetable: React.FC<Props> = ({selectedSessions}) => {
 
     const byDayTime = computeDayTimeArrays(selectedSessions); 
 
-    return <div className="table timetable">
-        {makeTimeElements(true)}
-        {_.range(5).map(i => <React.Fragment key={i}>
-            <DayColumn day={i} daySessions={byDayTime[i]}></DayColumn>
-            <div className="rtable-spacer"></div>
-        </React.Fragment>)}
+    const timeCells = makeTimeElements()
+    // dayCells[d][h]
+    const dayCells = _.range(5).map(i => makeDayCells(i, byDayTime[i]));
+
+    return <div className="table-container">
+        <table className="table timetable">
+            <thead>
+                <tr>{makeHeaderCells()}</tr>
+            </thead>
+            <tbody>
+                {_.range(START_HOUR, END_HOUR+1).map((h, i) => 
+                <tr key={h}>
+                    {timeCells[i]}
+                    {dayCells.map(day => day[i])}
+                </tr>)}
+            </tbody>
+        </table>
     </div>;
 };
 

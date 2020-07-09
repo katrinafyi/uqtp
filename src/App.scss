@@ -2,7 +2,7 @@
 // https://codepen.io/davidelrizzo/pen/GobVLe
 // https://codepen.io/davidelrizzo/pen/eJwqzp
 .timetable {
-  display: grid;
+  // display: grid;
   grid-template-columns: 4rem;
   grid-template-rows: min-content repeat(11, min-content);
   
@@ -18,25 +18,25 @@
 }
 
 
-@media screen and (max-width: $tablet) {
-  .timetable {
-    grid-template-columns: 4rem 1fr;
-    grid-auto-flow: row;
+// @media screen and (max-width: $tablet) {
+//   .timetable {
+//     grid-template-columns: 4rem 1fr;
+//     grid-auto-flow: row;
     
-    & > td, & > th {
-      width: 100%;
-    }
+//     & > td, & > th {
+//       width: 100%;
+//     }
 
-    &.is-bordered > .col-time {
-      margin-left: 0;
-    }
-  }
-  .rtable-spacer {
-    display: block;
-    margin-bottom: $block-spacing;
-  }
+//     &.is-bordered > .col-time {
+//       margin-left: 0;
+//     }
+//   }
+//   .rtable-spacer {
+//     display: block;
+//     margin-bottom: $block-spacing;
+//   }
   
-}
+// }
 
 
 .is-no-wrap {
@@ -74,6 +74,8 @@
   padding-top: 0;
   padding-bottom: 0;
   line-height: 1;
+
+  height: 100%;
 
   display: flex;
   justify-content: space-between;
