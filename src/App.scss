@@ -25,6 +25,10 @@ $border-light: #e8e8e8;
   border-right: 2px solid $border-light;
 }
 
+.timetable th {
+  font-weight: normal;
+}
+
 .timetable thead th {
   border-width: 0;
   padding-left: 1.25rem;
@@ -161,10 +165,14 @@ $border-light: #e8e8e8;
   // color: black;
 
   &.highlighted {
-    background-color: white; //hsl(0; 0%; 99.9%);
+    background-color: transparent; //hsl(0; 0%; 99.9%);
   }
 
   &.clash {
     // background: hsl(48, 100%, 96%);
+  }
+
+  &.empty {
+    background-color: transparent;
   }
 }

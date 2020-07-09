@@ -47,13 +47,23 @@ const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
     highlightClass += thisHighlighted ? 'highlighted ' : '';
 
     let positionClass = '';
-    if (session.time.hour === hour)
+    let topPercent = 0;
+    let heightPercent = 100;
+    if (session.time.hour === hour) {
         positionClass += 'start ';
-    if ((hour - session.time.hour + 1) * 60 >= session.duration)
+        topPercent = session.time.minute * 100 / 60;
+    }
+    if ((hour - session.time.hour + 1) * 60 >= session.duration) {
         positionClass += 'end ';
+        const endMinutes = (session.duration + session.time.minute);
+        if (endMinutes % 60 !== 0)
+            heightPercent = endMinutes % 60 * 100 / 60;
+    }
 
-    return <div className={highlightClass + " session " + positionClass} onClick={onClick}>
-        <span className={!thisHighlighted ? "has-text-weight-bold" : ''}>
+    return (
+    <div className={highlightClass + " session " + positionClass}
+            style={{height: `${heightPercent}%`, top: `${topPercent}%`}} onClick={onClick}>
+        <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
         </span>
         <span>
@@ -61,7 +71,7 @@ const TimetableSession = (({hour, session, clash}: TimetableSessionProps) => {
             &thinsp;
             <span className={locked ? 'has-text-grey' : ''}>{locked ? <FaLock size="12px"></FaLock> : session.group}</span>
         </span>
-    </div>;
+    </div>);
 });
 
 const makeHeaderCells = () => {
