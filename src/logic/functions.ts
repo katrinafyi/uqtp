@@ -23,6 +23,9 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     return byDayTime;
 };
 
+export const makeActivityKey = (session: CourseEvent) =>
+    [session.course, session.activity, session.group].join('|');
+
 export const makeSessionKey = (session: CourseEvent) => 
     [session.course, session.activity, session.group, session.day, session.time.hour].join('|');
 
