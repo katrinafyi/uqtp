@@ -51,7 +51,7 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse}
         const unlocked = true;
         const makeId = (s: string) => `${activity.course}|${activity.activity}|${s}`;
         return (
-        <div className="column is-narrow py-0" key={actType}>
+        <div className="column is-narrow py-0" key={actType} style={{maxWidth: '100%'}}>
             <details>
                 <summary style={{cursor: 'pointer'}}>
                     <span className="has-text-weight-medium">{actType}</span>
@@ -109,8 +109,8 @@ const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse }
     
     const courses = _(allActivities).map(x => x.course).uniq().sort().value();
 
-    return <div style={{display: 'flex', flexWrap: 'wrap', margin: '-1rem'}}>
-        {courses.map(c => <div key={c} style={{margin: '1rem', maxWidth: '25rem'}}>
+    return <div className="columns is-multiline">
+        {courses.map(c => <div key={c} className="column is-narrow" style={{maxWidth: '25rem'}}>
             <MemoCourseSessionSelector activities={byCourse[c]} 
                 selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}
                 deleteCourse={() => deleteCourse(c)}></MemoCourseSessionSelector>
