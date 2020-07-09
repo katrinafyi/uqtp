@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from './state/types';
 import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted } from './logic/functions';
 
-import {css} from 'emotion';
 import { HighlightContext } from './HightlightContext';
 import { FaLock } from 'react-icons/fa';
 
@@ -13,45 +12,6 @@ export type Props = {
 
 const START_HOUR = 8;
 const END_HOUR = 18;
-
-const typeTagStyle = css({
-    flexWrap: 'nowrap',
-});
-
-const sessionStyle = css({
-    padding: '0.5em 0',
-
-    flexGrow: 1,
-    flexBasis: 0,
-    wordBreak: 'keep-all',
-
-    // paddingTop: '0.5em',
-    //lineHeight: 1,
-
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignContent: 'center',
-    flexWrap: 'wrap',
-
-
-    // marginLeft: '2px',
-    // marginRight: '2px' ,
-    marginRight: '-1px',
-
-    borderRadius: '0px',
-    borderLeft: '1px solid #dbdbdb',
-    borderRight: '1px solid #dbdbdb',
-    
-    backgroundColor: 'hsl(0, 0%, 98%)',
-    '&.highlighted': {
-        background: 'none', //'hsl(0, 0%, 99.9%)',
-    },
-    '&.clash': {
-        background: 'hsl(48, 100%, 96%)',
-    },
-    color: 'black',
-});
 
 type TimetableSessionProps = {
     session: CourseEvent,
@@ -85,8 +45,8 @@ const TimetableSession = (({session, clash}: TimetableSessionProps) => {
     highlightClass += (clash && !thisHighlighted) ? 'clash ' : '';
     highlightClass += thisHighlighted ? 'highlighted ' : '';
 
-    return <a className={highlightClass + sessionStyle} onClick={onClick}>
-        <span className={!thisHighlighted ? "has-text-weight-bold" : 'is-italic	'}>
+    return <a className={highlightClass + " session"} onClick={onClick}>
+        <span className={!thisHighlighted ? "has-text-weight-bold" : ''}>
             {getCourseCode(session.course)}
         </span>
         <span>
@@ -97,31 +57,11 @@ const TimetableSession = (({session, clash}: TimetableSessionProps) => {
     </a>;
 });
 
-const timeStyle = css({
-    display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-})
-
 const makeTimeElements = (desktop: boolean) => [
     <div key="ht" className={"th thead has-text-right " + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}></div>,
     ..._.range(START_HOUR, END_HOUR+1).map(h =>
-        <div key={"t"+h} className={"th has-text-right is-size-5 " + timeStyle + ' ' + (!desktop?"is-hidden-tablet":"is-hidden-mobile")}>{h}</div>)
+        <div key={"t"+h} className={`th has-text-right is-size-5 time ${!desktop ? "is-hidden-tablet" : "is-hidden-mobile"}`}>{h}</div>)
 ];
-
-const hourStyle = css({
-    paddingTop: 0,
-    paddingBottom: 0,
-    lineHeight: 1,
-
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'stretch',
-    // marginLeft: '-2px',
-    // marginRight: '-2px',
-
-    // height: '3.9rem',
-});
 
 type DayColumnProps = {
     day: number,
@@ -136,7 +76,7 @@ const DayColumn = (({day, daySessions}: DayColumnProps) => {
         {_.range(START_HOUR, END_HOUR+1).map((h, i) =>
             <React.Fragment key={h}>
                 {timeColumn[i]}
-                <div className={"td has-text-centered " + hourStyle}>
+                <div className={"td has-text-centered hour"}>
                     {daySessions[h].map(s => 
                         <TimetableSession key={makeSessionKey(s)} session={s} clash={daySessions[h].length > 1}></TimetableSession>
                     )}
