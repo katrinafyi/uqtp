@@ -73,11 +73,14 @@ const TimetableSession = (({hour, session, clash, left, right}: TimetableSession
         <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
         </span>
-        <span>
+        {" "}
+        <span className="is-no-wrap">
             <span className={"has-text-weight-semibold " + activityClass}>{session.activity}</span>
             &thinsp;
             <span className={locked ? 'has-text-grey' : ''}>{locked ? <FaLock size="12px"></FaLock> : session.group}</span>
         </span>
+        <br/>
+        <span className="is-no-wrap">{session.location.split(' - ')[0]}</span>
         </>}
     </div>);
 });
@@ -95,7 +98,7 @@ const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
 
 const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
     return _.range(START_HOUR, END_HOUR+1).map((h, i) =>
-    <td className={"td has-text-centered py-0 col-day"} key={`day:${day},hour:${h}`}>
+    <td className={"td py-0 col-day"} key={`day:${day},hour:${h}`}>
         <div className="hour">
         {daySessions[h].map((s, i) => 
             s == null 
