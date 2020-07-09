@@ -33,3 +33,6 @@ export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 
 export const isHighlighted = (session: CourseGroup, highlight: CourseActivity | null) => 
     session.course === highlight?.course && session.activity === highlight.activity;
+
+export const coerceToArray = <T>(arg: T | T[]) => 
+    Array.isArray(arg) ? arg : [arg];

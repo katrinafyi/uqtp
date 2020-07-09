@@ -7,14 +7,14 @@ import { cursorTo } from 'readline';
 
 interface CourseSessionSelectorProps {
     activities: CourseGroup[],
-    selected: {[activity: string]: string},
+    selected: {[activity: string]: string | string[]},
     setSelected: (activity: string, group: string | null) => any,
     deleteCourse: () => any,
 }
 
 export interface Props {
     allActivities: CourseGroup[],
-    selected: {[course: string]: {[activity: string]: string}},
+    selected: {[course: string]: {[activity: string]: string | string[]}},
     setSelected: (course: string, activity: string, group: string | null) => any,
     deleteCourse: (course: string) => any,
 };
@@ -37,41 +37,52 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse}
 
     const makeActivitySelector = (activity: CourseActivity, actType: string, groups: string[]) => {
         const unlocked = true;
-        return <div key={actType} className="field is-horizontal">
-            <div className="field-label is-normal">
-                <label className="label" style={{width: '3em', cursor: unlocked ? 'pointer' : ''}}
+        const makeId = (s: string) => `${activity.course}|${activity.activity}|${s}`;
+        return (
+        <div className="column is-narrow pb-0">
+            <div key={actType} className="field">
+                <label className="label" style={{cursor: unlocked ? 'pointer' : ''}}
                     onClick={() => unlocked && setHighlight(activity)}>{actType}</label>
+                <div className="control">
+                    {groups.map(s => <label className="checkbox" key={makeId(s)} htmlFor={makeId(s)}>
+                        <input type="checkbox" id={makeId(s)}/>
+                        {" "}{s}
+                    </label>)}
+                </div>
             </div>
-            <div className="field-body"><div className="field is-narrow">
-                <div className="control"><div className="select">
-                    <select className="" value={selected[actType] ?? nullString}
-                        onChange={makeOnChange(actType)}>
-                        <option value={nullString}>(none)</option>
-                        {groups.map(s => <option key={s}>{s}</option>)}
-                    </select>
-                </div></div>
-            </div></div>
-        </div>;
+        </div>);
     };
+    /*
+    <div className="select">
+                <select className="" value={selected[actType] ?? nullString}
+                    onChange={makeOnChange(actType)}>
+                    <option value={nullString}>(none)</option>
+                    {groups.map(s => <option key={s}>{s}</option>)}
+                </select>
+            </div>
+    */
 
-    return <div className="card">
-        <header className="card-header">
-            <p className="card-header-title is-no-wrap" title={activities[0].course}>
-                {activities[0].course}
-            </p>
+    return (
+    <div className="message">
+        <div className="message-header">
+                {/* style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> */}
+            <span className="mr-2 has-text-weight-normal">{activities[0].course}</span>
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-            <a className="card-header-icon" type="button" onClick={deleteCourse}>
-                <span className="icon">
+            {/* <button className="button is-small is-outlined is-danger" type="button" onClick={deleteCourse}
+                    title={"Delete " + activities[0].course}>
+                <span className="icon is-small">
                     <FaTimes></FaTimes>
                 </span>
-            </a>
-        </header>
-        <div className="card-content">
+            </button> */}
+            <button className="delete"></button>
+        </div>
+        <div className="message-body">
+        <div className="columns is-multiline is-mobile">
             {Object.entries(actTypes).map(([type, options]) => 
                 makeActivitySelector(options[0], type, options.map(x => x.group)))}
         </div>
-        
-    </div>;
+        </div>
+    </div>);
 }
 
 const MemoCourseSessionSelector = memo(CourseSessionSelector);
@@ -79,18 +90,15 @@ const MemoCourseSessionSelector = memo(CourseSessionSelector);
 const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse }: Props) => {
     const byCourse = _.groupBy(allActivities, (x) => x.course);
     
-    const courses = _(allActivities).map(x => x.course).uniq().value();
+    const courses = _(allActivities).map(x => x.course).uniq().sort().value();
 
-    return <>
-        <div className="columns is-multiline is-mobile">
-            {courses.map(c => <div key={c} className="column is-6-mobile is-narrow">
-                <MemoCourseSessionSelector activities={byCourse[c]} 
-                    selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}
-                    deleteCourse={() => deleteCourse(c)}></MemoCourseSessionSelector>
-            </div>)}
-            <div className="column is-3 is-hidden-touch"></div>
-        </div>
-    </>;
+    return <div style={{display: 'flex', flexWrap: 'wrap', margin: '-1rem', justifyContent: 'space-around'}}>
+        {courses.map(c => <div key={c} style={{margin: '1rem', maxWidth: '25rem'}}>
+            <MemoCourseSessionSelector activities={byCourse[c]} 
+                selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}
+                deleteCourse={() => deleteCourse(c)}></MemoCourseSessionSelector>
+        </div>)}
+    </div>;
 }
 
 export default memo(SessionSelectors);

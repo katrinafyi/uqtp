@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import './App.scss';
 import FileInput from './FileInput';
 import { HighlightContext } from './HightlightContext';
-import { isHighlighted } from './logic/functions';
+import { isHighlighted, coerceToArray } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
 import SessionSelectors from './SessionSelectors';
@@ -56,7 +56,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
   }
 
   const isSessionSelected = (x: CourseEvent) => 
-    _.get(timetable.selectedGroups, [x.course, x.activity], null) === x.group;
+    coerceToArray(_.get(timetable.selectedGroups, [x.course, x.activity], null)).includes(x.group);
 
   // returns a string like CSSE2310|PRA1
   const getActivityKey = (s: CourseEvent) => s.course + '|' + s.activity;

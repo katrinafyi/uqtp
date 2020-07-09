@@ -35,7 +35,7 @@ export type CourseEvent = CourseGroup & {
 }
 
 export type SelectedActivities = {
-    [course: string]: { [activity: string]: string }
+    [course: string]: { [activity: string]: string | string[] }
 }
 
 export type Timetable = {
