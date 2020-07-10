@@ -16,6 +16,7 @@ export const rootReducer = (state: PersistState = DEFAULT_PERSIST, action: RootA
         case 'setAllSessions':
         case 'deleteCourse':
         case 'replaceActivityGroup':
+        case 'setCourseVisibility':
             draft.timetables[draft.current] = currentTimetableReducer(state.timetables[state.current], action);
             break;
         case 'setUser':

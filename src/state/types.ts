@@ -42,12 +42,14 @@ export type Timetable = {
     name: string,
     allSessions: CourseEvent[],
     selectedGroups: SelectedActivities,
+    courseVisibility?: {[course: string]: boolean}
 }
 
 export const EMPTY_TIMETABLE: Timetable = {
     name: 'empty timetable',
     allSessions: [],
     selectedGroups: {},
+    courseVisibility: {},
 }
 
 export type TimetablesState = {

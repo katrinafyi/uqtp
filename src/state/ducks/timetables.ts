@@ -20,6 +20,10 @@ export type TimetableStateAction = {
     activity: string,
     oldGroup: string,
     newGroup: string
+} | {
+    type: 'setCourseVisibility',
+    course: string,
+    visible: boolean,
 };
 
 export const setAllSessions = (sessions: CourseEvent[]): TimetableStateAction => 
@@ -33,6 +37,9 @@ export const replaceActivityGroup = (course: string, activity: string, oldGroup:
 
 export const deleteCourse = (course: string): TimetableStateAction =>
     ({ type: 'deleteCourse', course });
+
+export const setCourseVisibility = (course: string, visible: boolean): TimetableStateAction =>
+    ({ type: 'setCourseVisibility', course, visible });
 
 
 const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, sessions: CourseEvent[]) => 
@@ -66,6 +73,11 @@ const timetableReducer = (state: Timetable, action: TimetableStateAction) => pro
         case 'deleteCourse':
             draft.allSessions = state.allSessions.filter(x => x.course !== action.course);
             // delete draft.selectedGroups[action.course];
+            break;
+        case 'setCourseVisibility':
+            if (state.courseVisibility == null)
+                draft.courseVisibility = {};
+            draft.courseVisibility![action.course] = action.visible;
             break;
         default:
             return;

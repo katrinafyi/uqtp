@@ -149,20 +149,12 @@ $border-light: #e8e8e8;
   // margin-right: 2px ;
   // margin-right: -1px;
 
-  border-right: 1px solid $border;
-  border-left: 1px solid $border;
-  &.top {
-    border-top: 1px solid $border;
-  }
-  &.bottom {
-    border-bottom: 1px solid $border;
-  }
-  &.left {
-    border-left-width: 2px;
-  }
-  &.right {
-    border-right-width: 2px;
-  }
+  border: 1px solid $border;
+  // border-left-width: 10px;
+  // border-right-width: 10px;
+  border-bottom-color: transparent;
+  // margin: 1px;
+  // box-sizing: border-box;
 
   border-radius: 0px;
   background-color: hsl(0, 0%, 98%);
@@ -171,6 +163,8 @@ $border-light: #e8e8e8;
 
   &.highlighted {
     background-color: white; //hsl(0; 0%; 99.9%);
+    // overflow: visible;
+    z-index: 10;
   }
 
   &.clash {
@@ -180,5 +174,6 @@ $border-light: #e8e8e8;
   &.empty {
     background-color: transparent;
     border-color: transparent;
+    z-index: -1;
   }
 }

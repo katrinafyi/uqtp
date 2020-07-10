@@ -51,23 +51,8 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
     highlightClass += thisHighlighted ? 'highlighted ' : '';
 
     let positionClass = '';
-    let topPercent = 0;
-    let heightPercent = 100;
-    const top = session.time.hour === hour;
-    const bottom = (hour - session.time.hour + 1) * 60 >= session.duration;
-    if (top) {
-        positionClass += 'top ';
-        topPercent = session.time.minute * 100 / 60;
-    }
-    if (bottom) {
-        positionClass += 'bottom ';
-        const endMinutes = (session.duration + session.time.minute);
-        if (endMinutes % 60 !== 0)
-            heightPercent = endMinutes % 60 * 100 / 60;
-    }
-    if (left) positionClass += 'left ';
-    if (right) positionClass += 'right ';
-
+    const topPercent = session.time.minute * 100 / 60;
+    
     const positionStyle = {
         // left: `${100*index/numInHour}%`,
         width: `${100/numInHour}%`,
@@ -78,7 +63,6 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
     return (
     <div className={highlightClass + " session " + positionClass} onClick={onClick}
             style={positionStyle}>
-        {top && <>
         <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
         </span>
@@ -90,7 +74,6 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         </span>
         <br/>
         <span className="is-no-wrap">{session.location.split(' - ')[0]}</span>
-        </>}
     </div>);
 });
 

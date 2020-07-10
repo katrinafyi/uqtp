@@ -5,10 +5,14 @@ import { FaCross, FaTimes, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
 import { HighlightContext } from './HightlightContext';
 import { cursorTo } from 'readline';
 import { coerceToArray } from './logic/functions';
+import { Timetable } from './state/types';
+
 
 interface CourseSessionSelectorProps {
     activities: CourseGroup[],
     selected: {[activity: string]: string | string[]},
+    visibility: Timetable['courseVisibility'],
+    setVisible: (course: string, visible: boolean) => any, 
     setSelected: (activity: string, group: string[]) => any,
     deleteCourse: () => any,
 }
@@ -17,10 +21,12 @@ export interface Props {
     allActivities: CourseGroup[],
     selected: {[course: string]: {[activity: string]: string | string[]}},
     setSelected: (course: string, activity: string, group: string[]) => any,
+    visibility: Timetable['courseVisibility'],
+    setVisible: (course: string, visible: boolean) => any, 
     deleteCourse: (course: string) => any,
 };
 
-const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse}: CourseSessionSelectorProps) => {
+const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse, visibility, setVisible}: CourseSessionSelectorProps) => {
     const [enabled, setEnabled] = useState(true);
 
     const {highlight, setHighlight, setSelectedGroup} = useContext(HighlightContext);
@@ -79,11 +85,17 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse}
             </div>
     */
 
+    const isVisible = visibility?.[activities[0].course] ?? true;
+
     return (
     <div className="message">
         <div className="message-header">
                 {/* style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> */}
-            <span className="mr-2 has-text-weight-normal">{activities[0].course}</span>
+            <label className="mr-2 has-text-weight-normal is-clickable">
+                <input type="checkbox" checked={isVisible}
+                    onChange={() => setVisible(activities[0].course, !isVisible)}
+                ></input> {activities[0].course}
+            </label>
             {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             {/* <button className="button is-small is-outlined is-danger" type="button" onClick={deleteCourse}
                     title={"Delete " + activities[0].course}>
@@ -104,14 +116,14 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse}
 
 const MemoCourseSessionSelector = memo(CourseSessionSelector);
 
-const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse }: Props) => {
+const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse, visibility, setVisible }: Props) => {
     const byCourse = _.groupBy(allActivities, (x) => x.course);
     
     const courses = _(allActivities).map(x => x.course).uniq().sort().value();
 
     return <div className="columns is-multiline">
         {courses.map(c => <div key={c} className="column is-narrow" style={{maxWidth: '25rem'}}>
-            <MemoCourseSessionSelector activities={byCourse[c]} 
+            <MemoCourseSessionSelector activities={byCourse[c]} visibility={visibility} setVisible={setVisible}
                 selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}
                 deleteCourse={() => deleteCourse(c)}></MemoCourseSessionSelector>
         </div>)}

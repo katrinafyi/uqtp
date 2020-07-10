@@ -9,7 +9,7 @@ import { isHighlighted, coerceToArray } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
 import SessionSelectors from './SessionSelectors';
-import { setActivityGroup, setAllSessions, deleteCourse, replaceActivityGroup } from './state/ducks/timetables';
+import { setActivityGroup, setAllSessions, deleteCourse, replaceActivityGroup, setCourseVisibility } from './state/ducks/timetables';
 import { PersistState } from './state/schema';
 import { RootAction } from './state/store';
 import { CourseActivity, CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
@@ -62,16 +62,21 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
       coerceToArray(_.get(timetable.selectedGroups, [x.course, x.activity], null)).includes(x.group);
 
     setVisibleSessions(timetable.allSessions
-    .filter(x => isSessionSelected(x) || isHighlighted(x, highlight))
+    .filter(x => (isSessionSelected(x) && (timetable.courseVisibility?.[x.course] ?? true))
+      || isHighlighted(x, highlight))
     .map(x => ({...x, numGroups: activityGroups[getActivityKey(x)]?.length ?? 0})));
 
-  }, [highlight, activityGroups, timetable.selectedGroups, timetable.allSessions]);
+  }, [highlight, activityGroups, timetable.selectedGroups, timetable.allSessions, timetable.courseVisibility]);
 
   const setSelectedGroup = useCallback((group: string | null) => {
     if (highlight == null) throw new Error('setting highlight group but nothing is highlighted.');
     if (group != null)
       dispatch(replaceActivityGroup(highlight.course, highlight.activity, highlight.group, group));
   }, [highlight, dispatch]);
+
+  const setVisibility = useCallback((c: string, v: boolean) => {
+    dispatch(setCourseVisibility(c, v));
+  }, [dispatch])
 
   // returns a string like CSSE2310|PRA1
   const getActivityKey = (s: CourseEvent) => s.course + '|' + s.activity;
@@ -135,9 +140,10 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
         </div></div>
 
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
-          <SessionSelectors allActivities={activities} 
+          <SessionSelectors allActivities={activities} visibility={timetable.courseVisibility}
             selected={timetable.selectedGroups} setSelected={setSelected}
-            deleteCourse={(c) => dispatch(deleteCourse(c))}></SessionSelectors>
+            deleteCourse={(c) => dispatch(deleteCourse(c))}
+            setVisible={setVisibility}></SessionSelectors>
 
           {/* <h4 className="title is-4">Timetable</h4> */}
           <Timetable selectedSessions={visibleSessions}></Timetable>
