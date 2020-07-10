@@ -18,10 +18,12 @@ type TimetableSessionProps = {
     session: CourseEvent,
     clash?: boolean,
     left: boolean,
-    right: boolean
+    right: boolean,
+    index: number,
+    numInHour: number
 }
 
-const TimetableSession = (({hour, session, clash, left, right}: TimetableSessionProps) => {
+const TimetableSession = (({hour, session, clash, left, right, index, numInHour}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'has-text-info',
         'TUT': 'has-text-success',
@@ -66,9 +68,16 @@ const TimetableSession = (({hour, session, clash, left, right}: TimetableSession
     if (left) positionClass += 'left ';
     if (right) positionClass += 'right ';
 
+    const positionStyle = {
+        // left: `${100*index/numInHour}%`,
+        width: `${100/numInHour}%`,
+        height: `${session.duration * 100 / 60}%`, 
+        top: `${topPercent}%`, 
+    };
+
     return (
-    <div className={highlightClass + " session " + positionClass}
-            style={{height: `${heightPercent}%`, top: `${topPercent}%`}} onClick={onClick}>
+    <div className={highlightClass + " session " + positionClass} onClick={onClick}
+            style={positionStyle}>
         {top && <>
         <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
@@ -101,12 +110,15 @@ const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
     <td className={"td py-0 col-day"} key={`day:${day},hour:${h}`}>
         <div className="hour">
         {daySessions[h].map((s, i) => 
-            s == null 
-            ? <div className="session empty" key={"empty-" + i}></div>
+            (s == null || s.time.hour !== h)
+            ? <div className="session empty" key={"empty-" + i}
+                style={{width: `${100/daySessions[h].length}%`}}></div>
             : <TimetableSession key={makeSessionKey(s)} 
                     hour={h} session={s} clash={daySessions[h].length > 1}
                     left={daySessions[h][i-1] == null} 
-                    right={daySessions[h][i+1] == null}/>
+                    right={daySessions[h][i+1] == null}
+                    index={i}
+                    numInHour={daySessions[h].length}/>
         )}
         </div>
     </td>);
@@ -136,4 +148,4 @@ const Timetable: React.FC<Props> = ({selectedSessions}) => {
     </div>;
 };
 
-export default Timetable;
+export default memo(Timetable);

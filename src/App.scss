@@ -51,7 +51,7 @@ $border-light: #e8e8e8;
 .timetable td, .timetable th {
   & > * {
     height: 3.5rem;
-    overflow: hidden;
+    // overflow-x: hidden;
   }
 }
 
@@ -101,7 +101,9 @@ $border-light: #e8e8e8;
   height: 100%;
   width: 100%;
 
-  display: flex;
+  overflow-y: visible;
+
+  // display: flex;
   justify-content: space-between;
   align-items: stretch;  
 }
@@ -120,6 +122,11 @@ $border-light: #e8e8e8;
   }
 
   // margin: 0 0.25rem;
+
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+  // float: left;
 
   flex-grow: 1;
   flex-basis: 0;

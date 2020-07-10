@@ -19,7 +19,7 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
                 || next.time.hour > currentHour + matrix.length - 1) {
             for (let r = 0; r < matrix.length; r++) {
                 for (let c = 0; c < matrixColumns; c++) {
-                    byDayTime[currentDay][r + currentHour][c] = matrix[r][c];
+                    byDayTime[currentDay][r + currentHour][c] = matrix[r][c]; //c === 0 ? matrix[r][c] : null;
                 }
             }
             // console.log('flushed matrix', matrix);
