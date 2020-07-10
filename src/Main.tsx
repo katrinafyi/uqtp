@@ -94,50 +94,29 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
           dispatch={dispatch}></TimetableSelector>
         <hr></hr>
 
-        {/* <div className="title is-4">Data</div> */}
-        <form className="form block">
-          <label className="label">Import courses from My Timetable</label>
-          <div className="field has-addons">
-            <FileInput className="control" fileName={""} setFile={importFile}></FileInput>
-            <div className="control">
-              <button className="button" type="button" onClick={() => setShowHelp(true)}>
-                <span className="icon"><FaQuestionCircle></FaQuestionCircle></span>
-              </button>
-            </div>
-          </div>
-          <div className="field">
-            <p className="help">
-              Export as Excel from <a href="https://timetable.my.uq.edu.au/even/timetable/#subjects" target="_blank" rel="noopener noreferrer">UQ Public Timetable</a>.
-            </p>
-          </div>
-        </form>
+        <h4 className="title is-4">Search Courses</h4>
+        <CourseSearcher></CourseSearcher>
 
-        {/* <CourseSearcher></CourseSearcher> */}
-
-        <div className={"modal " + (showHelp ? 'is-active' : '')}>
-            <div className="modal-background" onClick={onClickCancel}></div>
-            <div className="modal-card">
-                <header className="modal-card-head">
-                    <p className="modal-card-title">Help</p>
-                    <button className="delete" aria-label="close" type="button" onClick={onClickCancel}></button>
-                </header>
-                <section className="modal-card-body">
-                    <MyTimetableHelp></MyTimetableHelp>
-                </section>
-                <footer className="modal-card-foot">
-                    <button className="button" type="button" onClick={onClickCancel}>Close</button>
-                </footer>
+        <details>
+          <summary className="is-clickable has-text-weight-medium">Manual import from Allocate+</summary>
+          {/* <div className="title is-4">Data</div> */}
+          <form className="form my-2">
+            <div className="field">
+              <FileInput className="control" fileName={""} setFile={importFile}></FileInput>
             </div>
-        </div>
+          </form>
+          <p className="mb-2">
+            If you can't find your courses by searching, you can manually import specific classes from the
+            <a href="https://timetable.my.uq.edu.au/even/timetable/#subjects" target="_blank" rel="noopener noreferrer"> UQ Public Timetable</a>.
+          </p>
+          <MyTimetableHelp></MyTimetableHelp>
+        </details>
         <hr/>
 
-
-        <h4 className="title is-4">Courses and Timetable</h4>
-        <div className="message is-info is-small"><div className="message-body">
+        <h4 className="title is-4">Selected Classes</h4>
+        {/* <div className="message is-info is-small"><div className="message-body">
             Changes to your selected classes are saved automatically. 
-            {/* Your timetables are saved in <em>local browser storage</em> and 
-            may be lost if you clear your cookies / site data. */}
-        </div></div>
+        </div></div> */}
 
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
           <SessionSelectors allActivities={activities} visibility={timetable.courseVisibility}
@@ -145,8 +124,16 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
             deleteCourse={(c) => dispatch(deleteCourse(c))}
             setVisible={setVisibility}></SessionSelectors>
 
-          {/* <h4 className="title is-4">Timetable</h4> */}
+          <h4 className="title is-4">Timetable</h4>
           <Timetable selectedSessions={visibleSessions}></Timetable>
+          <div className="content">
+            <ul>
+              <li>Changes to your timetable and classes are saved automatically.</li>
+              <li>Be careful not to mix up semester 1 and semester 2!</li>
+              <li>Some classes do not run every week. Always double check with your personal timetable.</li>
+              <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just search and add the course again.</li>
+            </ul>
+          </div>
         </HighlightContext.Provider>
       </div>
     </>;

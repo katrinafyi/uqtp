@@ -1,6 +1,22 @@
 @import 'bulma/bulma.sass';
 
-$border-light: #e8e8e8;
+// $border-light: #ededed;
+
+.bordered {
+  box-shadow: none;
+  border: 1px solid $border;
+  border-radius: 4px;
+}
+
+.button-card {
+  height: unset;
+  text-align: left;
+  line-height: 1.2;
+
+  max-width: 100%;
+  white-space: pre-wrap;
+  justify-content: left;
+}
 
 // https://codepen.io/davidelrizzo/pen/GobVLe
 // https://codepen.io/davidelrizzo/pen/eJwqzp
