@@ -88,9 +88,9 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
     const isVisible = visibility?.[activities[0].course] ?? true;
 
     return (
-    <div className="message" style={{fontSize: '0.9rem'}}>
+    <div className="message">
         <div className="message-header">
-            {/* style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> */}
+                {/* style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> */}
             <label className="mr-2 has-text-weight-normal is-clickable">
                 <input type="checkbox" checked={isVisible}
                     onChange={() => setVisible(activities[0].course, !isVisible)}
@@ -103,7 +103,6 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
                     <FaTimes></FaTimes>
                 </span>
             </button> */}
-            {/* <button className="button is-small">Colour</button> */}
             <button className="delete" onClick={deleteCourse}></button>
         </div>
         <div className="message-body">
