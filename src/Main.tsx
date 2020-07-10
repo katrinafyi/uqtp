@@ -109,12 +109,13 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
         </details>
         <hr/>
 
-        <h4 className="title is-4">Selected Classes</h4>
+        
         {/* <div className="message is-info is-small"><div className="message-body">
             Changes to your selected classes are saved automatically. 
         </div></div> */}
 
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
+          {/* <h4 className="title is-4">Selected Classes</h4> */}
           <SessionSelectors allActivities={activities} visibility={timetable.courseVisibility}
             selected={timetable.selectedGroups} setSelected={setSelected}
             deleteCourse={(c) => dispatch(deleteCourse(c))}

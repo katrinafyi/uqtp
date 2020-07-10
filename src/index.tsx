@@ -24,7 +24,7 @@ const previousState = previousJSON !== null ? JSON.parse(previousJSON) : DEFAULT
 const migratedState = migratePeristState(previousState, CURRENT_VERSION);
 
 const saveState = (s: PersistState) => {
-  console.log('saving to localStorage');
+  // console.log('saving to localStorage');
   localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(s));
 }
 
@@ -54,12 +54,12 @@ auth.onAuthStateChanged((user) => {
 
   unsubFirebase = null;
   unsubSnapshot = null;
-  console.log('auth state changed: ' + user?.uid);
-  console.log(user);
+  // console.log('auth state changed: ' + user?.uid);
+  // console.log(user);
   if (user) {
     const docRef = firestore.collection('users').doc(user.uid);
     unsubSnapshot = docRef.onSnapshot((doc) => {
-      console.log('got snapshot from firebase');
+      // console.log('got snapshot from firebase');
       if (doc?.exists) {
         // previous data exists. load from online.
         const data = doc.data()! as PersistState;

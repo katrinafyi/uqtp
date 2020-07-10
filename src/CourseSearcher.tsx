@@ -81,7 +81,7 @@ export const CourseSearcher = () => {
             <div className="field has-addons">
                 {/* <label htmlFor="" className="label">Search courses</label> */}
                 <div className="control">
-                    <input className="input" type="search" placeholder="MATH1051" style={{width: 'unset'}}
+                    <input className="input" type="search" placeholder="ABCD1234" style={{width: 'unset'}}
                         value={query} onChange={(e) => setQuery(e.target.value)}/>
                     {/* <span className="icon is-small is-left">
                         <FaSearch></FaSearch>
@@ -103,6 +103,9 @@ export const CourseSearcher = () => {
         </>}
         {resultsEmpty && <div className="has-text-weight-bold mb-3 has-text-danger-dark">No results.</div>}
         {resultsError && <div className="has-text-weight-bold mb-3 has-text-danger-dark">Error while searching courses.</div>}
+        {loading === 'done' && results == null && <div className="mb-3">
+            Search for your courses here. You can also include the semester or delivery mode, e.g. &ldquo;MATH1051 S2 EX&rdquo;.
+        </div>}
     </div>;
 };
 

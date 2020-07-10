@@ -28,6 +28,7 @@ export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSe
     const [confirmDelete, setConfirmDelete] = useState(false);
 
     const onClickTag = (ev: React.MouseEvent<HTMLButtonElement>) => {
+        setIsRenaming(false);
         dispatch({type: 'selectTimetable', id: (ev.target as HTMLButtonElement).value});
     }
 
@@ -83,7 +84,7 @@ export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSe
                     placeholder="timetable name…"/>
             </div>
         </div>
-        <div className="field is-grouped">
+        <div className="field is-grouped is-grouped-multiline">
             <div className="control">
                 <div className="buttons  has-addons">
                     <button className="button is-small is-success" type="submit" onClick={onClickRename}>

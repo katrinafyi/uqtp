@@ -24,7 +24,7 @@ export type FullSearchResult = {
   [course: string]: CourseSearchResult
 }
 
-const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const mappings = {
   course: 'subject_code',
@@ -49,6 +49,7 @@ const convertActivity = (data: any): CourseEvent => {
   for (const [to, from] of Object.entries(mappings)) {
     event[to] = typeof from == 'string' ? data[from] : from(data);
   }
+  console.assert(event.day !== -1);
   return event;
 }
 

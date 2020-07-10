@@ -29,6 +29,7 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         'TUT': 'has-text-success',
         'PRA': 'has-text-danger',
         'STU': 'has-text-primary',
+        'WKS': 'has-text-danger-dark',
     };
     const defaultCSS = 'has-text-dark';
     const activityClass = (activityCSS[session.activityType!]) ?? defaultCSS;
@@ -60,9 +61,11 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         top: `${topPercent}%`, 
     };
 
+    const text = `${session.course}\n${session.activity} ${session.group}\n${session.location}\n${session.duration} minutes`;
+
     return (
     <div className={highlightClass + " session " + positionClass} onClick={onClick}
-            style={positionStyle}>
+            style={positionStyle} title={text}>
         <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
         </span>

@@ -29,7 +29,7 @@ export const getFirebaseUIConfig = () => ({
     // Avoid redirects after sign-in.
     // eslint-disable-next-line no-sequences
     signInSuccessWithAuthResult: (userCredential: firebase.auth.UserCredential) => {
-      console.log(userCredential);
+      // console.log(userCredential);
       return false;
     },
   }
@@ -44,8 +44,8 @@ const _FirebaseSignIn = ({ setUser }: Props) => {
   const config = getFirebaseUIConfig();
 
   config.callbacks!.signInSuccessWithAuthResult = (cred: firebase.auth.UserCredential) => {
-    console.log('signInSuccessWithAuthResult');
-    console.log(cred);
+    // console.log('signInSuccessWithAuthResult');
+    // console.log(cred);
     // if (cred.operationType === 'link')
     //   setUser(cred.user);
     return false;

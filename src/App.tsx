@@ -34,8 +34,8 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Pro
 
   const config = getFirebaseUIConfig();
   config.callbacks!.signInSuccessWithAuthResult = (cred: firebase.auth.UserCredential) => {
-    console.log('signInSuccessWithAuthResult:');
-    console.log(cred);
+    // console.log('signInSuccessWithAuthResult:');
+    // console.log(cred);
     setShowUserInfo(false);
     setShowSignIn(false);
     if (cred.operationType === 'link')
@@ -113,13 +113,18 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Pro
       </div>}>
       <UserInfoView firebaseUI={showUserInfo ? authElement! : undefined}></UserInfoView>
     </ModalCard>
-    <div className="hero" style={{ backgroundColor: '#fafafa' }}>
+    <div className="hero is-dark">
       <div className="hero-body">
         <div className="container">
           <div className="columns">
             <div className="column">
-              <h1 className="title "><span className="is-size-1"><Emoji symbol="🧻"></Emoji></span> UQ Toilet Paper <span className="tag is-link is-light">{process.env.REACT_APP_VERSION}</span> <span className="tag is-danger is-light">Unofficial</span></h1>
-              <p className="block">Plan your timetable where Allocate+®™ can't hurt you. Works on mobile!</p>
+              <h1 className="title is-1"><Emoji symbol="📅"></Emoji>&nbsp;UQTP&nbsp;<Emoji symbol="✨" className="has-text-size-4"></Emoji> <span className="is-no-wrap"><span className="tag is-link">{process.env.REACT_APP_VERSION}</span> <span className="tag is-warning">Unofficial</span></span></h1>
+              <p className="mb-2">
+                <em>Plan your timetable where Allocate+ can't hurt you.</em>
+              </p>
+              <p className="block">
+                UQTP is a new timetable planner for UQ. Works on mobile and syncs to the cloud!
+              </p>
             </div>
             <div className="column is-narrow">
               {uid && <div className="buttons">
@@ -150,7 +155,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Pro
     <footer className="footer">
       <div className="content has-text-centered">
         <p>
-          <strong>UQ Toilet Paper</strong> is a (unofficial) timetable planner for UQ, built by&nbsp;
+          <strong>UQTP</strong> is an (unofficial) timetable planner for UQ, built by&nbsp;
           <a href="https://kentonlam.xyz">Kenton Lam</a>.
           The source code is available on <a href="https://github.com/kentonlam/uqtp">GitHub</a>.
         </p>

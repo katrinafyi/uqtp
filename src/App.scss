@@ -77,7 +77,8 @@
 
 .timetable tbody {
   & td, & th {
-    background: linear-gradient(to bottom, $border 1px, transparent 1px);
+    background: linear-gradient(to bottom, $border-light 1px, transparent 1px),
+    linear-gradient(to top, $border-light 1px, transparent 1px);
     // border-top: 1px dashed $border-light;
     border-width: 0;
   }
@@ -172,7 +173,7 @@
   border: 1px solid $border;
   // border-left-width: 10px;
   // border-right-width: 10px;
-  border-bottom-color: transparent;
+  // border-bottom-color: transparent;
   // margin: 1px;
   // box-sizing: border-box;
 
@@ -182,7 +183,7 @@
   // color: black;
 
   &.highlighted {
-    background-color: white; //hsl(0; 0%; 99.9%);
+    background-color: hsl(219, 70%, 96%); //hsl(0; 0%; 99.9%);
     // overflow: visible;
     z-index: 10;
   }
