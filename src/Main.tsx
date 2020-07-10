@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import React, { Dispatch, useState, useEffect, useCallback } from 'react';
-import { FaQuestionCircle } from 'react-icons/fa';
 import { connect } from 'react-redux';
 import './App.scss';
 import FileInput from './FileInput';
@@ -12,7 +11,7 @@ import SessionSelectors from './SessionSelectors';
 import { setActivityGroup, setAllSessions, deleteCourse, replaceActivityGroup, setCourseVisibility } from './state/ducks/timetables';
 import { PersistState } from './state/schema';
 import { RootAction } from './state/store';
-import { CourseActivity, CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
+import { CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
 import Timetable from './Timetable';
 import TimetableSelector from './TimetableSelector';
 import CourseSearcher from './CourseSearcher';
@@ -22,9 +21,7 @@ type Props = ReturnType<typeof mapStateToProps>
   & ReturnType<typeof mapDispatchToProps>;
 
 const Main: React.FC<Props> = ({timetable, activities, current, timetables, dispatch}) => {
-  const [fileError, setFileError] = useState<string>();
-  const [showHelp, setShowHelp] = useState(false);
-
+  const [, setFileError] = useState<string>();
   
   const importFile = async (file: File | undefined) => {
     // ev.preventDefault();
@@ -83,7 +80,6 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
 
   // console.log(visibleSessions);
 
-  const onClickCancel = () => setShowHelp(false);
 
   return <>
       <div className="container">

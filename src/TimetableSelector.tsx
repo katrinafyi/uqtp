@@ -1,5 +1,5 @@
-import React, { useState, ButtonHTMLAttributes, DetailedHTMLProps, createRef } from "react"
-import { FaSave, FaPencilAlt, FaCopy, FaTimes, FaPlus, FaTrash } from "react-icons/fa";
+import React, { useState, createRef } from "react"
+import { FaSave, FaPencilAlt, FaCopy, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "emotion";
 import { PersistStateAction } from "./state/ducks/persist";
 import { Timetable, TimetablesState } from "./state/types";

@@ -1,8 +1,7 @@
 import XLSX from 'xlsx';
 import _ from 'lodash';
-import { CourseEvent, DayOfWeek } from '../state/types';
+import { CourseEvent } from '../state/types';
 import parse from 'date-fns/parse'
-import { minTime } from 'date-fns';
 
 export const parseExcelFile = (file: Blob) => {
     const f = new FileReader();

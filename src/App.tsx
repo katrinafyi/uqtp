@@ -6,12 +6,11 @@ import { setPersistState } from './state/ducks/persist';
 import { setUser } from './state/ducks/user';
 import StateErrorBoundary from './StateErrorBoundary';
 import Main from './Main';
-import { PersistState, DEFAULT_PERSIST } from './state/schema';
+import { PersistState } from './state/schema';
 import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth, firestore } from './state/firebase';
 import * as firebaseui from 'firebaseui';
-import { useCopyToClipboard } from 'react-use';
 import { getFirebaseUIConfig } from './FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
 import { UserInfoView } from './UserInfoView';
@@ -20,9 +19,7 @@ import { FirebaseAuth } from 'react-firebaseui';
 type Props = ReturnType<typeof mapStateToProps>
   & typeof dispatchProps;
 
-const App = ({ uid, name, email, photo, phone, isAnon, providers, setPersistState, setUser }: Props) => {
-  const [signInError, setSignInError] = useState<firebaseui.auth.AuthUIError | null>(null);
-
+const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Props) => {
   const [showSignIn, setShowSignIn] = useState(false);
 
   const [showUserInfo, setShowUserInfo] = useState(false);
@@ -77,7 +74,6 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setPersistStat
         })
       );
   };
-  const linkedProviders = new Set(providers ?? []);
   // config.signInOptions = config.signInOptions!
   //   .filter(x => !linkedProviders.has(typeof x == 'string' ? x : x.provider));
 

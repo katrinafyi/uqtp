@@ -1,4 +1,3 @@
-import { createStore, combineReducers } from 'redux'
 import persistReducer from './ducks/persist'
 import currentTimetableReducer, { TimetableStateAction } from './ducks/timetables'
 import { PersistStateAction } from './ducks/persist'

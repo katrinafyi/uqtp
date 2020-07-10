@@ -1,9 +1,6 @@
 import { PersistState } from "../schema";
 import produce from "immer";
 import { EMPTY_TIMETABLE } from "../types";
-import { RootAction } from "../store";
-import { Dispatch } from "redux";
-import { database } from "firebase";
 import uuidv4 from 'uuid/v4';
 
 export type PersistStateAction = {
@@ -42,14 +39,14 @@ export const setPersistState = (state: PersistState): PersistStateAction =>
 
 const persistReducer = (state: PersistState, action: PersistStateAction) => produce(state, (draft) => {
 
-    const getNames = () => Object.values(draft.timetables).map(x => x.name);
 
     const selectTimetable = (id: string) => {
         draft.current = id;
     };
-    const newTimetable = (name: string) => {
+    const addNewTimetable = (name: string) => {
         const newID = uuidv4();
         draft.timetables[newID] = EMPTY_TIMETABLE;
+        draft.timetables[newID].name = name;
         selectTimetable(newID);
         return newID;
     };
@@ -58,7 +55,7 @@ const persistReducer = (state: PersistState, action: PersistStateAction) => prod
         if (id === draft.current) {
             const newCurrent = Object.keys(draft.timetables)[0];
             if (newCurrent === undefined)
-                newTimetable('new timetable');
+                addNewTimetable('new timetable');
             else 
                 selectTimetable(newCurrent);
         }
@@ -74,7 +71,7 @@ const persistReducer = (state: PersistState, action: PersistStateAction) => prod
             deleteTimetable(action.id);
             break;
         case 'newTimetable':
-            newTimetable('new timetable');
+            addNewTimetable('new timetable');
             break;
         case 'copyTimetable':
             dupeTimetable(action.id);

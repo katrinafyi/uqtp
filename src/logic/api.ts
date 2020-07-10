@@ -3,7 +3,7 @@ import { CourseEvent } from "../state/types";
 const ENDPOINT = 'https://asia-northeast1-uq-toilet-paper.cloudfunctions.net/proxy/even/rest/timetable/subjects';
 
 export const fetchCourseData = async (query: string) =>
-  fetch("https://asia-northeast1-uq-toilet-paper.cloudfunctions.net/proxy/even/rest/timetable/subjects", {
+  fetch(ENDPOINT, {
     "headers": {
       "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
     },

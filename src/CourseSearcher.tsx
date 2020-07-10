@@ -4,7 +4,6 @@ import { searchCourses, FullSearchResult, CourseSearchResult } from "./logic/api
 import _ from "lodash";
 import { connect } from "react-redux";
 import { RootAction } from "./state/store";
-import { CourseEvent } from "./state/types";
 import { setAllSessions } from "./state/ducks/timetables";
 
 type SearchResultProps = {

@@ -1,9 +1,6 @@
-import React, { memo, useState, useContext } from 'react';
+import React, { memo } from 'react';
 import { CourseGroup, CourseActivity } from './state/types';
 import _ from 'lodash';
-import { FaCross, FaTimes, FaCheckSquare, FaRegSquare } from 'react-icons/fa';
-import { HighlightContext } from './HightlightContext';
-import { cursorTo } from 'readline';
 import { coerceToArray } from './logic/functions';
 import { Timetable } from './state/types';
 
@@ -27,16 +24,11 @@ export interface Props {
 };
 
 const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse, visibility, setVisible}: CourseSessionSelectorProps) => {
-    const [enabled, setEnabled] = useState(true);
-
-    const {highlight, setHighlight, setSelectedGroup} = useContext(HighlightContext);
 
     // console.log(activities);
     const actTypes = _.groupBy(activities, x => x.activity);
 
-    const nullString = 'null';
-
-    const makeOnChange = (activity: string, group: string) => (ev: React.ChangeEvent<HTMLInputElement>) => {
+    const makeOnChange = (activity: string) => (ev: React.ChangeEvent<HTMLInputElement>) => {
         const checked = ev.target.checked; 
         const group = ev.target.value;
         const newSelected = coerceToArray(selected[activity]).filter(x => x !== group);
@@ -54,7 +46,6 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
         else if (numSelected === 1 && groups.length === 1)
             countClass = 'has-text-grey ';
 
-        const unlocked = true;
         const makeId = (s: string) => `${activity.course}|${activity.activity}|${s}`;
         return (
         <div className="column is-narrow py-0" key={actType} style={{maxWidth: '100%'}}>
@@ -68,7 +59,7 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
                 {groups.map(s => 
                 <label style={{margin: '0 0.25rem'}} className="checkbox" key={makeId(s)} htmlFor={makeId(s)}>
                     <input type="checkbox" id={makeId(s)} value={s}
-                        checked={isSelected(s)} onChange={makeOnChange(activity.activity, s)}/>
+                        checked={isSelected(s)} onChange={makeOnChange(activity.activity)}/>
                     {" "}{s}
                 </label>)}
                 </div>
@@ -88,7 +79,7 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
     const isVisible = visibility?.[activities[0].course] ?? true;
 
     return (
-    <div className="message">
+    <div className="message session-selector">
         <div className="message-header">
                 {/* style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> */}
             <label className="mr-2 has-text-weight-normal is-clickable">

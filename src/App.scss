@@ -18,6 +18,13 @@
   justify-content: left;
 }
 
+.session-selector {
+  & .message-body {
+    border: 1px solid lightgrey;
+    border-top: none;
+  }
+}
+
 // https://codepen.io/davidelrizzo/pen/GobVLe
 // https://codepen.io/davidelrizzo/pen/eJwqzp
 .timetable {
@@ -35,10 +42,7 @@
   width: 100%;
   // height: 42rem;
 
-  border-top: 1px solid $border-light;
-  border-bottom: 2px solid $border-light;
-  border-left: 1px solid $border-light;
-  border-right: 2px solid $border-light;
+  border: 1px solid $border-light;
 }
 
 .timetable th {

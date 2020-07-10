@@ -1,4 +1,4 @@
-import { EMPTY_TIMETABLE, Timetable, TimetablesState } from "./types"
+import { EMPTY_TIMETABLE, TimetablesState } from "./types"
 import { UserState } from "./ducks/user";
 import uuidv4 from 'uuid/v4';
 

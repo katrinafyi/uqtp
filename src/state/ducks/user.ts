@@ -1,8 +1,3 @@
-import { PersistState } from "../schema";
-import produce from "immer";
-import { EMPTY_TIMETABLE } from "../types";
-import { RootAction } from "../store";
-import { Dispatch } from "redux";
 import { User } from "firebase";
 
 export type UserState = {
