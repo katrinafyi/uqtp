@@ -23,7 +23,7 @@ export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSe
     
     const renameRef = createRef<HTMLInputElement>();
     const [isRenaming, setIsRenaming] = useState(false);
-    const currentName = timetables[current].name;
+    const currentName = timetables?.[current]?.name;
     const [name, setName] = useState<string>(currentName);
     const [confirmDelete, setConfirmDelete] = useState(false);
 

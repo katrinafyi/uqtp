@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef } from 'react';
+import React, { useState, useEffect, createRef, useCallback } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -11,91 +11,78 @@ import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth, firestore } from './state/firebase';
 import * as firebaseui from 'firebaseui';
-import { getFirebaseUIConfig } from './FirebaseSignIn';
+import { getFirebaseUIConfig, NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
 import { UserInfoView } from './UserInfoView';
 import { FirebaseAuth } from 'react-firebaseui';
+import { useAuthState } from 'react-firebase-hooks/auth';
+
+
+const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
+  const oldUser = auth.currentUser!;
+  const oldData = await firestore.collection('users').doc(oldUser.uid).get()
+    .then(doc => doc.data()) as PersistState;
+  
+  const newUser = await auth.signInWithCredential(newCredential);
+  
+  const newDocRef = firestore.collection('users').doc(newUser.user!.uid);
+  const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
+
+  if (newData) {
+    newData.timetables = { ...newData.timetables, ...oldData.timetables };
+  }
+
+  await newDocRef.set(newData ?? oldData);
+};
+
 
 type Props = ReturnType<typeof mapStateToProps>
   & typeof dispatchProps;
 
-const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Props) => {
-  const [showSignIn, setShowSignIn] = useState(false);
+const App = ({ user, setUser }: Props) => {
+  const [authUser, authLoading, authError] = useAuthState(auth);
+  const signedOut = !authUser && !authLoading;
 
+  const [showSignIn, setShowSignIn] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
 
   const signOut = () => {
     setShowUserInfo(false);
     setShowSignIn(false);
     auth.signOut();
-  }
+  };
 
-  const displayName = name ?? email ?? phone;
+  useEffect(() => {
+    if (!authLoading && !authError)
+      setUser(authUser ?? null);
+  }, [authUser, authLoading, authError, setUser]);
 
-  const config = getFirebaseUIConfig();
-  config.callbacks!.signInSuccessWithAuthResult = (cred: firebase.auth.UserCredential) => {
-    // console.log('signInSuccessWithAuthResult:');
-    // console.log(cred);
+  const signInSuccess = () => {
     setShowUserInfo(false);
     setShowSignIn(false);
-    if (cred.operationType === 'link')
-      setUser(cred.user);
     return false;
   };
-  config.callbacks!.signInFailure = (error) => {
-    // For merge conflicts, the error.code will be
-    // 'firebaseui/anonymous-upgrade-merge-conflict'.
-    console.log('error signing in: ' +error.code);
-    console.log('error uid: ' + error.credential?.uid);
-    if (error.code !== 'firebaseui/anonymous-upgrade-merge-conflict') {
-      return Promise.resolve(error.credential);
-    }
-    // The credential the user tried to sign in with.
-    const newCred = error.credential;
-    // The user currently signed in.
-    const oldUser = auth.currentUser!;
 
-    // read old data and merge.
-    return firestore.collection('users').doc(oldUser.uid).get()
-      .then(doc => doc.data() as PersistState)
-      .then(oldData => auth.signInWithCredential(newCred)
-        .then((newUser) => {
-          const newDocRef = firestore.collection('users').doc(newUser.user!.uid);
-          newDocRef.get().then(newDoc => {
-            setShowSignIn(false);
-            setShowUserInfo(false);
-
-            const newData = newDoc.data() as PersistState | undefined;
-            if (newData) {
-              newData.timetables = { ...newData.timetables, ...oldData.timetables };
-            }
-            return newDocRef.set(newData ?? oldData);
-          })
-        })
-      );
+  const signInConfig: NewFirebaseLoginProps = {
+    signInSuccess,
+    anonymousMergeConflict: async (cred: firebase.auth.AuthCredential) => {
+      await mergeAnonymousData(cred);
+      signInSuccess();
+    },
   };
-  // config.signInOptions = config.signInOptions!
-  //   .filter(x => !linkedProviders.has(typeof x == 'string' ? x : x.provider));
+  
+  const [firebaseLoginElement] = useState(() => <NewFirebaseLogin {...signInConfig}></NewFirebaseLogin>);
+  
+  const displayName = user?.name ?? user?.email ?? user?.phone;
+  const isAnon = user?.isAnon ?? false;
+  const uid = user?.uid;
+  const photo = user?.photo;
 
-  const [authElement, setAuthElement] = useState<JSX.Element | null>(null);
-  useEffect(() => {
-    if (!authElement)
-      setAuthElement(<FirebaseAuth uiConfig={config} firebaseAuth={auth}></FirebaseAuth>)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authElement]);
-
-  const firebaseRef = createRef<HTMLDivElement>();
   const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
-  useEffect(() => {
-    if (isEmailLink)
-      new firebaseui.auth.AuthUI(auth).start(firebaseRef.current!, config);
-  // We only want to run this once.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return <>
     <Modal visible={showSignIn} setVisible={setShowSignIn}>
-      {showSignIn && !isEmailLink && authElement}
+      {showSignIn && !authLoading && firebaseLoginElement}
     </Modal>
     <ModalCard visible={showUserInfo} setVisible={setShowUserInfo}
       title={"User Info"}
@@ -111,7 +98,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Pro
           </div>
         </div>
       </div>}>
-      <UserInfoView firebaseUI={showUserInfo ? authElement! : undefined}></UserInfoView>
+      <UserInfoView></UserInfoView>
     </ModalCard>
     <div className="hero is-dark">
       <div className="hero-body">
@@ -147,9 +134,8 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Pro
     </div>
     <section className="section">
       <StateErrorBoundary>
-        <div id="firebaseui-email" ref={firebaseRef}></div>
-        {uid ? <Main></Main>
-          : (!showSignIn && !isEmailLink && authElement)}
+        {!showSignIn && (signedOut || isEmailLink) && firebaseLoginElement}
+        {uid && <Main></Main>}
       </StateErrorBoundary>
     </section>
     <footer className="footer">
@@ -169,13 +155,7 @@ const App = ({ uid, name, email, photo, phone, isAnon, providers, setUser }: Pro
 
 const mapStateToProps = (state: PersistState) => {
   return {
-    isAnon: state.user?.isAnon,
-    uid: state.user?.uid,
-    email: state.user?.email,
-    name: state.user?.name,
-    photo: state.user?.photo,
-    phone: state.user?.phone,
-    providers: state.user?.providers,
+    user: state.user
   }
 }
 

@@ -2,11 +2,9 @@ import React from "react"
 import { PersistState } from "./state/schema";
 import { connect } from "react-redux";
 
-type Props = ReturnType<typeof mapStateToProps> & {
-  firebaseUI?: JSX.Element
-};
+type Props = ReturnType<typeof mapStateToProps>;
 
-const _UserInfoView = ({ user, state, firebaseUI }: Props) => {
+const _UserInfoView = ({ user, state }: Props) => {
   if (!user)
     return <></>;
   return <>
