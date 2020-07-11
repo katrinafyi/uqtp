@@ -1,11 +1,10 @@
 import { auth } from "./state/firebase";
-import * as firebaseui from "firebaseui";
-import { FirebaseAuth, StyledFirebaseAuth } from "react-firebaseui";
-import React, { useState, useEffect, createContext, createRef, useCallback } from "react";
+import React, { useEffect } from "react";
 import firebase from "firebase/app";
 import 'firebase/auth';
-import { setUser } from './state/ducks/user'; 
-import { connect } from "react-redux";
+
+import * as firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui.css';
 
 export const getFirebaseUIConfig = 
   (signInSuccess?: NewFirebaseLoginProps['signInSuccess'],
@@ -13,6 +12,7 @@ export const getFirebaseUIConfig =
   ({
     signInFlow: 'popup',
     signInOptions: [
+      firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID,
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       firebase.auth.GithubAuthProvider.PROVIDER_ID,
@@ -24,7 +24,7 @@ export const getFirebaseUIConfig =
         provider: firebase.auth.PhoneAuthProvider.PROVIDER_ID,
         defaultCountry: 'AU',
       }
-    ].concat([firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID]),
+    ],
     autoUpgradeAnonymousUsers: true,
     credentialHelper: firebaseui.auth.CredentialHelper.GOOGLE_YOLO,
     privacyPolicyUrl: 'https://kentonlam.xyz/uqtp-privacy/',
@@ -46,35 +46,6 @@ export const getFirebaseUIConfig =
     }
   });
 
-const mapDispatchToProps = {
-  setUser
-};
-
-type Props = typeof mapDispatchToProps;
-const _FirebaseSignIn = ({ setUser }: Props) => {
-  const config = getFirebaseUIConfig();
-
-  config.callbacks!.signInSuccessWithAuthResult = (cred: firebase.auth.UserCredential) => {
-    // console.log('signInSuccessWithAuthResult');
-    // console.log(cred);
-    // if (cred.operationType === 'link')
-    //   setUser(cred.user);
-    return false;
-  }
-
-  const [element, setElement] = useState<JSX.Element | null>(null);
-  
-  useEffect(() => {
-    if (!element)
-      setElement(<FirebaseAuth uiConfig={config} firebaseAuth={auth}></FirebaseAuth>)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [element]);
-
-  return element;
-}
-
-export const FirebaseSignIn = connect(null, mapDispatchToProps)(_FirebaseSignIn);
-
 export type NewFirebaseLoginProps = {
   anonymousMergeConflict?: (newCredential: firebase.auth.AuthCredential) => Promise<void>,
   signInSuccess?: (authResult: firebase.auth.UserCredential) => boolean,
@@ -83,8 +54,15 @@ export type NewFirebaseLoginProps = {
 export const NewFirebaseLogin = (props: NewFirebaseLoginProps) => {
   const config = getFirebaseUIConfig(props.signInSuccess, props.anonymousMergeConflict);
 
-  const uiCallback = useCallback((ui: firebaseui.auth.AuthUI) => ui.reset(), []);
+  // const uiCallback = useCallback((ui: firebaseui.auth.AuthUI) => ui.reset(), []);
 
-  return <StyledFirebaseAuth uiConfig={config} firebaseAuth={auth} uiCallback={uiCallback}>
-  </StyledFirebaseAuth>;
+  const id = "new-firebaseui-login";
+
+  // this component should only be instantiated once!
+  useEffect(() => {
+    const ui = firebaseui.auth.AuthUI.getInstance() ?? new firebaseui.auth.AuthUI(auth);
+    ui.start('#'+id, config);
+  }, [config]);
+
+  return <div id={id}></div>;
 }

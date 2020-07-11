@@ -61,8 +61,10 @@ const persistReducer = (state: PersistState, action: PersistStateAction) => prod
         }
     };
     const dupeTimetable = (id: string) => {
+        const old = state.timetables[id];
         const newID = uuidv4();
-        draft.timetables[newID] = draft.timetables[id];
+        draft.timetables[newID] = {...old};
+        draft.timetables[newID].name = old.name.trimRight() + ' (copy)';
         selectTimetable(newID);
     };
 

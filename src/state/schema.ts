@@ -27,7 +27,7 @@ export const DEFAULT_PERSIST: PersistState = {
         //     allSessions: testData,
         //     selectedGroups: {"MATH3401_S1_STLUC_IN":{"LEC1":"01","LEC2":"01","LEC3":"01","TUT1":"01"},"STAT3001_S1_STLUC_IN":{"LEC1":"01","LEC2":"01","LEC3":"01","TUT1":"01"},"STAT3004_S1_STLUC_IN":{"LEC1":"01","LEC2":"01","LEC3":"01","TUT1":"01"},"COMP4403_S1_STLUC_IN":{"LEC1":"01","LEC2":"01","TUT1":"01"}},
         // },
-        [uuidv4()]: EMPTY_TIMETABLE,
+        [DEFAULT_CURRENT]: EMPTY_TIMETABLE,
     },
     current: DEFAULT_CURRENT,
     user: null,

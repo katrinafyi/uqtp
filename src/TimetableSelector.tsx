@@ -1,4 +1,4 @@
-import React, { useState, createRef } from "react"
+import React, { useState, createRef, useEffect } from "react"
 import { FaSave, FaPencilAlt, FaCopy, FaPlus, FaTrash } from "react-icons/fa";
 import { css } from "emotion";
 import { PersistStateAction } from "./state/ducks/persist";
@@ -23,9 +23,14 @@ export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSe
     
     const renameRef = createRef<HTMLInputElement>();
     const [isRenaming, setIsRenaming] = useState(false);
-    const currentName = timetables?.[current]?.name;
+    const currentName = timetables?.[current]?.name ?? 'invalid timetable name';
     const [name, setName] = useState<string>(currentName);
     const [confirmDelete, setConfirmDelete] = useState(false);
+
+    useEffect(() => {
+        if (!isRenaming)
+            setName(currentName);
+    }, [isRenaming, currentName]);
 
     const onClickTag = (ev: React.MouseEvent<HTMLButtonElement>) => {
         setIsRenaming(false);
@@ -79,8 +84,8 @@ export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSe
         <div className="field">
             <div className="control">
                 <input ref={renameRef} type="text" className={"title "+inputStyle} 
-                    readOnly={!isRenaming} value={isRenaming ? name : currentName} 
-                    onChange={(ev) => setName(ev.target.value)}
+                    value={isRenaming ? name : currentName} 
+                    onChange={(ev) => isRenaming && setName(ev.target.value)}
                     placeholder="timetable name…"/>
             </div>
         </div>

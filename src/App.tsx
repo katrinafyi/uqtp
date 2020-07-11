@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createRef, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -10,11 +10,9 @@ import { PersistState } from './state/schema';
 import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth, firestore } from './state/firebase';
-import * as firebaseui from 'firebaseui';
-import { getFirebaseUIConfig, NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
+import { NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
 import { UserInfoView } from './UserInfoView';
-import { FirebaseAuth } from 'react-firebaseui';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 
@@ -41,9 +39,10 @@ type Props = ReturnType<typeof mapStateToProps>
 
 const App = ({ user, setUser }: Props) => {
   const [authUser, authLoading, authError] = useAuthState(auth);
-  const signedOut = !authUser && !authLoading;
+  const showMainSignIn = authUser == null;
+  // console.log({authUser, authLoading, authError});
 
-  const [showSignIn, setShowSignIn] = useState(false);
+  const [showSignInModal, setShowSignIn] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
 
   const signOut = () => {
@@ -81,8 +80,10 @@ const App = ({ user, setUser }: Props) => {
   const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
 
   return <>
-    <Modal visible={showSignIn} setVisible={setShowSignIn}>
-      {showSignIn && !authLoading && firebaseLoginElement}
+    <Modal visible={showSignInModal} setVisible={setShowSignIn}>
+      <div style={{display: authLoading ? 'none' : ''}}>
+        {showSignInModal && firebaseLoginElement}
+      </div>
     </Modal>
     <ModalCard visible={showUserInfo} setVisible={setShowUserInfo}
       title={"User Info"}
@@ -134,7 +135,9 @@ const App = ({ user, setUser }: Props) => {
     </div>
     <section className="section">
       <StateErrorBoundary>
-        {!showSignIn && (signedOut || isEmailLink) && firebaseLoginElement}
+        <div style={{display: authLoading ? 'none' : ''}}>
+          {!showSignInModal && (showMainSignIn || isEmailLink) && firebaseLoginElement}
+        </div>
         {uid && <Main></Main>}
       </StateErrorBoundary>
     </section>
