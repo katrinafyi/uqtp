@@ -17,3 +17,17 @@ firebase.initializeApp(firebaseConfig);
 // export const database = firebase.database();
 export const firestore = firebase.firestore();
 export const auth = firebase.auth();
+
+export const userFirestoreDocRef = (userOrUid?: firebase.User | string | null) => {
+    let uid = undefined;
+    if (typeof userOrUid == 'string') {
+        uid = userOrUid;
+    } else {
+        let user = userOrUid;
+        if (!userOrUid)
+            user = auth.currentUser ?? undefined;
+        uid = user?.uid;
+    }
+    console.assert(uid != null);
+    return firestore.collection('users').doc(uid);
+}

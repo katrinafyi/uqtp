@@ -9,7 +9,7 @@ import Main from './Main';
 import { PersistState } from './state/schema';
 import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
-import { auth, firestore } from './state/firebase';
+import { auth, userFirestoreDocRef } from './state/firebase';
 import { NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
 import { UserInfoView } from './UserInfoView';
@@ -17,13 +17,11 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 
 
 const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
-  const oldUser = auth.currentUser!;
-  const oldData = await firestore.collection('users').doc(oldUser.uid).get()
-    .then(doc => doc.data()) as PersistState;
+  const oldData = await userFirestoreDocRef().get().then(doc => doc.data()) as PersistState;
   
   const newUser = await auth.signInWithCredential(newCredential);
   
-  const newDocRef = firestore.collection('users').doc(newUser.user!.uid);
+  const newDocRef = userFirestoreDocRef(newUser.user);
   const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
 
   if (newData) {
@@ -45,10 +43,18 @@ const App = ({ user, setUser }: Props) => {
   const [showSignInModal, setShowSignIn] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
 
-  const signOut = () => {
+  const signOut = async () => {
     setShowUserInfo(false);
     setShowSignIn(false);
-    auth.signOut();
+
+    try {
+      if (user?.isAnon ?? false)
+        await userFirestoreDocRef().delete();
+    } catch (e) {
+      console.error('failed to delete anonymous data', e);
+    }
+    
+    await auth.signOut();
   };
 
   useEffect(() => {

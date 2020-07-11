@@ -1,6 +1,5 @@
 import React, { useState, createRef, useEffect } from "react"
 import { FaSave, FaPencilAlt, FaCopy, FaPlus, FaTrash } from "react-icons/fa";
-import { css } from "emotion";
 import { PersistStateAction } from "./state/ducks/persist";
 import { Timetable, TimetablesState } from "./state/types";
 import _ from "lodash";
@@ -10,13 +9,6 @@ export type TimetableSelectorProps = {
     current: string,
     dispatch: (action: PersistStateAction) => any
 }
-
-const inputStyle = css({
-    width: '100%',
-    border: 'none !important',
-    outline: 'none !important',
-    lineHeight: 1,
-});
 
 export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSelectorProps) => {
     const savedValid = !!timetables[current];
@@ -83,10 +75,12 @@ export const TimetableSelector = ({ timetables, current, dispatch }: TimetableSe
     return <form className="form">
         <div className="field">
             <div className="control">
-                <input ref={renameRef} type="text" className={"title "+inputStyle} 
+                <input ref={renameRef} type="text" className={"title"} 
                     value={isRenaming ? name : currentName} 
                     onChange={(ev) => isRenaming && setName(ev.target.value)}
-                    placeholder="timetable name…"/>
+                    placeholder="timetable name…"
+                    readOnly={!isRenaming}
+                    style={{ width: '100%', border: 'none', outline: 'none', lineHeight: 1}}/>
             </div>
         </div>
         <div className="field is-grouped is-grouped-multiline">

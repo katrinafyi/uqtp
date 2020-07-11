@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { firestore, auth } from './state/firebase';
+import { firestore, auth, userFirestoreDocRef } from './state/firebase';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -57,7 +57,7 @@ auth.onAuthStateChanged((user) => {
   // console.log('auth state changed: ' + user?.uid);
   // console.log(user);
   if (user) {
-    const docRef = firestore.collection('users').doc(user.uid);
+    const docRef = userFirestoreDocRef(user);
     unsubSnapshot = docRef.onSnapshot((doc) => {
       // console.log('got snapshot from firebase');
       if (doc?.exists) {
