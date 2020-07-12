@@ -17,10 +17,12 @@ type FirebaseSnapshotAction<T> = {
 };
 
 export const makeFirestorePersistEnhancer = 
-  <T>(getDocRef: (user: firebase.User | null) => DocRef, 
+  <T>(firebaseAuth: firebase.auth.Auth,
+    getDocRef: (user: firebase.User | null) => DocRef, 
     migrateState?: (state: T) => T | null, 
     defaultState?: T,
-    firebaseAuth?: firebase.auth.Auth): StoreEnhancer => {
+    setUser?: (user: firebase.User | null) => any,
+    ): StoreEnhancer => {
   
   const auth = firebaseAuth ?? globalAuth;
   const migrate = migrateState ?? (() => null);
@@ -39,11 +41,11 @@ export const makeFirestorePersistEnhancer =
       console.log("firebase reducer called with ", a);
       if (a?.type === 'firebaseSnapshotAction') {
         const a2 = a as FirebaseSnapshotAction<S>;
-        return { ...a2.state, __user: a2?.user?.uid };
+        return a2.state;
       } else if (user != null) {
         const newState = reducer(s, a as A);
         // @ts-ignore
-        if (newState !== s && newState != null && s?.__user === user.uid)
+        if (newState !== s && newState != null)
           getDocRef(user).set(newState)
         return newState;
       };
@@ -84,6 +86,9 @@ export const makeFirestorePersistEnhancer =
         // new user state is signed out. delete data.
         store.dispatch(firebaseSnapshotAction(null, null as unknown as S));
       }
+
+      if (setUser)
+        store.dispatch(setUser(user));
     });
 
     return store;

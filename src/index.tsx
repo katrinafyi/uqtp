@@ -43,13 +43,8 @@ if (migratedState) {
   saveLocalStorage(migratedState);
 }
 
-// must be before persist enhancer to presist enhancer goes first?
-auth.onAuthStateChanged((user) => {
-  rootStore.dispatch(setUser(user));
-});
-
 const rootStore = createStore(rootReducer, migratedState ?? previousState,
-  makeFirestorePersistEnhancer(userFirestoreDocRef, migratePeristState, DEFAULT_PERSIST, auth));
+  makeFirestorePersistEnhancer(auth, userFirestoreDocRef, migratePeristState, DEFAULT_PERSIST, setUser));
 
 rootStore.subscribe(() => {
   const state = rootStore.getState();
