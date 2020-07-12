@@ -15,85 +15,47 @@ import { setUser } from './state/ducks/user';
 import { firebaseMiddleware } from './state/firebaseMiddleware';
 import { setPersistState } from './state/ducks/persist';
 import firebase from 'firebase/app';
+import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
 const previousJSON = localStorage.getItem(LOCALSTORAGE_KEY);
 
-const previousState = previousJSON !== null ? JSON.parse(previousJSON) : DEFAULT_PERSIST;
+let previousState = DEFAULT_PERSIST;
+try {
+  if (previousJSON != null) {
+    const parsed = JSON.parse(previousJSON);
+    if (parsed)
+      previousState = parsed;
+  }
+} catch (e) {
+  console.error("failed to load state from local storage", e);
+}
+
 const migratedState = migratePeristState(previousState, CURRENT_VERSION);
 
-const saveState = (s: PersistState) => {
+const saveLocalStorage = (s: PersistState) => {
   // console.log('saving to localStorage');
   localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(s));
 }
 
 if (migratedState) {
-  saveState(migratedState);
+  saveLocalStorage(migratedState);
 }
 
-const rootStore = createStore(rootReducer, migratedState ?? previousState,
-  applyMiddleware(firebaseMiddleware, thunk));
-
-rootStore.subscribe(() => {
-  const state = rootStore.getState();
-  saveState(state);
-});
-
-
-type DatabaseCallback = (a: firebase.database.DataSnapshot, b?: string | null) => any;
-let unsubFirebase: Function | null = null;
-let unsubSnapshot: Function | null = null;
-
+// must be before persist enhancer to presist enhancer goes first?
 auth.onAuthStateChanged((user) => {
-  unsubFirebase?.();
-  // if (unsubSnapshot && docRef) {
-  //   docRef.off('value', unsubSnapshot);
-  // }
-  unsubSnapshot?.();
-
-  unsubFirebase = null;
-  unsubSnapshot = null;
-  // console.log('auth state changed: ' + user?.uid);
-  // console.log(user);
-  if (user) {
-    const docRef = userFirestoreDocRef(user);
-    unsubSnapshot = docRef.onSnapshot((doc) => {
-      // console.log('got snapshot from firebase');
-      if (doc?.exists) {
-        // previous data exists. load from online.
-        const data = doc.data()! as PersistState;
-        const migrated = migratePeristState(data);
-        if (migrated)
-          docRef?.set(migrated);
-        else
-          rootStore.dispatch(setPersistState(data));
-      } else {
-        // no previous data exists. upload our data.
-        docRef?.set(rootStore.getState());
-      }
-
-      if (!unsubFirebase) {
-        // unsubFirebase = rootStore.subscribe(() => {
-        //   console.log('uploading to firebase.');
-        //   // console.log(rootStore.getState());
-        //   docRef?.set(rootStore.getState());
-        // });
-      }
-    });
-  } else {
-    // new user is signed out.
-    if (rootStore.getState().user != null) {
-      rootStore.dispatch(setPersistState(DEFAULT_PERSIST));
-    }
-  }
   rootStore.dispatch(setUser(user));
 });
 
+const rootStore = createStore(rootReducer, migratedState ?? previousState,
+  makeFirestorePersistEnhancer(userFirestoreDocRef, migratePeristState, DEFAULT_PERSIST, auth));
 
-// if (auth.isSignInWithEmailLink(window.location.href)) {
-//   new firebaseui.auth.AuthUI(auth).start('#root', firebaseUIConfig);
-// } else 
+rootStore.subscribe(() => {
+  const state = rootStore.getState();
+  saveLocalStorage(state);
+});
+
 
 ReactDOM.render(
   <Provider store={rootStore}><App /></Provider>,

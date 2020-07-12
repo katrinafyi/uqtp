@@ -3,33 +3,17 @@ import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
 import { setPersistState } from './state/ducks/persist';
-import { setUser } from './state/ducks/user';
+import { setUser, UserState } from './state/ducks/user';
 import StateErrorBoundary from './StateErrorBoundary';
 import Main from './Main';
 import { PersistState } from './state/schema';
 import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
-import { auth, userFirestoreDocRef } from './state/firebase';
+import { auth, userFirestoreDocRef, mergeAnonymousData } from './state/firebase';
 import { NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
 import { UserInfoView } from './UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
-
-
-const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
-  const oldData = await userFirestoreDocRef().get().then(doc => doc.data()) as PersistState;
-  
-  const newUser = await auth.signInWithCredential(newCredential);
-  
-  const newDocRef = userFirestoreDocRef(newUser.user);
-  const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
-
-  if (newData) {
-    newData.timetables = { ...newData.timetables, ...oldData.timetables };
-  }
-
-  await newDocRef.set(newData ?? oldData);
-};
 
 
 type Props = ReturnType<typeof mapStateToProps>
@@ -164,7 +148,7 @@ const App = ({ user, setUser }: Props) => {
 
 const mapStateToProps = (state: PersistState) => {
   return {
-    user: state.user
+    user: state?.user as (UserState | null)
   }
 }
 
