@@ -2,6 +2,10 @@
 
 // $border-light: #ededed;
 
+.mdl-button.firebaseui-idp-anonymous { 
+  margin-bottom: 0.75rem;
+}
+
 .bordered {
   box-shadow: none;
   border: 1px solid $border;
