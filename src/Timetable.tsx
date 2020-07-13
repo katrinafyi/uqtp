@@ -1,7 +1,7 @@
 import React, { memo, useContext } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from './state/types';
-import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted } from './logic/functions';
+import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime } from './logic/functions';
 
 import { HighlightContext } from './HightlightContext';
 import { FaLock } from 'react-icons/fa';
@@ -61,7 +61,8 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         top: `${topPercent}%`, 
     };
 
-    const text = `${session.course}\n${session.activity} ${session.group}\n${session.location}\n${session.duration} minutes`;
+    const s = session;
+    const text = `${s.course}\n${s.activity} ${s.group}\n${formatTime(s.time)} - ${formatTime(sessionEndTime(s))} (${s.duration} minutes)\n${s.location}`;
 
     return (
     <div className={highlightClass + " session " + positionClass} onClick={onClick}

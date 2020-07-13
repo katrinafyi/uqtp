@@ -1,4 +1,4 @@
-import { CourseEvent, CourseActivity, CourseGroup } from "../state/types";
+import { CourseEvent, CourseActivity, CourseGroup, ClockTime } from "../state/types";
 import _ from "lodash";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
@@ -105,6 +105,19 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
     if (a.time.minute !== b.time.minute)
         return a.time.minute - b.time.minute;
     return 0;
+}
+
+export const sessionEndTime = (e: CourseEvent) => {
+    const endMinutes = e.time.hour * 60 + e.time.minute + e.duration;
+    return { 
+        hour: Math.floor(endMinutes / 60),
+        minute: endMinutes % 60,
+    };
+}
+
+export const formatTime = (t: ClockTime) => {
+    const d = new Date(2020, 1, 1, t.hour, t.minute);
+    return d.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric'});
 }
 
 export const makeActivityKey = (session: CourseEvent) =>
