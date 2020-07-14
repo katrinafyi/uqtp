@@ -7,7 +7,7 @@ import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
 import { model } from './state/easy-peasy';
 import { createStore, StoreProvider } from 'easy-peasy';
-import { makeFirebaseModel, attachFirebaseListeners, FIREBASE_MODEL_DEFAULT } from './state/firebaseSync';
+import { makeFirebaseModel, attachFirebaseListeners, FIREBASE_META_DEFAULT } from './state/firebaseSync';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -35,7 +35,7 @@ if (migratedState) {
   saveLocalStorage(migratedState);
 }
 
-const initialState = { ...migratedState ?? previousState, firebase: FIREBASE_MODEL_DEFAULT };
+const initialState = { ...migratedState ?? previousState, firebase: FIREBASE_META_DEFAULT };
 
 const rootStore = createStore(
   { ...model, ...makeFirebaseModel() },
@@ -43,6 +43,10 @@ const rootStore = createStore(
 );
 
 attachFirebaseListeners(rootStore);
+
+rootStore.subscribe(() => {
+  saveLocalStorage(rootStore.getState());
+})
 
 ReactDOM.render(
   <StoreProvider store={rootStore}>

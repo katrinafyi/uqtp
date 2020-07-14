@@ -7,8 +7,7 @@ import { isHighlighted, coerceToArray, makeActivityKey } from './logic/functions
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
 import SessionSelectors from './SessionSelectors';
-import { deleteCourse } from './state/ducks/timetables';
-import { CourseEvent, CourseGroup } from './state/types';
+import { CourseEvent, CourseActivityGroup } from './state/types';
 import Timetable from './Timetable';
 import TimetableSelector from './TimetableSelector';
 import CourseSearcher from './CourseSearcher';
@@ -16,13 +15,10 @@ import { useStoreState, useStoreActions } from './state/easy-peasy';
 
 
 const Main = () => {
-  const current = useStoreState(s => s.current);
-  const timetable = useStoreState(s => s.timetable.current);
-  const activities = useStoreState(s => s.timetable.currentActivities);
-  const timetables = useStoreState(s => s.timetables);
+  const timetable = useStoreState(s => s.currentTimetable);
 
-  const replaceActivityGroup = useStoreActions(s => s.timetable.replaceOneSelectedGroup);
-  const updateSessions = useStoreActions(s => s.timetable.updateSessions);
+  const replaceActivityGroup = useStoreActions(s => s.replaceOneSelectedGroup);
+  const updateSessions = useStoreActions(s => s.updateSessions);
   
   const [importError, setImportError] = useState<string | null>(null);
   
@@ -46,7 +42,7 @@ const Main = () => {
     setImportError(null);
   };
 
-  const [highlight, setHighlight] = useState<CourseGroup | null>(null);
+  const [highlight, setHighlight] = useState<CourseActivityGroup | null>(null);
   const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
   
   const activitiesByGroup = useMemo(
@@ -115,10 +111,7 @@ const Main = () => {
 
         <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup: selectHighlightedGroup}}>
           {/* <h4 className="title is-4">Selected Classes</h4> */}
-          <SessionSelectors allActivities={activities} visibility={timetable.courseVisibility}
-            selected={timetable.selectedGroups} setSelected={setSelected}
-            deleteCourse={(c) => dispatch(deleteCourse(c))}
-            setVisible={setVisibility}></SessionSelectors>
+          <SessionSelectors></SessionSelectors>
 
           <h4 className="title is-4">Timetable</h4>
           <Timetable selectedSessions={visibleSessions}></Timetable>

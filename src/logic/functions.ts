@@ -1,4 +1,4 @@
-import { CourseEvent, CourseActivity, CourseGroup } from "../state/types";
+import { CourseEvent, CourseActivity, CourseActivityGroup } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
 
@@ -106,12 +106,12 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
     if (a.time.minute !== b.time.minute)
         return a.time.minute - b.time.minute;
     return 0;
-}
+};
 
 export const getCourseGroups = memo((events: CourseEvent[]) => {
     console.log("computing getCourseGroups for ", events);
     return _(events)
-        .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
+        .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseActivityGroup)
         .uniqWith(_.isEqual).value();
 }, 10);
 
@@ -127,8 +127,8 @@ export const makeSessionKey = (session: CourseEvent) =>
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 
-export const isHighlighted = (session: CourseGroup, highlight: CourseActivity | null) => 
+export const isHighlighted = (session: CourseActivityGroup, highlight: CourseActivity | null) => 
     session.course === highlight?.course && session.activity === highlight.activity;
 
-export const coerceToArray = <T>(arg: T | T[]) => 
+export const coerceToArray = <T>(arg?: T | T[]) => 
     arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);

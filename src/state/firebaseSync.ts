@@ -1,50 +1,61 @@
 import { Action, State, action, Store } from "easy-peasy"
 import { v4 } from "uuid"
-import { auth, userFirestoreDocRef } from "./firebase";
+import { auth, userFirestoreDocRef, mergeData } from "./firebase";
 
-export type FirebaseModel = {
-  firebase: {
-    instance: string,
-    timestamp: number,
-    uid: string | null,
+export type FirebaseMeta = {
+  __instance: string,
+  __timestamp: number,
+  __uid: string | null,
+}
 
-    setState: Action<FirebaseModel, State<FirebaseModel>>
-  }
+export type FirebaseModel = FirebaseMeta & {
+  setState: Action<FirebaseModel, FirebaseMeta>,
 }
 
 export const instance = v4();
-export const FIREBASE_MODEL_DEFAULT = {
-  instance: instance,
-  timestamp: 0,
-  uid: null,
-}
+export const FIREBASE_META_DEFAULT: FirebaseMeta = {
+  __instance: instance,
+  __timestamp: 0,
+  __uid: null,
+};
+
+export const updateFirebaseMeta = (): FirebaseMeta => ({
+  __instance: instance,
+  __timestamp: Date.now(),
+  __uid: auth.currentUser?.uid ?? null,
+});
 
 export const makeFirebaseModel = () => {
   
   const model: FirebaseModel = {
-    firebase: {
-      ...FIREBASE_MODEL_DEFAULT,
-      
-      setState: action((oldState, state) => {
-        if (instance === state.firebase.instance) {
-          console.info("received state from same instance, ignoring.");
-          return;
-        }
+    ...FIREBASE_META_DEFAULT,
+    
+    setState: action((oldState, payload) => {
+      debugger;
+      if (payload.__instance == null) {
+        console.warn("received state missing firebase metadata, merging.");
+        // @ts-ignore
+        return mergeData(payload, oldState) as any;
+      }
 
-        if (oldState.firebase.uid != null && oldState.firebase.uid !== state.firebase.uid) {
-          console.warn("received state from different user, ignoring.");
-          return;
-        }
-
-        if (state.firebase.timestamp > oldState.firebase.timestamp) {
-          console.info('received newer state, updating.');
-          return state;
-        }
-
-        console.info('local state is newer than remote, keeping.');
+      if (instance === payload.__instance) {
+        console.info("received state from same instance, ignoring.");
         return;
-      }),
-    }
+      }
+
+      if (oldState.__uid != null && oldState.__uid !== payload.__uid) {
+        console.warn("received state from different user, ignoring.");
+        return;
+      }
+
+      if (payload.__timestamp > oldState.__timestamp) {
+        console.info('received newer state, updating.');
+        return payload;
+      }
+
+      console.info('local state is newer than remote, keeping.');
+      return;
+    }),
   };
 
   return model;  
@@ -71,23 +82,23 @@ export const attachFirebaseListeners = <C>(store: Store<FirebaseModel, C>) => {
         if (doc?.exists) {
           // previous data exists. load from online.
           const data = doc.data()! as FirebaseModel;
-          store.getActions().firebase.setState(data);
+          store.getActions().setState({ ...FIREBASE_META_DEFAULT, ...data });
         } else {
           // no previous data exists. upload our data.
-          document!.set(store.getState());
+          document!.set({ ...store.getState(), ...updateFirebaseMeta()});
           // store.dispatch(firebaseSnapshotAction(user, defaultState as unknown as S));
         }
       });
     } else {
       document = null;
       // new user state is signed out. delete data.
-      store.getActions().firebase.setState({firebase: FIREBASE_MODEL_DEFAULT});
+      store.getActions().setState(FIREBASE_META_DEFAULT);
     }
   });
 
   store.subscribe(() => {
     // @ts-ignore
     console.log("subscribe listener called. meta: ", store.getState()?.firebase);
-    document?.set(store.getState());
+    document?.set({ ...store.getState(), ...updateFirebaseMeta()});
   });
 };

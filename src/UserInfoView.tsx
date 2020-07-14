@@ -1,12 +1,15 @@
 import React from "react"
-import { PersistState } from "./state/schema";
-import { connect } from "react-redux";
+import { useStoreState } from "./state/easy-peasy";
 
-type Props = ReturnType<typeof mapStateToProps>;
+const UserInfoView = () => {
+  const user = useStoreState(s => s.user);
+  const state = useStoreState(s => s);
 
-const _UserInfoView = ({ user, state }: Props) => {
-  if (!user)
+  if (!user) {
+    console.warn("attempting to render UserInfoView with no user set");
     return <></>;
+  }
+
   return <>
     <div className="field">
       <label className="label">User ID</label>
@@ -25,7 +28,7 @@ const _UserInfoView = ({ user, state }: Props) => {
       </div>
     </div>
     <div className="field">
-      <label className="label">Export Timetable Data</label>
+      <label className="label">Raw Timetable Data</label>
       <input type="text" className="input is-small" value={JSON.stringify(state)} readOnly/>
     </div>
     {/* {firebaseUI && <div className="field">
@@ -35,9 +38,4 @@ const _UserInfoView = ({ user, state }: Props) => {
   </>;
 };
 
-const mapStateToProps = (state: PersistState) => ({
-  user: state.user,
-  state: state,
-})
-
-export const UserInfoView = connect(mapStateToProps)(_UserInfoView);
+export default UserInfoView;

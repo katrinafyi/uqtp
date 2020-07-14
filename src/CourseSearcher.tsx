@@ -1,112 +1,101 @@
 import React, { useState, Dispatch } from "react";
 import { FaSearch } from "react-icons/fa";
-import { searchCourses, FullSearchResult, CourseSearchResult } from "./logic/api";
+import { searchCourses, FullSearchResult, CourseSearchResult, compareSearchResultSemesters } from "./logic/api";
 import _ from "lodash";
 import { connect } from "react-redux";
 import { RootAction } from "./state/store";
 import { setAllSessions } from "./state/ducks/timetables";
+import { useStoreActions } from "./state/easy-peasy";
 
-type SearchResultProps = {
-    result: CourseSearchResult, 
-    dispatch: Dispatch<RootAction>
-}
+export const SearchResult = (props: { result: CourseSearchResult }) => {
+  const updateSessions = useStoreActions(s => s.updateSessions);
 
-const _SearchResult = ({ result, dispatch }: SearchResultProps) => {
-    return (
+  const result = props.result;
+
+  return (
     <div className="column is-narrow">
-        <button className="button button-card" title={`Click to add ${result.course} to the current timetable`}
-                onClick={() => (dispatch(setAllSessions(result.activities)))}>
-            <div>
-                <h6 className="title is-6 mb-2">
-                    {result.course}
-                </h6>
-                <p className="mb-1">{result.name}</p>
-                <p><small>{result.coordinator}</small></p>
-                <p className="mt-2">{result.semester}</p>
-            </div>
-        </button>
+      <button className="button button-card" title={`Click to add ${result.course} to your timetable`}
+        onClick={() => updateSessions(result.activities)}>
+        <div>
+          <h6 className="title is-6 mb-2">
+            {result.course}
+          </h6>
+          <p className="mb-1">{result.name}</p>
+          <p><small>{result.coordinator}</small></p>
+          <p className="mt-2">{result.semester}</p>
+        </div>
+      </button>
     </div>);
 };
 
-const mapDispatchToProps = (dispatch: Dispatch<RootAction>) => {
-    return {dispatch};
+enum SearchState {
+  LOADING, ERROR, DONE,
 }
-
-export const SearchResult = connect(undefined, mapDispatchToProps)(_SearchResult);
-
-
-export const compareSemesters = (a: CourseSearchResult, b: CourseSearchResult) => {
-    let x = a.semester.localeCompare(b.semester);
-    if (x !== 0) return x;
-    x = a.course.localeCompare(b.course);
-    return x;
-}
-
-
-type SearchState = 'loading' | 'error' | 'done';
 
 export const CourseSearcher = () => {
-    const [query, setQuery] = useState('');
-    const [loading, setLoading] = useState<SearchState>('done');
-    const [results, setResults] = useState<FullSearchResult | null>(null);
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState<SearchState>(SearchState.DONE);
+  const [results, setResults] = useState<FullSearchResult | null>(null);
 
-    const search = (ev: React.MouseEvent<HTMLButtonElement>) => {
-        ev.stopPropagation();
-        ev.preventDefault();
+  const search = async (ev: React.MouseEvent<HTMLButtonElement>) => {
+    ev.stopPropagation();
+    ev.preventDefault();
 
-        if (loading !== 'done')
-            return;
+    if (loading !== SearchState.DONE)
+      return;
 
-        setLoading('loading');
+    setLoading(SearchState.LOADING);
 
-        searchCourses(query)
-        .then((data) => {
-            setLoading('done');
-            setResults(data);
-        })
-        .catch(e => {
-            console.error('error while searching courses', e);
-            setLoading('error');
-            setResults(null);
-        });
-    };
+    try {
+      const results = await searchCourses(query);
+      setLoading(SearchState.DONE);
+      setResults(results);
+    } catch (e) {
+      console.error('error while searching courses', e);
+      setLoading(SearchState.ERROR);
+      setResults(null);
+    }
+  };
 
-    const isLoading = loading === 'loading';
-    const resultsEmpty = results != null && _.isEmpty(results);
-    const resultsPresent = results != null && !_.isEmpty(results);
-    const resultsError = loading === 'error';
+  const isDone = loading === SearchState.DONE;
+  const isLoading = loading === SearchState.LOADING;
+  const isError = loading === SearchState.ERROR;
+  const resultsEmpty = results != null && _.isEmpty(results);
+  const resultsPresent = results != null && !_.isEmpty(results);
 
-    return <div className="">
-        <form className="form mb-3">
-            <div className="field has-addons">
-                {/* <label htmlFor="" className="label">Search courses</label> */}
-                <div className="control">
-                    <input className="input" type="search" placeholder="ABCD1234" style={{width: 'unset'}}
-                        value={query} onChange={(e) => setQuery(e.target.value)}/>
-                    {/* <span className="icon is-small is-left">
-                        <FaSearch></FaSearch>
-                    </span> */}
-                </div>
-                <div className="control">
-                    <button className={"button is-info " + (isLoading ? 'is-loading' : '')} type="submit" onClick={search}>
-                        <span className="icon"><FaSearch></FaSearch></span>
-                    </button>
-                </div>
-            </div>
-        </form>
-        {resultsPresent && <>
-            {/* <div className="has-text-weight-bold my-3">Results</div> */}
-            <div className="columns is-multiline mb-2">
-                {Object.values(results!).slice(0, 10).sort(compareSemesters)
-                    .map(r => <SearchResult result={r} key={r.course}></SearchResult>)}
-            </div>
-        </>}
-        {resultsEmpty && <div className="has-text-weight-bold mb-3 has-text-danger-dark">No results.</div>}
-        {resultsError && <div className="has-text-weight-bold mb-3 has-text-danger-dark">Error while searching courses.</div>}
-        {loading === 'done' && results == null && <div className="mb-3">
-            Search for your courses here. You can also include the semester or delivery mode, e.g. &ldquo;MATH1051 S2 EX&rdquo;.
-        </div>}
-    </div>;
+  return <>
+    <form className="form mb-3">
+      <div className="field has-addons">
+
+        <div className="control">
+          <input className="input" type="search" placeholder="ABCD1234" style={{ width: 'unset' }}
+            value={query} onChange={(e) => setQuery(e.target.value)} />
+        </div>
+
+        <div className="control">
+          <button className={"button is-info " + (isLoading ? 'is-loading' : '')} type="submit" onClick={search}>
+            <span className="icon"><FaSearch></FaSearch></span>
+          </button>
+        </div>
+
+      </div>
+    </form>
+
+    {resultsPresent && <>
+      {/* <div className="has-text-weight-bold my-3">Results</div> */}
+      <div className="columns is-multiline mb-2">
+        {Object.values(results!).slice(0, 20).sort(compareSearchResultSemesters)
+          .map(r => <SearchResult result={r} key={r.course}></SearchResult>)}
+      </div>
+    </>}
+
+    {resultsEmpty && <div className="has-text-weight-bold mb-3 has-text-danger-dark">No results.</div>}
+    {isError && <div className="has-text-weight-bold mb-3 has-text-danger-dark">Error while searching courses.</div>}
+
+    {isDone && results == null && <div className="mb-3">
+      Search for your courses here. You can also include the semester or delivery mode, e.g. &ldquo;MATH1051 S2 EX&rdquo;.
+    </div>}
+  </>;
 };
 
 export default CourseSearcher;

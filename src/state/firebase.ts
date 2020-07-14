@@ -33,6 +33,10 @@ export const userFirestoreDocRef = (userOrUid?: firebase.User | string | null) =
     return firestore.collection('users').doc(uid);
 };
 
+export const mergeData = (oldData: PersistState, newData: PersistState) => {
+    return {...oldData, ...newData, timetables: { ...newData.timetables, ...oldData.timetables }};
+}
+
 export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
     const oldData = await userFirestoreDocRef().get().then(doc => doc.data()) as PersistState;
     
@@ -41,9 +45,5 @@ export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCreden
     const newDocRef = userFirestoreDocRef(newUser.user);
     const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
   
-    if (newData) {
-      newData.timetables = { ...newData.timetables, ...oldData.timetables };
-    }
-  
-    await newDocRef.set(newData ?? oldData);
+    await newDocRef.set(mergeData(oldData ?? {}, newData ?? {}));
   };

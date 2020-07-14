@@ -124,7 +124,7 @@ export const TimetableSelector = () => {
       <div className="control">
         <div className="field is-grouped is-grouped-multiline">
           {_.sortBy(Object.entries(timetables), ([k, v]) => v.name).map(
-            ([id, t]) => <TimetableTag id={id} current={current} timetable={t} onClick={onClickTag}></TimetableTag>
+            ([id, t]) => <TimetableTag id={id} current={current} timetable={t} onClick={onClickTag} key={id}></TimetableTag>
           )}
         </div>
       </div>

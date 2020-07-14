@@ -10,18 +10,21 @@ export enum DayOfWeek {
 export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 export type DayNames = typeof DAY_NAMES;
 
-export type CourseActivity = {
+export type Course = {
     course: string,
+}
+
+export type CourseActivity = Course & {
     activity: string,
     activityType?: string,
     numGroups?: number
 }
 
-export type CourseGroup = CourseActivity & {
+export type CourseActivityGroup = CourseActivity & {
     group: string,
 }
 
-export type CourseEvent = CourseGroup & {
+export type CourseEvent = CourseActivityGroup & {
     description: string, 
 
     dates: string,
@@ -35,7 +38,7 @@ export type CourseEvent = CourseGroup & {
 }
 
 export type SelectedActivities = {
-    [course: string]: { [activity: string]: string | string[] }
+    [course: string]: { [activity: string]: string[] | string }
 }
 
 export type Timetable = {

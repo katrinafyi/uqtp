@@ -1,9 +1,9 @@
 import React from 'react';
-import { CourseGroup } from './state/types';
+import { CourseActivityGroup } from './state/types';
 
 export type HightlightContextType = {
-    highlight: CourseGroup | null,
-    setHighlight: (highlight: CourseGroup | null) => any,
+    highlight: CourseActivityGroup | null,
+    setHighlight: (highlight: CourseActivityGroup | null) => any,
 
     setSelectedGroup: (group: string | null) => any,
 }
