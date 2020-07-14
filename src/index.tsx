@@ -1,21 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { firestore, auth, userFirestoreDocRef } from './state/firebase';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
-import { rootReducer } from './state/store';
 import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
-import { createStore, applyMiddleware } from 'redux';
-import { Provider } from 'react-redux';
 import { migratePeristState } from './state/migrations';
-import thunk from 'redux-thunk';
-import { setUser } from './state/ducks/user';
-import { firebaseMiddleware } from './state/firebaseMiddleware';
-import { setPersistState } from './state/ducks/persist';
-import firebase from 'firebase/app';
-import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
+import { model } from './state/easy-peasy';
+import { createStore, StoreProvider } from 'easy-peasy';
+import { makeFirebaseModel, attachFirebaseListeners } from './state/firebaseSync';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -43,17 +35,19 @@ if (migratedState) {
   saveLocalStorage(migratedState);
 }
 
-const rootStore = createStore(rootReducer, migratedState ?? previousState,
-  makeFirestorePersistEnhancer(auth, userFirestoreDocRef, migratePeristState, DEFAULT_PERSIST, setUser));
+const initialState = migratedState ?? previousState;
 
-rootStore.subscribe(() => {
-  const state = rootStore.getState();
-  saveLocalStorage(state);
-});
+const rootStore = createStore(
+  { ...model, ...makeFirebaseModel() },
+  { initialState }
+);
 
+attachFirebaseListeners(rootStore);
 
 ReactDOM.render(
-  <Provider store={rootStore}><App /></Provider>,
+  <StoreProvider store={rootStore}>
+    <App />
+  </StoreProvider>,
   document.getElementById('root'));
 
 
