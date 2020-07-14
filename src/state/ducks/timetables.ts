@@ -1,7 +1,7 @@
 import { CourseEvent, SelectedActivities, Timetable } from "../types";
 import produce from "immer";
 import _ from "lodash";
-import { makeActivityKey, coerceToArray } from "../../logic/functions";
+import { makeActivityGroupKey, coerceToArray } from "../../logic/functions";
 
 export type TimetableStateAction = {
     type: 'setAllSessions',
@@ -55,10 +55,10 @@ const timetableReducer = (state: Timetable, action: TimetableStateAction) => pro
     
     switch (action.type) {
         case 'setAllSessions':
-            const newActivities = new Set(action.sessions.map(makeActivityKey));
+            const newActivities = new Set(action.sessions.map(makeActivityGroupKey));
             // console.log('newActivities', newActivities);
             const sessions = [...action.sessions,
-                ...state.allSessions.filter(x => !newActivities.has(makeActivityKey(x)))];
+                ...state.allSessions.filter(x => !newActivities.has(makeActivityGroupKey(x)))];
             draft.allSessions = sessions;
             setDefaultGroupsForSessions(draft.selectedGroups, sessions);
             break;

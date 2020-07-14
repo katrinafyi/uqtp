@@ -1,58 +1,57 @@
 import _ from 'lodash';
-import React, { Dispatch, useState, useEffect, useCallback } from 'react';
-import { connect } from 'react-redux';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './App.scss';
 import FileInput from './FileInput';
 import { HighlightContext } from './HightlightContext';
-import { isHighlighted, coerceToArray } from './logic/functions';
+import { isHighlighted, coerceToArray, makeActivityKey } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './MyTimetableHelp';
 import SessionSelectors from './SessionSelectors';
-import { setActivityGroup, setAllSessions, deleteCourse, replaceActivityGroup, setCourseVisibility } from './state/ducks/timetables';
-import { PersistState } from './state/schema';
-import { RootAction } from './state/store';
-import { CourseEvent, CourseGroup, EMPTY_TIMETABLE } from './state/types';
+import { deleteCourse } from './state/ducks/timetables';
+import { CourseEvent, CourseGroup } from './state/types';
 import Timetable from './Timetable';
 import TimetableSelector from './TimetableSelector';
 import CourseSearcher from './CourseSearcher';
+import { useStoreState, useStoreActions } from './state/easy-peasy';
 
 
-type Props = ReturnType<typeof mapStateToProps>
-  & ReturnType<typeof mapDispatchToProps>;
+const Main = () => {
+  const current = useStoreState(s => s.current);
+  const timetable = useStoreState(s => s.timetable.current);
+  const activities = useStoreState(s => s.timetable.currentActivities);
+  const timetables = useStoreState(s => s.timetables);
 
-const Main: React.FC<Props> = ({timetable, activities, current, timetables, dispatch}) => {
-  const [, setFileError] = useState<string>();
+  const replaceActivityGroup = useStoreActions(s => s.timetable.replaceOneSelectedGroup);
+  const updateSessions = useStoreActions(s => s.timetable.updateSessions);
+  
+  const [importError, setImportError] = useState<string | null>(null);
   
   const importFile = async (file: File | undefined) => {
     // ev.preventDefault();
     try {
       const rows = await parseExcelFile(file!); 
       const parsed = parseSheetRows(rows);
+
       if (!parsed) {
-        setFileError("invalid timetable.");
+        setImportError("invalid timetable.");
         return;
       }
 
       //console.log(JSON.stringify(parsed));
-      dispatch(setAllSessions(parsed));
+      updateSessions(parsed);
     } catch (e) {
-      setFileError("error while importing: " + e.toString());
+      setImportError("error while importing: " + e.toString());
       return;
     }
-    setFileError(undefined);
+    setImportError(null);
   };
-
-  const setSelected = useCallback((course: string, activity: string, group: string[]) => {
-    dispatch(setActivityGroup(course, activity, group));
-  }, [dispatch]);
 
   const [highlight, setHighlight] = useState<CourseGroup | null>(null);
   const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
-  const [activityGroups, setActivityGroups] = useState<{[s: string]: CourseEvent[]}>({});
-
-  useEffect(() => {
-    setActivityGroups(_.groupBy(timetable.allSessions, getActivityKey));
-  }, [timetable.allSessions]);
+  
+  const activitiesByGroup = useMemo(
+    () => _.groupBy(timetable.allSessions, makeActivityKey), 
+    [timetable.allSessions]);
 
   useEffect(() => {
     const isSessionSelected = (x: CourseEvent) => 
@@ -61,22 +60,22 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
     setVisibleSessions(timetable.allSessions
     .filter(x => (isSessionSelected(x) && (timetable.courseVisibility?.[x.course] ?? true))
       || isHighlighted(x, highlight))
-    .map(x => ({...x, numGroups: activityGroups[getActivityKey(x)]?.length ?? 0})));
+    .map(x => ({...x, numGroups: activitiesByGroup[makeActivityKey(x)]?.length ?? 0})));
 
-  }, [highlight, activityGroups, timetable.selectedGroups, timetable.allSessions, timetable.courseVisibility]);
+  }, [highlight, timetable.selectedGroups, timetable.allSessions, timetable.courseVisibility, activitiesByGroup]);
 
-  const setSelectedGroup = useCallback((group: string | null) => {
-    if (highlight == null) throw new Error('setting highlight group but nothing is highlighted.');
-    if (group != null)
-      dispatch(replaceActivityGroup(highlight.course, highlight.activity, highlight.group, group));
-  }, [highlight, dispatch]);
+  const selectHighlightedGroup = useCallback((group: string | null) => {
+    if (highlight == null) {
+      throw new Error('setting highlight group but nothing is highlighted.');
+    }
 
-  const setVisibility = useCallback((c: string, v: boolean) => {
-    dispatch(setCourseVisibility(c, v));
-  }, [dispatch])
+    const {course, activity, group: old} = highlight;
+    if (group != null) {
+      replaceActivityGroup({course, activity, old, new: group});
+    }
+  }, [highlight, replaceActivityGroup]);
 
-  // returns a string like CSSE2310|PRA1
-  const getActivityKey = (s: CourseEvent) => s.course + '|' + s.activity;
+  
 
   // console.log(visibleSessions);
 
@@ -86,8 +85,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
         {/* <div className="message is-warning is-small"><div className="message-body">
             Managing multiple timetables is currently <strong>not supported</strong>. The buttons below do nothing.
         </div></div> */}
-        <TimetableSelector timetables={timetables} current={current}
-          dispatch={dispatch}></TimetableSelector>
+        <TimetableSelector></TimetableSelector>
         <hr></hr>
 
         <h4 className="title is-4">Search Courses</h4>
@@ -101,6 +99,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
               <FileInput className="control" fileName={""} setFile={importFile}></FileInput>
             </div>
           </form>
+          {importError && <div className="has-text-weight-bold my-2 has-text-danger-dark">{importError}</div>}
           <p className="mb-2">
             If you can't find your courses by searching, you can manually import specific classes from the
             <a href="https://timetable.my.uq.edu.au/even/timetable/#subjects" target="_blank" rel="noopener noreferrer"> UQ Public Timetable</a>.
@@ -114,7 +113,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
             Changes to your selected classes are saved automatically. 
         </div></div> */}
 
-        <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup}}>
+        <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup: selectHighlightedGroup}}>
           {/* <h4 className="title is-4">Selected Classes</h4> */}
           <SessionSelectors allActivities={activities} visibility={timetable.courseVisibility}
             selected={timetable.selectedGroups} setSelected={setSelected}
@@ -137,20 +136,4 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
   ;
 }
 
-const mapStateToProps = (state: PersistState) => {
-  const timetable = state.timetables[state.current] ?? EMPTY_TIMETABLE;
-
-  return {
-    timetable,
-    current: state.current,
-    timetables: state.timetables,
-    activities: _(timetable.allSessions)
-      .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
-      .uniqWith(_.isEqual).value(),
-  }
-};
-
-const mapDispatchToProps = (dispatch: Dispatch<RootAction>) =>
-  ({ dispatch });
-
-export default connect(mapStateToProps, mapDispatchToProps)(Main);
+export default Main;

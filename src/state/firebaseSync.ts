@@ -12,7 +12,7 @@ export type FirebaseModel = {
   }
 }
 
-const instance = v4();
+export const instance = v4();
 export const FIREBASE_MODEL_DEFAULT = {
   instance: instance,
   timestamp: 0,
@@ -26,7 +26,7 @@ export const makeFirebaseModel = () => {
       ...FIREBASE_MODEL_DEFAULT,
       
       setState: action((oldState, state) => {
-        if (oldState.firebase.instance === state.firebase.instance) {
+        if (instance === state.firebase.instance) {
           console.info("received state from same instance, ignoring.");
           return;
         }

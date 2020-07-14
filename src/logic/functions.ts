@@ -1,5 +1,6 @@
 import { CourseEvent, CourseActivity, CourseGroup } from "../state/types";
 import _ from "lodash";
+import { memo } from "easy-peasy";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     const byDayTime = _.range(7)
@@ -107,7 +108,18 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
     return 0;
 }
 
-export const makeActivityKey = (session: CourseEvent) =>
+export const getCourseGroups = memo((events: CourseEvent[]) => {
+    console.log("computing getCourseGroups for ", events);
+    return _(events)
+        .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseGroup)
+        .uniqWith(_.isEqual).value();
+}, 10);
+
+// returns a string like CSSE2310|PRA1
+export const makeActivityKey = (session: CourseEvent) => 
+    session.course + '|' + session.activity;
+
+export const makeActivityGroupKey = (session: CourseEvent) =>
     [session.course, session.activity, session.group].join('|');
 
 export const makeSessionKey = (session: CourseEvent) => 
