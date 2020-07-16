@@ -1,4 +1,4 @@
-import { Action, State, action, Store } from "easy-peasy"
+import { Action, State, action, Store, ThunkOn, Thunk, thunk } from "easy-peasy"
 import { v4 } from "uuid"
 import { auth, userFirestoreDocRef, mergeData } from "./firebase";
 
@@ -9,7 +9,8 @@ export type FirebaseMeta = {
 }
 
 export type FirebaseModel = FirebaseMeta & {
-  setState: Action<FirebaseModel, FirebaseMeta>,
+  setStateFromFirebase: Action<FirebaseModel, FirebaseMeta>,
+  uploadStateToFirebase: Thunk<FirebaseModel, FirebaseModel>,
 }
 
 export const instance = v4();
@@ -30,8 +31,8 @@ export const makeFirebaseModel = () => {
   const model: FirebaseModel = {
     ...FIREBASE_META_DEFAULT,
     
-    setState: action((oldState, payload) => {
-      debugger;
+    setStateFromFirebase: action((oldState, payload) => {
+      // debugger;
       if (payload.__instance == null) {
         console.warn("received state missing firebase metadata, merging.");
         // @ts-ignore
@@ -55,6 +56,16 @@ export const makeFirebaseModel = () => {
 
       console.info('local state is newer than remote, keeping.');
       return;
+    }),
+
+    uploadStateToFirebase: thunk(async (actions, payload) => {
+      console.log("upload state to firebase called...");
+      if (payload.__uid == null) {
+        console.warn("refusing to upload null user.");
+        return;
+      }
+      
+      await userFirestoreDocRef(payload.__uid).set(payload);
     }),
   };
 
@@ -82,7 +93,8 @@ export const attachFirebaseListeners = <C>(store: Store<FirebaseModel, C>) => {
         if (doc?.exists) {
           // previous data exists. load from online.
           const data = doc.data()! as FirebaseModel;
-          store.getActions().setState({ ...FIREBASE_META_DEFAULT, ...data });
+          // debugger;
+          store.getActions().setStateFromFirebase({ ...FIREBASE_META_DEFAULT, ...data });
         } else {
           // no previous data exists. upload our data.
           document!.set({ ...store.getState(), ...updateFirebaseMeta()});
@@ -92,13 +104,13 @@ export const attachFirebaseListeners = <C>(store: Store<FirebaseModel, C>) => {
     } else {
       document = null;
       // new user state is signed out. delete data.
-      store.getActions().setState(FIREBASE_META_DEFAULT);
+      store.getActions().setStateFromFirebase(FIREBASE_META_DEFAULT);
     }
   });
 
   store.subscribe(() => {
     // @ts-ignore
-    console.log("subscribe listener called. meta: ", store.getState()?.firebase);
-    document?.set({ ...store.getState(), ...updateFirebaseMeta()});
+    console.log("subscribe listener called, uploading state. meta: ", store.getState()?.firebase);
+    // document?.set({ ...store.getState(), ...updateFirebaseMeta()});
   });
 };
