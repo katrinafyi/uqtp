@@ -17,9 +17,7 @@
   text-align: left;
   line-height: 1.2;
 
-  max-width: none;
-  width: auto;
-  min-width: 100%;
+  max-width: 100%;
 
   white-space: pre-wrap;
   justify-content: left;
@@ -43,10 +41,16 @@
   // grid-auto-rows: min-content;
 
   // grid-auto-flow: column;
+  width: auto;
   min-width: 70rem;
   max-width: 80rem;
   table-layout: fixed;
-  width: 100%;
+  
+  // has the effect of width: 100%, which was broken on safari.
+  // max-width: none;
+  // width: auto;
+  // min-width: 100%;
+
   // height: 42rem;
 
   border: 1px solid $border-light;
