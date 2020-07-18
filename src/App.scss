@@ -41,19 +41,18 @@
   // grid-auto-rows: min-content;
 
   // grid-auto-flow: column;
-  width: auto;
-  min-width: 70rem;
-  max-width: 80rem;
+  // width: 100%;
+  // max-width: 80rem;
   table-layout: fixed;
   
   // has the effect of width: 100%, which was broken on safari.
-  // max-width: none;
-  // width: auto;
+  // max-width: 100%;
+  width: 100%;
   // min-width: 100%;
 
   // height: 42rem;
 
-  border: 1px solid $border-light;
+  // border: 1px solid $border-light;
 }
 
 .timetable th {
@@ -63,19 +62,25 @@
 .timetable thead th {
   border-width: 0;
   padding-left: 1.25rem;
+  @media screen and (max-width: $tablet) {
+    padding-left: 0.2rem;
+  }
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .timetable .col-day {
-  width: calc( ( 100% - 3rem ) / 5 );
+  width: calc( ( 100% - 2rem ) / 5 );
   // padding-left: 0.25rem;
   // padding-right: 0.25rem;
 }
 
 .timetable .col-time {
-  width: 3rem;
+  width: 2rem;
   line-height: 1;
   padding-right: 0.25rem;
-  // padding-top: 0.0rem;
+  // padding-top: 0.1rem;
   // vertical-align: middle;
 }
 
@@ -83,6 +88,10 @@
   & > * {
     height: 3.5rem;
     // overflow-x: hidden;
+  }
+  @media screen and (max-width: $tablet) {
+    padding: 0.2rem 0.1rem;
+    font-size: 80%;
   }
 }
 
@@ -128,6 +137,7 @@
 .hour {
   padding-top: 0;
   padding-bottom: 0;
+
   line-height: 1;
 
   height: 100%;
@@ -142,7 +152,10 @@
 .session {
   font-size: 85%;
 
-  padding: 0.5em 0.25rem;
+  padding: 0.5rem 0.25rem;
+  @media screen and (max-width: $tablet) {
+    padding: 0.2rem 0.05rem;
+  }
 
   & > * {
     margin: 0 0.25rem;
