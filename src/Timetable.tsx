@@ -6,6 +6,9 @@ import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, for
 import { HighlightContext } from './HightlightContext';
 import { FaLock } from 'react-icons/fa';
 
+// @ts-ignore
+import LongPress from 'react-long';
+
 export type Props = {
     selectedSessions: CourseEvent[],
 }
@@ -62,9 +65,9 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
     };
 
     const s = session;
-    const text = `${s.course}\n${s.activity} ${s.group}\n${formatTime(s.time)} - ${formatTime(sessionEndTime(s))} (${s.duration} minutes)\n${s.location}`;
+    const text = `${s.course}\n${s.activity} ${s.group}\n${DAY_NAMES[session.day]} ${formatTime(s.time)} - ${formatTime(sessionEndTime(s))} (${s.duration} minutes)\n${s.location}`;
 
-    return (
+    return <LongPress time={500} onLongPress={() => alert(text)}>
     <div className={highlightClass + " session cell " + positionClass} onClick={onClick}
             style={positionStyle} title={text}>
         <span className="has-text-weight-medium">
@@ -78,7 +81,8 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         </span>
         <br/>
         <span className="is-no-wrap">{session.location.split(' - ')[0]}</span>
-    </div>);
+    </div>
+    </LongPress>;
 });
 
 const makeHeaderCells = () => {
