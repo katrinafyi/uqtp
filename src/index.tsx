@@ -9,6 +9,7 @@ import { model } from './state/easy-peasy';
 import { createStore, StoreProvider } from 'easy-peasy';
 import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
 import { userFirestoreDocRef, auth } from './state/firebase';
+import _ from 'lodash';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -48,11 +49,11 @@ const rootStore = createStore(model,
 
 // attachFirebaseListeners(rootStore);
 
-rootStore.subscribe(() => {
+rootStore.subscribe(_.throttle(() => {
   const s = rootStore.getState();
  //console.log("subscribed to state: ", s);
   saveLocalStorage(s);
-})
+}, 2000));
 
 ReactDOM.render(
   <StoreProvider store={rootStore}>
