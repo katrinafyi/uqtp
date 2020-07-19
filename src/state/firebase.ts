@@ -39,6 +39,9 @@ export const mergeData = (oldData: PersistState, newData: PersistState) => {
 
 export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
     const oldUser = auth.currentUser;
+
+    console.log("merging data from accounts:", oldUser, newCredential);    
+
     const oldDocRef = userFirestoreDocRef(oldUser);
     if (!oldDocRef) {
         return;

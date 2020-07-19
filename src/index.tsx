@@ -7,10 +7,8 @@ import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
 import { model } from './state/easy-peasy';
 import { createStore, StoreProvider } from 'easy-peasy';
-import { makeFirebaseModel, attachFirebaseListeners, FIREBASE_META_DEFAULT } from './state/firebaseSync';
 import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
 import { userFirestoreDocRef, auth } from './state/firebase';
-import { setUser } from './state/ducks/user';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -45,15 +43,15 @@ const firestoreEnhancer = makeFirestorePersistEnhancer(
   auth, userFirestoreDocRef, '@action.setState', ['@action.setUser'],
   DEFAULT_PERSIST, migratePeristState);
 
-const rootStore = createStore(
-  model,
-  { initialState, enhancers: [firestoreEnhancer] }
-);
+const rootStore = createStore(model, 
+  { initialState, enhancers: [firestoreEnhancer] });
 
 // attachFirebaseListeners(rootStore);
 
 rootStore.subscribe(() => {
-  saveLocalStorage(rootStore.getState());
+  const s = rootStore.getState();
+  console.log("subscribed to state: ", s);
+  saveLocalStorage(s);
 })
 
 ReactDOM.render(
