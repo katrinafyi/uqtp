@@ -2,6 +2,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import { PersistState } from './schema';
+import 'firebase/analytics';
 
 export const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -18,6 +19,7 @@ firebase.initializeApp(firebaseConfig);
 // export const database = firebase.database();
 export const firestore = firebase.firestore();
 export const auth = firebase.auth();
+firebase.analytics();
 
 export const userFirestoreDocRef = (userOrUid: firebase.User | string | null) => {
     if (userOrUid == null)

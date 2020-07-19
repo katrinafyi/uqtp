@@ -1,10 +1,13 @@
 import React, { memo, useContext } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from './state/types';
-import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted } from './logic/functions';
+import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime } from './logic/functions';
 
 import { HighlightContext } from './HightlightContext';
 import { FaLock } from 'react-icons/fa';
+
+// @ts-ignore
+import LongPress from 'react-long';
 
 export type Props = {
     selectedSessions: CourseEvent[],
@@ -61,10 +64,11 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         top: `${topPercent}%`, 
     };
 
-    const text = `${session.course}\n${session.activity} ${session.group}\n${session.location}\n${session.duration} minutes`;
+    const s = session;
+    const text = `${s.course}\n${s.activity} ${s.group}\n${DAY_NAMES[session.day]} ${formatTime(s.time)} - ${formatTime(sessionEndTime(s))} (${s.duration} minutes)\n${s.location}`;
 
-    return (
-    <div className={highlightClass + " session " + positionClass} onClick={onClick}
+    return <LongPress time={500} onLongPress={() => alert(text)}>
+    <div className={highlightClass + " session cell " + positionClass} onClick={onClick}
             style={positionStyle} title={text}>
         <span className="has-text-weight-medium">
             {getCourseCode(session.course)}
@@ -77,27 +81,28 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
         </span>
         <br/>
         <span className="is-no-wrap">{session.location.split(' - ')[0]}</span>
-    </div>);
+    </div>
+    </LongPress>;
 });
 
 const makeHeaderCells = () => {
     return [
-        <th key="ht" className={"th thead has-text-right col-time"}></th>,
-        ...DAY_NAMES.slice(0, 5).map(d => <th key={d} className="th is-size-5 col-day">{d}</th>)
+        <div key="ht" className={"th thead has-text-right col-time cell"}></div>,
+        ...DAY_NAMES.slice(0, 5).map(d => <div key={d} className="th col-day cell"><b>{d}</b></div>)
     ];
 }
 
 const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
-    h => <th key={"t"+h} className={`th has-text-right is-size-5 col-time`}>{h}</th>
+    h => <div key={"t"+h} className={`th cell has-text-right col-time`}><b>{h}</b></div>
 );
 
 const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
     return _.range(START_HOUR, END_HOUR+1).map((h, i) =>
-    <td className={"td py-0 col-day"} key={`day:${day},hour:${h}`}>
+    <div className={"td py-0 col-day"} key={`day:${day},hour:${h}`}>
         <div className="hour">
         {daySessions[h].map((s, i) => 
             (s == null || s.time.hour !== h)
-            ? <div className="session empty" key={"empty-" + i}
+            ? <div className="session cell empty" key={"empty-" + i}
                 style={{width: `${100/daySessions[h].length}%`}}></div>
             : <TimetableSession key={makeSessionKey(s)} 
                     hour={h} session={s} clash={daySessions[h].length > 1}
@@ -107,7 +112,7 @@ const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
                     numInHour={daySessions[h].length}/>
         )}
         </div>
-    </td>);
+    </div>);
 };
 
 const Timetable: React.FC<Props> = ({selectedSessions}) => {
@@ -118,19 +123,13 @@ const Timetable: React.FC<Props> = ({selectedSessions}) => {
     // dayCells[d][h]
     const dayCells = _.range(5).map(i => makeDayCells(i, byDayTime[i]));
 
-    return <div className="table-container">
-        <table className="table timetable">
-            <thead>
-                <tr>{makeHeaderCells()}</tr>
-            </thead>
-            <tbody>
-                {_.range(START_HOUR, END_HOUR+1).map((h, i) => 
-                <tr key={h}>
-                    {timeCells[i]}
-                    {dayCells.map(day => day[i])}
-                </tr>)}
-            </tbody>
-        </table>
+    return <div className="timetable">
+        {makeHeaderCells()}
+        {_.range(START_HOUR, END_HOUR+1).map((h, i) => 
+        <React.Fragment key={h}>
+            {timeCells[i]}
+            {dayCells.map(day => day[i])}
+        </React.Fragment>)}
     </div>;
 };
 

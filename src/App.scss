@@ -2,6 +2,10 @@
 
 // $border-light: #ededed;
 
+.mdl-button.firebaseui-idp-anonymous { 
+  margin-bottom: 0.75rem;
+}
+
 .bordered {
   box-shadow: none;
   border: 1px solid $border;
@@ -14,97 +18,37 @@
   line-height: 1.2;
 
   max-width: 100%;
+
   white-space: pre-wrap;
   justify-content: left;
 }
 
 .session-selector {
-  & .message-body {
-    border: 1px solid lightgrey;
-    border-top: none;
+  & .message-header {
+    // background-color: $white-ter;
+    // color: $black;
+    // border-bottom: 1px solid lightgrey;
   }
+
+  border: 1px solid lightgrey;
+
+  // background-color: transparent;
 }
 
 // https://codepen.io/davidelrizzo/pen/GobVLe
 // https://codepen.io/davidelrizzo/pen/eJwqzp
 .timetable {
-  // display: grid;
-  // grid-template-columns: 4rem;
-  // grid-template-rows: min-content repeat(11, min-content);
-  
-  // grid-auto-columns: 1fr;
-  // grid-auto-rows: min-content;
+  // max-width: 70rem;
 
-  // grid-auto-flow: column;
-  min-width: 70rem;
-  max-width: 80rem;
-  table-layout: fixed;
-  width: 100%;
-  // height: 42rem;
-
-  border: 1px solid $border-light;
-}
-
-.timetable th {
-  font-weight: normal;
-}
-
-.timetable thead th {
-  border-width: 0;
-  padding-left: 1.25rem;
-}
-
-.timetable .col-day {
-  width: calc( ( 100% - 3rem ) / 5 );
-  // padding-left: 0.25rem;
-  // padding-right: 0.25rem;
-}
-
-.timetable .col-time {
-  width: 3rem;
-  line-height: 1;
-  padding-right: 0.25rem;
-  // padding-top: 0.0rem;
-  // vertical-align: middle;
-}
-
-.timetable td, .timetable th {
-  & > * {
-    height: 3.5rem;
-    // overflow-x: hidden;
+  display: grid;
+  grid-template-columns: min-content repeat(5, minmax(0, 1fr));
+  grid-template-rows: 2rem;
+  grid-auto-rows: 3rem;
+  column-gap: 0.15rem;
+  @media screen and (min-width: $tablet) {
+    column-gap: 1rem;
   }
 }
-
-.timetable tbody {
-  & td, & th {
-    background: linear-gradient(to bottom, $border-light 1px, transparent 1px),
-    linear-gradient(to top, $border-light 1px, transparent 1px);
-    // border-top: 1px dashed $border-light;
-    border-width: 0;
-  }
-}
-
-
-// @media screen and (max-width: $tablet) {
-//   .timetable {
-//     grid-template-columns: 4rem 1fr;
-//     grid-auto-flow: row;
-    
-//     & > td, & > th {
-//       width: 100%;
-//     }
-
-//     &.is-bordered > .col-time {
-//       margin-left: 0;
-//     }
-//   }
-//   .rtable-spacer {
-//     display: block;
-//     margin-bottom: $block-spacing;
-//   }
-  
-// }
-
 
 .is-no-wrap {
   white-space: nowrap;
@@ -114,27 +58,32 @@
   cursor: pointer;
 }
 
-.hour {
-  padding-top: 0;
-  padding-bottom: 0;
+.cell {
+  padding: 0.3rem 0.3rem;
   line-height: 1;
-
-  height: 100%;
-  width: 100%;
-
-  overflow-y: visible;
+  font-size: 0.95rem;
+  @media screen and (max-width: $tablet) {
+    padding: 0.15rem;
+    font-size: 0.75rem;
+  }
+  overflow: hidden;
+  // white-space: nowrap;
+  // text-overflow: ellipsis;
 }
 
-.sessionType {
+.hour {
+  height: 100%;
+  overflow-y: visible;
+  background: linear-gradient(to top, $border-light 0px 1px, transparent 1px),
+    linear-gradient(to bottom, $border-light 0px 1px, transparent 1px),;
 }
 
 .session {
-  font-size: 85%;
 
-  padding: 0.5em 0.25rem;
+  // margin: 0 -0.25rem;
 
   & > * {
-    margin: 0 0.25rem;
+    // margin: 0 0.25rem;
   }
 
   // margin: 0 0.25rem;
@@ -144,8 +93,6 @@
   vertical-align: top;
   // float: left;
 
-  flex-grow: 1;
-  flex-basis: 0;
   // word-break: keep-all;
   
   height: 100%;
@@ -173,7 +120,7 @@
   // box-sizing: border-box;
 
   border-radius: 0px;
-  background-color: hsl(0, 0%, 98%);
+  background-color: $white-bis;
   
   // color: black;
 

@@ -1,4 +1,4 @@
-import { CourseEvent, CourseActivity, CourseActivityGroup } from "../state/types";
+import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
 
@@ -118,6 +118,19 @@ export const getCourseGroups = memo((events: CourseEvent[]) => {
 // returns a string like CSSE2310|PRA1
 export const makeActivityKey = (session: CourseEvent) => 
     session.course + '|' + session.activity;
+
+export const sessionEndTime = (e: CourseEvent) => {
+    const endMinutes = e.time.hour * 60 + e.time.minute + e.duration;
+    return { 
+        hour: Math.floor(endMinutes / 60),
+        minute: endMinutes % 60,
+    };
+}
+
+export const formatTime = (t: ClockTime) => {
+    const d = new Date(2020, 1, 1, t.hour, t.minute);
+    return d.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric'});
+}
 
 export const makeActivityGroupKey = (session: CourseEvent) =>
     [session.course, session.activity, session.group].join('|');
