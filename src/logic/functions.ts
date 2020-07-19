@@ -1,5 +1,6 @@
-import { CourseEvent, CourseActivity, CourseGroup, ClockTime } from "../state/types";
+import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime } from "../state/types";
 import _ from "lodash";
+import { memo } from "easy-peasy";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     const byDayTime = _.range(7)
@@ -22,7 +23,7 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
                     byDayTime[currentDay][r + currentHour][c] = matrix[r][c]; //c === 0 ? matrix[r][c] : null;
                 }
             }
-            // console.log('flushed matrix', matrix);
+           //console.log('flushed matrix', matrix);
 
             if (next != null) {
                 currentDay = next.day;
@@ -79,7 +80,7 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
 
 
     // sessions.forEach(session => {
-    //     console.log(session);
+    //    //console.log(session);
     //     // we know the event starts somewhere in this hour.
     //     byDayTime[session.day][session.time.hour].push(session);
     //     // start time of event, in minutes past midnight
@@ -88,8 +89,8 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     //     const endHour = session.time.hour * 60 + session.time.minute + session.duration;
     //     for (let i = session.time.hour + 1; i * 60 < endHour; i++) {
     //         if (i >= 24) throw new Error('event has continued into next day. unsupported!');
-    //         // console.log(session);
-    //         // console.log('continued into hour ' + i);
+    //        //console.log(session);
+    //        //console.log('continued into hour ' + i);
             
     //         byDayTime[session.day][i].push(session);
     //     }
@@ -105,7 +106,18 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
     if (a.time.minute !== b.time.minute)
         return a.time.minute - b.time.minute;
     return 0;
-}
+};
+
+export const getCourseGroups = memo((events: CourseEvent[]) => {
+   //console.log("computing getCourseGroups for ", events);
+    return _(events)
+        .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseActivityGroup)
+        .uniqWith(_.isEqual).value();
+}, 10);
+
+// returns a string like CSSE2310|PRA1
+export const makeActivityKey = (session: CourseEvent) => 
+    session.course + '|' + session.activity;
 
 export const sessionEndTime = (e: CourseEvent) => {
     const endMinutes = e.time.hour * 60 + e.time.minute + e.duration;
@@ -120,7 +132,7 @@ export const formatTime = (t: ClockTime) => {
     return d.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric'});
 }
 
-export const makeActivityKey = (session: CourseEvent) =>
+export const makeActivityGroupKey = (session: CourseEvent) =>
     [session.course, session.activity, session.group].join('|');
 
 export const makeSessionKey = (session: CourseEvent) => 
@@ -128,8 +140,8 @@ export const makeSessionKey = (session: CourseEvent) =>
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 
-export const isHighlighted = (session: CourseGroup, highlight: CourseActivity | null) => 
+export const isHighlighted = (session: CourseActivityGroup, highlight: CourseActivity | null) => 
     session.course === highlight?.course && session.activity === highlight.activity;
 
-export const coerceToArray = <T>(arg: T | T[]) => 
+export const coerceToArray = <T>(arg?: T | T[]) => 
     arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);

@@ -2,43 +2,24 @@ import React, { useState, useEffect } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
-import { setPersistState } from './state/ducks/persist';
-import { setUser } from './state/ducks/user';
-import StateErrorBoundary from './StateErrorBoundary';
+import StateErrorBoundary from './components/StateErrorBoundary';
 import Main from './Main';
-import { PersistState } from './state/schema';
-import { connect } from 'react-redux';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
-import { auth, userFirestoreDocRef } from './state/firebase';
-import { NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
+import { auth, userFirestoreDocRef, mergeAnonymousData } from './state/firebase';
+import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
-import { UserInfoView } from './UserInfoView';
+import UserInfoView from './components/UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import { useStoreState, useStoreActions } from './state/easy-peasy';
 
 
-const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
-  const oldData = await userFirestoreDocRef().get().then(doc => doc.data()) as PersistState;
-  
-  const newUser = await auth.signInWithCredential(newCredential);
-  
-  const newDocRef = userFirestoreDocRef(newUser.user);
-  const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
+const App = () => {
+  const user = useStoreState(s => s.user);
+  const setUser = useStoreActions(s => s.setUser);
 
-  if (newData) {
-    newData.timetables = { ...newData.timetables, ...oldData.timetables };
-  }
-
-  await newDocRef.set(newData ?? oldData);
-};
-
-
-type Props = ReturnType<typeof mapStateToProps>
-  & typeof dispatchProps;
-
-const App = ({ user, setUser }: Props) => {
   const [authUser, authLoading, authError] = useAuthState(auth);
   const showMainSignIn = authUser == null;
-  // console.log({authUser, authLoading, authError});
+ //console.log({authUser, authLoading, authError});
 
   const [showSignInModal, setShowSignIn] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
@@ -48,8 +29,9 @@ const App = ({ user, setUser }: Props) => {
     setShowSignIn(false);
 
     try {
-      if (user?.isAnon ?? false)
-        await userFirestoreDocRef().delete();
+      const ref = userFirestoreDocRef(user?.uid ?? null);
+      if ((user?.isAnon ?? false) && ref)
+        await ref.delete();
     } catch (e) {
       console.error('failed to delete anonymous data', e);
     }
@@ -105,7 +87,7 @@ const App = ({ user, setUser }: Props) => {
           </div>
         </div>
       </div>}>
-      <UserInfoView></UserInfoView>
+      {user && <UserInfoView></UserInfoView>}
     </ModalCard>
     <div className="hero is-dark">
       <div className="hero-body">
@@ -162,15 +144,4 @@ const App = ({ user, setUser }: Props) => {
   ;
 }
 
-const mapStateToProps = (state: PersistState) => {
-  return {
-    user: state.user
-  }
-}
-
-const dispatchProps = ({
-  setPersistState,
-  setUser
-});
-
-export default connect(mapStateToProps, dispatchProps)(App);
+export default App;

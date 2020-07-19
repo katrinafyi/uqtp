@@ -68,3 +68,10 @@ export const searchCourses = async (query: string): Promise<FullSearchResult> =>
   }
   return response;
 };
+
+export const compareSearchResultSemesters = (a: CourseSearchResult, b: CourseSearchResult) => {
+  let x = a.semester.localeCompare(b.semester);
+  if (x !== 0) return x;
+  x = a.course.localeCompare(b.course);
+  return x;
+};

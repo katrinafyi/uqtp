@@ -1,4 +1,4 @@
-import { auth } from "./state/firebase";
+import { auth } from "../state/firebase";
 import React, { useEffect } from "react";
 import firebase from "firebase/app";
 import 'firebase/auth';
@@ -31,7 +31,7 @@ export const getFirebaseUIConfig =
     callbacks: {
       // Avoid redirects after sign-in.
       signInSuccessWithAuthResult: (userCredential) => {
-        // console.log(userCredential);
+       //console.log(userCredential);
         return signInSuccess?.(userCredential) ?? false;
       },
       signInFailure: async (error) => {

@@ -1,6 +1,6 @@
 {
   "name": "uqtp",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "license": "Apache-2.0",
   "dependencies": {
@@ -13,7 +13,9 @@
     "@types/react-dom": "^16.9.8",
     "a11y-react-emoji": "^1.1.2",
     "bulma": "^0.9.0",
+    "classnames": "^2.2.6",
     "date-fns": "^2.14.0",
+    "easy-peasy": "^3.3.1",
     "firebase": "^7.15.5",
     "firebaseui": "^4.5.2",
     "immer": "^5.3.6",
@@ -30,6 +32,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "typescript": "^3.9.6",
+    "unstated-next": "^1.1.0",
     "uuid": "^3.4.0",
     "xlsx": "^0.15.6"
   },
@@ -55,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.10",
     "@types/lodash": "^4.14.157",
     "@types/react-redux": "^7.1.9",
     "@types/uuid": "^3.4.9"

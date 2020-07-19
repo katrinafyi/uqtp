@@ -1,13 +1,15 @@
 import React, { memo, useContext } from 'react';
 import _ from 'lodash';
-import { CourseEvent, DAY_NAMES } from './state/types';
-import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime } from './logic/functions';
+import { CourseEvent, DAY_NAMES } from '../state/types';
+import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime } from '../logic/functions';
 
 import { HighlightContext } from './HightlightContext';
 import { FaLock } from 'react-icons/fa';
 
 // @ts-ignore
 import LongPress from 'react-long';
+
+import './Timetable.scss';
 
 export type Props = {
     selectedSessions: CourseEvent[],
