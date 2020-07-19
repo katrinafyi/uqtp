@@ -1,7 +1,10 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { CourseActivityGroup, CourseActivity, Course } from './state/types';
 import { coerceToArray } from './logic/functions';
 import { useStoreActions, useStoreState } from './state/easy-peasy';
+import { searchCourses } from './logic/api';
+import { FaSyncAlt, FaCheck, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
+import classNames from 'classnames';
 
 const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActivityGroup & { selected: boolean }) => {
   const setOneSelectedGroup = useStoreActions(s => s.setOneSelectedGroup);
@@ -51,6 +54,10 @@ const ActivityGroupSelector = ({ course, activity }: CourseActivity) => {
   );
 };
 
+enum UpdatingState {
+  IDLE, UPDATING, DONE, ERROR
+}
+
 
 const CourseSessionSelector = ({ course }: Course) => {
 
@@ -59,6 +66,7 @@ const CourseSessionSelector = ({ course }: Course) => {
 
   const setCourseVisibility = useStoreActions(s => s.setCourseVisibility);
   const deleteCourse = useStoreActions(s => s.deleteCourse);
+  const updateSessions = useStoreActions(s => s.updateSessions);
   
   const setVisibleCallback = useCallback(() => {
     setCourseVisibility({ course, visible: !visible });
@@ -71,6 +79,44 @@ const CourseSessionSelector = ({ course }: Course) => {
   // console.log(activities);
   const activityTypes = useMemo(() => Object.keys(activities), [activities]);
 
+
+  const [updating, setUpdating] = useState<UpdatingState>(UpdatingState.IDLE);
+  const [updateError, setUpdateError] = useState('');
+
+  const update = async () => {
+    try {
+        setUpdating(UpdatingState.UPDATING);
+        setUpdateError('');
+        const results = Object.values(await searchCourses(course));
+        if (results.length !== 1) {
+            throw new Error(`Found ${results.length} courses matching ${course}.`);
+        }
+        updateSessions(results[0].activities);   
+        setUpdating(UpdatingState.DONE);         
+    } catch (e) {
+        setUpdateError(e.toString());
+        setUpdating(UpdatingState.ERROR);
+        console.error(e);
+    }
+  }
+
+  let icon = null;
+  let iconClass = null;
+  switch (updating) {
+    case UpdatingState.IDLE:
+      icon = <FaSyncAlt></FaSyncAlt>;
+      break;
+    case UpdatingState.UPDATING:
+      iconClass = 'is-loading';
+      break;
+    case UpdatingState.DONE:
+      icon = <FaCheck></FaCheck>;
+      break;
+    case UpdatingState.ERROR:
+      icon = <FaExclamationTriangle></FaExclamationTriangle>;
+      iconClass = 'is-danger';
+  }
+
   return (
     <div className="message session-selector">
 
@@ -80,7 +126,20 @@ const CourseSessionSelector = ({ course }: Course) => {
             onChange={setVisibleCallback}
           ></input> {course}
         </label>
-        <button className="delete" type="button" onClick={deleteCourseCallback}></button>
+        <p className="buttons">
+          <button className={classNames('button is-small is-dark', iconClass)} type="button"
+            title={updateError || "Update this course"} onClick={update}>
+            <span className="icon is-small">
+              {icon}
+            </span>
+          </button>
+          <button className="button is-small is-dark" type="button"
+            title="Delete this course" onClick={deleteCourseCallback}>
+            <span className="icon is-small">
+              <FaTimes></FaTimes>
+            </span>
+          </button>
+        </p>
       </div>
 
       <div className="message-body">

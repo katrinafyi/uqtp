@@ -13,6 +13,7 @@
     "@types/react-dom": "^16.9.8",
     "a11y-react-emoji": "^1.1.2",
     "bulma": "^0.9.0",
+    "classnames": "^2.2.6",
     "date-fns": "^2.14.0",
     "easy-peasy": "^3.3.1",
     "firebase": "^7.15.5",
@@ -57,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "@types/classnames": "^2.2.10",
     "@types/lodash": "^4.14.157",
     "@types/react-redux": "^7.1.9",
     "@types/uuid": "^3.4.9"
