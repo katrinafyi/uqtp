@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
-import StateErrorBoundary from './StateErrorBoundary';
+import StateErrorBoundary from './components/StateErrorBoundary';
 import Main from './Main';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth, userFirestoreDocRef, mergeAnonymousData } from './state/firebase';
-import { NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
+import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
-import UserInfoView from './UserInfoView';
+import UserInfoView from './components/UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useStoreState, useStoreActions } from './state/easy-peasy';
 
