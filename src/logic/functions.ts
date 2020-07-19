@@ -23,7 +23,7 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
                     byDayTime[currentDay][r + currentHour][c] = matrix[r][c]; //c === 0 ? matrix[r][c] : null;
                 }
             }
-            // console.log('flushed matrix', matrix);
+           //console.log('flushed matrix', matrix);
 
             if (next != null) {
                 currentDay = next.day;
@@ -80,7 +80,7 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
 
 
     // sessions.forEach(session => {
-    //     console.log(session);
+    //    //console.log(session);
     //     // we know the event starts somewhere in this hour.
     //     byDayTime[session.day][session.time.hour].push(session);
     //     // start time of event, in minutes past midnight
@@ -89,8 +89,8 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     //     const endHour = session.time.hour * 60 + session.time.minute + session.duration;
     //     for (let i = session.time.hour + 1; i * 60 < endHour; i++) {
     //         if (i >= 24) throw new Error('event has continued into next day. unsupported!');
-    //         // console.log(session);
-    //         // console.log('continued into hour ' + i);
+    //        //console.log(session);
+    //        //console.log('continued into hour ' + i);
             
     //         byDayTime[session.day][i].push(session);
     //     }
@@ -109,7 +109,7 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
 };
 
 export const getCourseGroups = memo((events: CourseEvent[]) => {
-    console.log("computing getCourseGroups for ", events);
+   //console.log("computing getCourseGroups for ", events);
     return _(events)
         .map(({course, activity, activityType, group}) => ({course, activity, activityType, group}) as CourseActivityGroup)
         .uniqWith(_.isEqual).value();

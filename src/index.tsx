@@ -28,7 +28,7 @@ try {
 const migratedState = migratePeristState(previousState, CURRENT_VERSION);
 
 const saveLocalStorage = (s: PersistState) => {
-  // console.log('saving to localStorage');
+ //console.log('saving to localStorage');
   localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(s));
 }
 
@@ -50,7 +50,7 @@ const rootStore = createStore(model,
 
 rootStore.subscribe(() => {
   const s = rootStore.getState();
-  console.log("subscribed to state: ", s);
+ //console.log("subscribed to state: ", s);
   saveLocalStorage(s);
 })
 

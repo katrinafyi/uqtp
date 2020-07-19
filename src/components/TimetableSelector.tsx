@@ -53,11 +53,11 @@ export const TimetableSelector = () => {
 
   const onClickRename = (ev: React.MouseEvent<HTMLElement>) => {
     if (isRenaming) {
-      // console.log('clicked while renaming');
+     //console.log('clicked while renaming');
       rename(name);
       setIsRenaming(false);
     } else {
-      // console.log('entering renaming mode');
+     //console.log('entering renaming mode');
       setName(currentName);
       renameRef.current!.focus();
       setIsRenaming(true);

@@ -6,7 +6,7 @@ const UserInfoView = () => {
   const state = useStoreState(s => s);
 
   if (!user) {
-    console.warn("attempting to render UserInfoView with no user set");
+    console.warn("Attempting to render UserInfoView with no user set.");
     return <></>;
   }
 

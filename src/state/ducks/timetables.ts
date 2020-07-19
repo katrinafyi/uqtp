@@ -50,13 +50,13 @@ const setDefaultGroupsForSessions = (selectedGroups: SelectedActivities, session
     });
 
 const timetableReducer = (state: Timetable, action: TimetableStateAction) => produce(state, (draft) => {
-    // console.log('producing new state for action:');
-    // console.log(action);
+   //console.log('producing new state for action:');
+   //console.log(action);
     
     switch (action.type) {
         case 'setAllSessions':
             const newActivities = new Set(action.sessions.map(makeActivityGroupKey));
-            // console.log('newActivities', newActivities);
+           //console.log('newActivities', newActivities);
             const sessions = [...action.sessions,
                 ...state.allSessions.filter(x => !newActivities.has(makeActivityGroupKey(x)))];
             draft.allSessions = sessions;

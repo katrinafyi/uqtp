@@ -6,13 +6,13 @@ import { userFirestoreDocRef } from "./firebase";
 
 export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootAction>, PersistState>) =>
     (next: Dispatch<RootAction>) => <A extends RootAction>(action: A): any => {
-        // console.log(action);
+       //console.log(action);
 
         const state = api.getState();
         if (action?.localOnly !== true) {
             if (state.user?.uid) {
-                // console.log('connected. redirecting via firebase: ' + action.type);
-                // console.log(action);
+               //console.log('connected. redirecting via firebase: ' + action.type);
+               //console.log(action);
 
                 const newState = rootReducer(state, action);
                 if (newState !== state)

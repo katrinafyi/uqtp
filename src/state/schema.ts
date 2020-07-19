@@ -39,4 +39,5 @@ export const DEFAULT_PERSIST: PersistState = {
         // },
         [DEFAULT_CURRENT]: EMPTY_TIMETABLE,
     },
+    current: DEFAULT_CURRENT,
 }

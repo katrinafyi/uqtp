@@ -31,7 +31,7 @@ export const getFirebaseUIConfig =
     callbacks: {
       // Avoid redirects after sign-in.
       signInSuccessWithAuthResult: (userCredential) => {
-        // console.log(userCredential);
+       //console.log(userCredential);
         return signInSuccess?.(userCredential) ?? false;
       },
       signInFailure: async (error) => {

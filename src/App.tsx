@@ -19,7 +19,7 @@ const App = () => {
 
   const [authUser, authLoading, authError] = useAuthState(auth);
   const showMainSignIn = authUser == null;
-  // console.log({authUser, authLoading, authError});
+ //console.log({authUser, authLoading, authError});
 
   const [showSignInModal, setShowSignIn] = useState(false);
   const [showUserInfo, setShowUserInfo] = useState(false);
@@ -87,7 +87,7 @@ const App = () => {
           </div>
         </div>
       </div>}>
-      <UserInfoView></UserInfoView>
+      {user && <UserInfoView></UserInfoView>}
     </ModalCard>
     <div className="hero is-dark">
       <div className="hero-body">

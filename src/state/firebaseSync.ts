@@ -59,7 +59,7 @@ export const makeFirebaseModel = () => {
     }),
 
     uploadStateToFirebase: thunk(async (actions, payload) => {
-      console.log("upload state to firebase called...");
+     //console.log("upload state to firebase called...");
       if (payload.__uid == null) {
         console.warn("refusing to upload null user.");
         return;
@@ -81,15 +81,15 @@ export const attachFirebaseListeners = <C>(store: Store<FirebaseModel, C>) => {
     unsubSnapshot?.();
     unsubSnapshot = null;
 
-    console.log("auth state updated in firebase listener. uid: ", user?.uid);
+   //console.log("auth state updated in firebase listener. uid: ", user?.uid);
 
     if (user) {
       document = userFirestoreDocRef(user);
 
       unsubSnapshot = document!.onSnapshot((doc) => {
-        console.log("received firebase document snapshot. meta: ", doc.data()?.firebase);
+       //console.log("received firebase document snapshot. meta: ", doc.data()?.firebase);
 
-        // console.log('got snapshot from firebase');
+       //console.log('got snapshot from firebase');
         if (doc?.exists) {
           // previous data exists. load from online.
           const data = doc.data()! as FirebaseModel;
@@ -110,7 +110,7 @@ export const attachFirebaseListeners = <C>(store: Store<FirebaseModel, C>) => {
 
   store.subscribe(() => {
     // @ts-ignore
-    console.log("subscribe listener called, uploading state. meta: ", store.getState()?.firebase);
+   //console.log("subscribe listener called, uploading state. meta: ", store.getState()?.firebase);
     // document?.set({ ...store.getState(), ...updateFirebaseMeta()});
   });
 };

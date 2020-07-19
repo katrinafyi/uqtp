@@ -33,17 +33,17 @@ export const makeFirestorePersistEnhancer =
     let user: firebase.User | null = null;
 
     const firebaseReducer = (s: S, a: A) => {
-      console.log("firebase reducer called with ", a, s);
+     //console.log("firebase reducer called with ", a, s);
       if (!blacklist.has(a.type) && user != null) {
         const newState = reducer(s, a as A);
         // @ts-ignore
         if (newState !== s && newState != null) {
-          console.log("... uploading new state to firebase", newState);
+         //console.log("... uploading new state to firebase", newState);
           getDocRef(user)!.set(newState)
         }
         return s;
       };
-      console.log("... action blacklisted: " + a.type);
+     //console.log("... action blacklisted: " + a.type);
       return reducer(s, a as A);
     };
 
@@ -57,13 +57,13 @@ export const makeFirestorePersistEnhancer =
 
       user = newUser;
   
-      console.log('auth state changed: ' + user?.uid);
-      // console.log(user);
+     //console.log('auth state changed: ' + user?.uid);
+     //console.log(user);
       if (user) {
         const docRef = getDocRef(user);
         unsubSnapshot = docRef!.onSnapshot((doc) => {
           if (doc?.exists) {
-            console.log('... got snapshot from firebase');
+           //console.log('... got snapshot from firebase');
             // previous data exists. load from online.
             const data = doc.data()! as T;
             const migrated = migrate(data);
@@ -72,7 +72,7 @@ export const makeFirestorePersistEnhancer =
             else
               store.dispatch(setState(data as unknown as S));
           } else {
-            console.log('... no data on firebase, uploading.');
+           //console.log('... no data on firebase, uploading.');
             // no previous data exists. upload our data.
             docRef?.set(store.getState());
             // store.dispatch(firebaseSnapshotAction(defaultState as unknown as S));

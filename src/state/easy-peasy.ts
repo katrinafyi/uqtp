@@ -55,8 +55,8 @@ export const model: PersistModel = {
   }),
 
   currentTimetable: computed(s => {
-    // console.log('timetable', s);
-    // console.log(s.currentTimetable);
+   //console.log('timetable', s);
+   //console.log(s.currentTimetable);
     // debugger;
     return s.timetables[s.current];
   }),
@@ -115,7 +115,7 @@ export const model: PersistModel = {
 
   updateSessions: action((s, sessions) => {
     const newActivities = new Set(sessions.map(makeActivityGroupKey));
-    // console.log('newActivities', newActivities);
+   //console.log('newActivities', newActivities);
     const oldSessions = s.timetables[s.current]!.allSessions;
     s.timetables[s.current]!.allSessions = [
       ...sessions,

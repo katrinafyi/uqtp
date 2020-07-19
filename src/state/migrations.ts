@@ -80,7 +80,7 @@ export const migratePeristState = (state: AllSchemas, latest: number = CURRENT_V
     while (stateVer < latest) {
         if (MIGRATIONS[stateVer] === undefined)
             throw new Error("No migration from " + stateVer);
-        console.log("Applying migration from state " + stateVer);
+       //console.log("Applying migration from state " + stateVer);
         state = MIGRATIONS[stateVer](state);
         stateVer = getStateSchemaVersion(state as StateMetadata);
     }
