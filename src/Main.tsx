@@ -46,6 +46,10 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
     dispatch(setActivityGroup(course, activity, group));
   }, [dispatch]);
 
+  const setAllSessionsCallback = useCallback((e: CourseEvent[]) => {
+    dispatch(setAllSessions(e));
+  }, [dispatch]);
+
   const [highlight, setHighlight] = useState<CourseGroup | null>(null);
   const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
   const [activityGroups, setActivityGroups] = useState<{[s: string]: CourseEvent[]}>({});
@@ -119,7 +123,7 @@ const Main: React.FC<Props> = ({timetable, activities, current, timetables, disp
           <SessionSelectors allActivities={activities} visibility={timetable.courseVisibility}
             selected={timetable.selectedGroups} setSelected={setSelected}
             deleteCourse={(c) => dispatch(deleteCourse(c))}
-            setVisible={setVisibility}></SessionSelectors>
+            setVisible={setVisibility} setAllSessions={setAllSessionsCallback}></SessionSelectors>
 
           <h4 className="title is-4">Timetable</h4>
           <Timetable selectedSessions={visibleSessions}></Timetable>

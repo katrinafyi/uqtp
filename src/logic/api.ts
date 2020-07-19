@@ -9,7 +9,12 @@ export const fetchCourseData = async (query: string) =>
     },
     "body": `search-term=${encodeURIComponent(query)}&semester=ALL&campus=ALL&faculty=ALL&type=ALL&days=1&days=2&days=3&days=4&days=5&days=6&days=0&start-time=00%3A00&end-time=23%3A00`,
     "method": "POST"
-  }).then(x => x.json());
+  }).then(x => {
+    if (!x.ok) {
+      throw new Error(`Error ${x.status} while fetching API data.`);
+    }
+    return x.json();
+  });
 
 export type CourseSearchResult = {
   course: string,

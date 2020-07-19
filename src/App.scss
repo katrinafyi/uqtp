@@ -24,10 +24,15 @@
 }
 
 .session-selector {
-  & .message-body {
-    border: 1px solid lightgrey;
-    border-top: none;
+  & .message-header {
+    // background-color: $white-ter;
+    // color: $black;
+    // border-bottom: 1px solid lightgrey;
   }
+
+  border: 1px solid lightgrey;
+
+  // background-color: transparent;
 }
 
 // https://codepen.io/davidelrizzo/pen/GobVLe
@@ -115,7 +120,7 @@
   // box-sizing: border-box;
 
   border-radius: 0px;
-  background-color: hsl(0, 0%, 98%);
+  background-color: $white-bis;
   
   // color: black;
 

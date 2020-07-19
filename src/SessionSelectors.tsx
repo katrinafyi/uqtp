@@ -1,8 +1,11 @@
-import React, { memo } from 'react';
-import { CourseGroup, CourseActivity } from './state/types';
+import React, { memo, useState } from 'react';
+import { CourseGroup, CourseActivity, CourseEvent } from './state/types';
 import _ from 'lodash';
 import { coerceToArray } from './logic/functions';
 import { Timetable } from './state/types';
+import { FaSyncAlt, FaTimes, FaExclamationTriangle, FaCheck } from 'react-icons/fa';
+import { searchCourses } from './logic/api';
+import { setAllSessions } from './state/ducks/timetables';
 
 
 interface CourseSessionSelectorProps {
@@ -12,6 +15,7 @@ interface CourseSessionSelectorProps {
     setVisible: (course: string, visible: boolean) => any, 
     setSelected: (activity: string, group: string[]) => any,
     deleteCourse: () => any,
+    setAllSessions: (sessions: CourseEvent[]) => any,
 }
 
 export interface Props {
@@ -21,9 +25,35 @@ export interface Props {
     visibility: Timetable['courseVisibility'],
     setVisible: (course: string, visible: boolean) => any, 
     deleteCourse: (course: string) => any,
+    setAllSessions: (sessions: CourseEvent[]) => any,
 };
 
+enum UpdatingState {
+    IDLE, UPDATING, DONE, ERROR
+}
+
 const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse, visibility, setVisible}: CourseSessionSelectorProps) => {
+
+    const [updating, setUpdating] = useState<UpdatingState>(UpdatingState.IDLE);
+    const [updateError, setUpdateError] = useState('');
+
+    const update = async () => {
+        const code = activities[0].course;
+        try {
+            setUpdating(UpdatingState.UPDATING);
+            setUpdateError('');
+            const results = Object.values(await searchCourses(code));
+            if (results.length !== 1) {
+                throw new Error(`Found ${results.length} courses matching ${code}.`);
+            }
+            setAllSessions(results[0].activities);   
+            setUpdating(UpdatingState.DONE);         
+        } catch (e) {
+            setUpdateError(e.toString());
+            setUpdating(UpdatingState.ERROR);
+            console.error(e);
+        }
+    }
 
     // console.log(activities);
     const actTypes = _.groupBy(activities, x => x.activity);
@@ -82,7 +112,7 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
     <div className="message session-selector">
         <div className="message-header">
                 {/* style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> */}
-            <label className="mr-2 has-text-weight-normal is-clickable">
+            <label className="mr-4 has-text-weight-semibold is-clickable">
                 <input type="checkbox" checked={isVisible}
                     onChange={() => setVisible(activities[0].course, !isVisible)}
                 ></input> {activities[0].course}
@@ -94,7 +124,22 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
                     <FaTimes></FaTimes>
                 </span>
             </button> */}
-            <button className="delete" onClick={deleteCourse}></button>
+            <p className="buttons">
+                <button className={"button is-small is-dark" + (updateError ? ' is-danger' : '') + (updating === UpdatingState.UPDATING ? ' is-loading' : '')} type="button"
+                    title={updateError || "Update this course"} onClick={update}>
+                    <span className="icon is-small">
+                        {!updateError
+                            ? (updating === UpdatingState.IDLE ? <FaSyncAlt></FaSyncAlt> : <FaCheck></FaCheck>)
+                            : <FaExclamationTriangle></FaExclamationTriangle>}
+                    </span>
+                </button>
+                <button className="button is-small is-dark" type="button"
+                    title="Delete this course" onClick={deleteCourse}>
+                    <span className="icon is-small">
+                        <FaTimes></FaTimes>
+                    </span>
+                </button>
+            </p>
         </div>
         <div className="message-body">
         <div className="columns is-multiline is-mobile">
@@ -107,7 +152,7 @@ const CourseSessionSelector = ({activities, selected, setSelected, deleteCourse,
 
 const MemoCourseSessionSelector = memo(CourseSessionSelector);
 
-const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse, visibility, setVisible }: Props) => {
+const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse, visibility, setVisible, setAllSessions }: Props) => {
     const byCourse = _.groupBy(allActivities, (x) => x.course);
     
     const courses = _(allActivities).map(x => x.course).uniq().sort().value();
@@ -116,7 +161,7 @@ const SessionSelectors = ({ allActivities, selected, setSelected, deleteCourse, 
         {courses.map(c => <div key={c} className="column is-narrow" style={{maxWidth: '25rem'}}>
             <MemoCourseSessionSelector activities={byCourse[c]} visibility={visibility} setVisible={setVisible}
                 selected={selected[c] || {}} setSelected={(...args) => setSelected(c, ...args)}
-                deleteCourse={() => deleteCourse(c)}></MemoCourseSessionSelector>
+                deleteCourse={() => deleteCourse(c)} setAllSessions={setAllSessions}></MemoCourseSessionSelector>
         </div>)}
     </div>;
 }
