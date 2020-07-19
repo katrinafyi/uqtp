@@ -1,12 +1,6 @@
-import { auth as globalAuth, userFirestoreDocRef } from "./firebase";
-import { PersistState } from "./schema";
-import { migratePeristState } from "./migrations";
+import { auth as globalAuth } from "./firebase";
 import type firebase from "firebase";
-import { StoreEnhancerStoreCreator, StoreEnhancer, Middleware, MiddlewareAPI, AnyAction, Action, Reducer, PreloadedState } from "redux";
-import { RootAction } from "./store";
-import { setPersistState } from "./ducks/persist";
-
-
+import { StoreEnhancer, AnyAction, Action, Reducer, PreloadedState } from "redux";
 
 type DocRef = firebase.firestore.DocumentReference;
 

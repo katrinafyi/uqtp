@@ -1,8 +1,8 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions, memo } from 'easy-peasy';
-import { DEFAULT_PERSIST, PersistState } from './schema';
+import { action, computed, Computed, Action, createTypedHooks, Actions } from 'easy-peasy';
+import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { makeActivityGroupKey, coerceToArray, getCourseGroups } from '../logic/functions';
+import { makeActivityGroupKey, coerceToArray } from '../logic/functions';
 import _ from 'lodash';
 
 export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
@@ -32,7 +32,7 @@ export type PersistModel = PersistState & {
 
 
 export const model: PersistModel = {
-  ...DEFAULT_PERSIST,
+  ...BLANK_PERSIST,
 
   setState: action((_, s) => {
     return s as any;

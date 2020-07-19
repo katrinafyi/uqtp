@@ -1,6 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
 import { CourseActivityGroup, CourseActivity, Course } from './state/types';
-import _ from 'lodash';
 import { coerceToArray } from './logic/functions';
 import { useStoreActions, useStoreState } from './state/easy-peasy';
 

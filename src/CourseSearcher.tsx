@@ -1,10 +1,7 @@
-import React, { useState, Dispatch } from "react";
+import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
 import { searchCourses, FullSearchResult, CourseSearchResult, compareSearchResultSemesters } from "./logic/api";
 import _ from "lodash";
-import { connect } from "react-redux";
-import { RootAction } from "./state/store";
-import { setAllSessions } from "./state/ducks/timetables";
 import { useStoreActions } from "./state/easy-peasy";
 
 export const SearchResult = (props: { result: CourseSearchResult }) => {
