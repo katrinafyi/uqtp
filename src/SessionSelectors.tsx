@@ -1,9 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
-import { CourseActivityGroup, CourseActivity, Course } from '../state/types';
-import { coerceToArray } from '../logic/functions';
-import { useStoreActions, useStoreState } from '../state/easy-peasy';
-
-import './SessionSelectors.scss';
+import { CourseActivityGroup, CourseActivity, Course } from './state/types';
+import { coerceToArray } from './logic/functions';
+import { useStoreActions, useStoreState } from './state/easy-peasy';
 
 const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActivityGroup & { selected: boolean }) => {
   const setOneSelectedGroup = useStoreActions(s => s.setOneSelectedGroup);

@@ -1,16 +1,16 @@
 import _ from 'lodash';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import './App.scss';
-import FileInput from './components/FileInput';
-import { HighlightContext } from './components/HightlightContext';
+import FileInput from './FileInput';
+import { HighlightContext } from './HightlightContext';
 import { isHighlighted, coerceToArray, makeActivityKey } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
-import { MyTimetableHelp } from './components/MyTimetableHelp';
-import SessionSelectors from './components/SessionSelectors';
+import { MyTimetableHelp } from './MyTimetableHelp';
+import SessionSelectors from './SessionSelectors';
 import { CourseEvent, CourseActivityGroup } from './state/types';
-import Timetable from './components/Timetable';
-import TimetableSelector from './components/TimetableSelector';
-import CourseSearcher from './components/CourseSearcher';
+import Timetable from './Timetable';
+import TimetableSelector from './TimetableSelector';
+import CourseSearcher from './CourseSearcher';
 import { useStoreState, useStoreActions } from './state/easy-peasy';
 
 

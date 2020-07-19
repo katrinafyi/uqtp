@@ -1,4 +1,4 @@
-import { auth } from "../state/firebase";
+import { auth } from "./state/firebase";
 import React, { useEffect } from "react";
 import firebase from "firebase/app";
 import 'firebase/auth';

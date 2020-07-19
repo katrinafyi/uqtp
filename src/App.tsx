@@ -6,9 +6,9 @@ import StateErrorBoundary from './StateErrorBoundary';
 import Main from './Main';
 import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
 import { auth, userFirestoreDocRef, mergeAnonymousData } from './state/firebase';
-import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSignIn';
+import { NewFirebaseLoginProps, NewFirebaseLogin } from './FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
-import UserInfoView from './components/UserInfoView';
+import UserInfoView from './UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useStoreState, useStoreActions } from './state/easy-peasy';
 

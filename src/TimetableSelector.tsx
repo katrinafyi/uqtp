@@ -1,9 +1,9 @@
 import React, { useState, createRef, useEffect } from "react"
 import { FaSave, FaPencilAlt, FaCopy, FaPlus, FaTrash } from "react-icons/fa";
-import { PersistStateAction } from "../state/ducks/persist";
-import { Timetable, TimetablesState } from "../state/types";
+import { PersistStateAction } from "./state/ducks/persist";
+import { Timetable, TimetablesState } from "./state/types";
 import _ from "lodash";
-import { useStoreState, useTimetableActions } from "../state/easy-peasy";
+import { useStoreState, useTimetableActions } from "./state/easy-peasy";
 
 export type TimetableSelectorProps = {
   timetables: TimetablesState,
