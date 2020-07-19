@@ -6,6 +6,17 @@
     // background-color: $white-ter;
     // color: $black;
     // border-bottom: 1px solid lightgrey;
+    // flex-wrap: wrap;
+
+    & label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    & .buttons {
+      flex-wrap: nowrap;
+    }
   }
 
   border: 1px solid lightgrey;

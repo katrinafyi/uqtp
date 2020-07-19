@@ -37,7 +37,7 @@ const ActivityGroupSelector = ({ course, activity }: CourseActivity) => {
     countClass = 'has-text-grey ';
 
   return (
-    <div className="column is-narrow py-0" key={activity} style={{ maxWidth: '100%' }}>
+    <div className="column is-narrow py-0" key={activity}>
       <details>
 
         <summary style={{ cursor: 'pointer' }}>
@@ -121,7 +121,6 @@ const CourseSessionSelector = ({ course }: Course) => {
 
   return (
     <div className="message session-selector">
-
       <div className="message-header">
         <label className="mr-4 has-text-weight-normal is-clickable">
           <input type="checkbox" checked={visible}
@@ -157,10 +156,10 @@ const CourseSessionSelector = ({ course }: Course) => {
 const SessionSelectors = () => {
 
   const activitiesByCourse = useStoreState(s => s.activities);
-  const courses = useMemo(() => Object.keys(activitiesByCourse), [activitiesByCourse]);
+  const courses = useMemo(() => Object.keys(activitiesByCourse).sort(), [activitiesByCourse]);
 
   return <div className="columns is-multiline">
-    {courses.map(c => <div key={c} className="column is-narrow" style={{ maxWidth: '25rem' }}>
+    {courses.map(c => <div key={c} className="column is-narrow">
       <CourseSessionSelector course={c}/>
     </div>)}
   </div>;
