@@ -6,6 +6,8 @@ import { searchCourses } from '../logic/api';
 import { FaSyncAlt, FaCheck, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 import classNames from 'classnames';
 
+import './SessionSelectors.scss';
+
 const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActivityGroup & { selected: boolean }) => {
   const setOneSelectedGroup = useStoreActions(s => s.setOneSelectedGroup);
   
@@ -121,7 +123,7 @@ const CourseSessionSelector = ({ course }: Course) => {
     <div className="message session-selector">
 
       <div className="message-header">
-        <label className="mr-2 has-text-weight-normal is-clickable">
+        <label className="mr-4 has-text-weight-normal is-clickable">
           <input type="checkbox" checked={visible}
             onChange={setVisibleCallback}
           ></input> {course}

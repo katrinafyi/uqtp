@@ -9,6 +9,8 @@ import { FaLock } from 'react-icons/fa';
 // @ts-ignore
 import LongPress from 'react-long';
 
+import './Timetable.scss';
+
 export type Props = {
     selectedSessions: CourseEvent[],
 }

@@ -1,0 +1,14 @@
+@import "bulma/sass/utilities/initial-variables";
+@import "bulma/sass/utilities/derived-variables";
+
+.session-selector {
+  & .message-header {
+    // background-color: $white-ter;
+    // color: $black;
+    // border-bottom: 1px solid lightgrey;
+  }
+
+  border: 1px solid lightgrey;
+
+  // background-color: transparent;
+}
