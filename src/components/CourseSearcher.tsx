@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { FaSearch } from "react-icons/fa";
-import { searchCourses, FullSearchResult, CourseSearchResult, compareSearchResultSemesters } from "./logic/api";
+import { searchCourses, FullSearchResult, CourseSearchResult, compareSearchResultSemesters } from "../logic/api";
 import _ from "lodash";
-import { useStoreActions } from "./state/easy-peasy";
+import { useStoreActions } from "../state/easy-peasy";
 
 export const SearchResult = (props: { result: CourseSearchResult }) => {
   const updateSessions = useStoreActions(s => s.updateSessions);

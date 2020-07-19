@@ -1,0 +1,8 @@
+@import 'bulma/bulma.sass';
+
+.session-selector {
+  & .message-body {
+    border: 1px solid lightgrey;
+    border-top: none;
+  }
+}
