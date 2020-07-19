@@ -16,7 +16,7 @@ export const firebaseMiddleware: Middleware = (api: MiddlewareAPI<Dispatch<RootA
 
                 const newState = rootReducer(state, action);
                 if (newState !== state)
-                    userFirestoreDocRef(state.user.uid).set(newState);
+                    userFirestoreDocRef(state.user.uid)?.set(newState);
                 return;
             }
         }

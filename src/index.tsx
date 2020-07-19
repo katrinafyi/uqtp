@@ -8,6 +8,9 @@ import { migratePeristState } from './state/migrations';
 import { model } from './state/easy-peasy';
 import { createStore, StoreProvider } from 'easy-peasy';
 import { makeFirebaseModel, attachFirebaseListeners, FIREBASE_META_DEFAULT } from './state/firebaseSync';
+import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
+import { userFirestoreDocRef, auth } from './state/firebase';
+import { setUser } from './state/ducks/user';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
@@ -35,14 +38,19 @@ if (migratedState) {
   saveLocalStorage(migratedState);
 }
 
-const initialState = { ...migratedState ?? previousState, firebase: FIREBASE_META_DEFAULT };
+const initialState = migratedState ?? previousState;
+
+const firestoreEnhancer = makeFirestorePersistEnhancer(
+  // @ts-ignore
+  auth, userFirestoreDocRef, '@action.setState', ['@action.setUser'],
+  DEFAULT_PERSIST, migratePeristState);
 
 const rootStore = createStore(
-  { ...model, ...makeFirebaseModel() },
-  { initialState }
+  model,
+  { initialState, enhancers: [firestoreEnhancer] }
 );
 
-attachFirebaseListeners(rootStore);
+// attachFirebaseListeners(rootStore);
 
 rootStore.subscribe(() => {
   saveLocalStorage(rootStore.getState());

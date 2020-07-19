@@ -29,8 +29,9 @@ const App = () => {
     setShowSignIn(false);
 
     try {
-      if (user?.isAnon ?? false)
-        await userFirestoreDocRef().delete();
+      const ref = userFirestoreDocRef(user?.uid ?? null);
+      if ((user?.isAnon ?? false) && ref)
+        await ref.delete();
     } catch (e) {
       console.error('failed to delete anonymous data', e);
     }

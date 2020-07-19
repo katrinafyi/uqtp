@@ -65,7 +65,7 @@ export const makeFirebaseModel = () => {
         return;
       }
       
-      await userFirestoreDocRef(payload.__uid).set(payload);
+      await userFirestoreDocRef(payload.__uid)!.set(payload);
     }),
   };
 
@@ -86,7 +86,7 @@ export const attachFirebaseListeners = <C>(store: Store<FirebaseModel, C>) => {
     if (user) {
       document = userFirestoreDocRef(user);
 
-      unsubSnapshot = document.onSnapshot((doc) => {
+      unsubSnapshot = document!.onSnapshot((doc) => {
         console.log("received firebase document snapshot. meta: ", doc.data()?.firebase);
 
         // console.log('got snapshot from firebase');

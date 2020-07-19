@@ -19,7 +19,7 @@ const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActi
 
 // component for selecting groups of a particular activity, e.g. LEC1 01 02 03...
 const ActivityGroupSelector = ({ course, activity }: CourseActivity) => {
-  const selected = coerceToArray(useStoreState(s => s.currentTimetable.selectedGroups[course][activity]));
+  const selected = coerceToArray(useStoreState(s => s.currentTimetable.selectedGroups?.[course]?.[activity]));
   const groups = useStoreState(s => s.activities?.[course]?.[activity]);
 
   const groupKeys = Object.keys(groups);

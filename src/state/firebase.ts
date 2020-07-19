@@ -19,15 +19,15 @@ firebase.initializeApp(firebaseConfig);
 export const firestore = firebase.firestore();
 export const auth = firebase.auth();
 
-export const userFirestoreDocRef = (userOrUid?: firebase.User | string | null) => {
-    let uid = undefined;
+export const userFirestoreDocRef = (userOrUid: firebase.User | string | null) => {
+    if (userOrUid == null)
+        return null;
+
+    let uid = '';
     if (typeof userOrUid == 'string') {
         uid = userOrUid;
     } else {
-        let user = userOrUid;
-        if (!userOrUid)
-            user = auth.currentUser ?? undefined;
-        uid = user?.uid;
+        uid = userOrUid.uid;
     }
     console.assert(uid != null);
     return firestore.collection('users').doc(uid);
@@ -38,11 +38,17 @@ export const mergeData = (oldData: PersistState, newData: PersistState) => {
 }
 
 export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
-    const oldData = await userFirestoreDocRef().get().then(doc => doc.data()) as PersistState;
+    const oldUser = auth.currentUser;
+    const oldDocRef = userFirestoreDocRef(oldUser);
+    if (!oldDocRef) {
+        return;
+    }
+
+    const oldData = await oldDocRef.get().then(doc => doc.data()) as PersistState;
     
     const newUser = await auth.signInWithCredential(newCredential);
     
-    const newDocRef = userFirestoreDocRef(newUser.user);
+    const newDocRef = userFirestoreDocRef(newUser.user)!;
     const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
   
     await newDocRef.set(mergeData(oldData ?? {}, newData ?? {}));

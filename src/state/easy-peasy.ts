@@ -8,6 +8,7 @@ import _ from 'lodash';
 export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
 
 export type PersistModel = PersistState & {
+  setState: Action<PersistModel, PersistState>,
 
   setUser: Action<PersistModel, firebase.User | null>,
 
@@ -32,6 +33,10 @@ export type PersistModel = PersistState & {
 
 export const model: PersistModel = {
   ...DEFAULT_PERSIST,
+
+  setState: action((_, s) => {
+    return s as any;
+  }),
 
   setUser: action((s, user) => {
     if (!user) {

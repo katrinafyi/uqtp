@@ -10,18 +10,13 @@ import { setPersistState } from "./ducks/persist";
 
 type DocRef = firebase.firestore.DocumentReference;
 
-type FirebaseSnapshotAction<T> = { 
-  type: 'firebaseSnapshotAction', 
-  user: firebase.User | null,
-  state: T, 
-};
-
 export const makeFirestorePersistEnhancer = 
   <T>(firebaseAuth: firebase.auth.Auth,
-    getDocRef: (user: firebase.User | null) => DocRef, 
-    migrateState?: (state: T) => T | null, 
+    getDocRef: (user: firebase.User | null) => DocRef | null, 
+    setStateType: string,
+    blacklistTypes?: string[],
     defaultState?: T,
-    setUser?: (user: firebase.User | null) => any,
+    migrateState?: (state: T) => T | null, 
     ): StoreEnhancer => {
   
   const auth = firebaseAuth ?? globalAuth;
@@ -30,26 +25,32 @@ export const makeFirestorePersistEnhancer =
   // @ts-ignore
   return (createStore) => <S = any, A extends Action = AnyAction>(reducer: Reducer<S, A>, preloadedState?: PreloadedState<S>) => {
 
-    const firebaseSnapshotAction = (u: firebase.User | null, s: S): FirebaseSnapshotAction<S> => ({
-      type: 'firebaseSnapshotAction', user: u, state: s,
+    const SET_STATE = setStateType;
+
+    const blacklist = new Set([...blacklistTypes ?? [], SET_STATE]);
+
+    const setState = (s: S): any => ({
+      type: SET_STATE, payload: s,
     });
+    console.assert(SET_STATE, 'set state type cannot be null');
+    blacklist.forEach(x => console.assert(x, 'blacklisted type should not be null'));
 
     let unsubSnapshot: Function | null = null;
     let user: firebase.User | null = null;
 
-    const firebaseReducer = (s?: S, a?: A | FirebaseSnapshotAction<S>) => {
-      console.log("firebase reducer called with ", a);
-      if (a?.type === 'firebaseSnapshotAction') {
-        const a2 = a as FirebaseSnapshotAction<S>;
-        return a2.state;
-      } else if (user != null) {
+    const firebaseReducer = (s: S, a: A) => {
+      console.log("firebase reducer called with ", a, s);
+      if (!blacklist.has(a.type) && user != null) {
         const newState = reducer(s, a as A);
         // @ts-ignore
-        if (newState !== s && newState != null)
-          getDocRef(user).set(newState)
-        return newState;
+        if (newState !== s && newState != null) {
+          console.log("... uploading new state to firebase", newState);
+          getDocRef(user)!.set(newState)
+        }
+        return s;
       };
-      return s;
+      console.log("... action blacklisted: " + a.type);
+      return reducer(s, a as A);
     };
 
     // @ts-ignore
@@ -63,32 +64,30 @@ export const makeFirestorePersistEnhancer =
       user = newUser;
   
       console.log('auth state changed: ' + user?.uid);
-      console.log(user);
+      // console.log(user);
       if (user) {
         const docRef = getDocRef(user);
-        unsubSnapshot = docRef.onSnapshot((doc) => {
-          // console.log('got snapshot from firebase');
+        unsubSnapshot = docRef!.onSnapshot((doc) => {
           if (doc?.exists) {
+            console.log('... got snapshot from firebase');
             // previous data exists. load from online.
             const data = doc.data()! as T;
             const migrated = migrate(data);
             if (migrated)
               docRef?.set(migrated);
             else
-              store.dispatch(firebaseSnapshotAction(user, data as unknown as S));
+              store.dispatch(setState(data as unknown as S));
           } else {
+            console.log('... no data on firebase, uploading.');
             // no previous data exists. upload our data.
-            // docRef?.set(store.getState());
-            store.dispatch(firebaseSnapshotAction(user, defaultState as unknown as S));
+            docRef?.set(store.getState());
+            // store.dispatch(firebaseSnapshotAction(defaultState as unknown as S));
           }
         });
       } else {
         // new user state is signed out. delete data.
-        store.dispatch(firebaseSnapshotAction(null, null as unknown as S));
+        store.dispatch(setState(defaultState as unknown as S));
       }
-
-      if (setUser)
-        store.dispatch(setUser(user));
     });
 
     return store;
