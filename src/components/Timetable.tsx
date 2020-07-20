@@ -10,22 +10,21 @@ import LongPress from 'react-long';
 
 import './Timetable.scss';
 import { UIStore } from '../state/uiState';
-import { useStoreState } from '../state/persistState';
+import { useStoreState, useStoreActions } from '../state/persistState';
 
 const START_HOUR = 8;
 const END_HOUR = 19;
 
+const HOURS = _.range(START_HOUR, END_HOUR+1);
+const DAYS = _.range(5);
+
 type TimetableSessionProps = {
-    hour: number,
     session: CourseEvent,
     clash?: boolean,
-    left: boolean,
-    right: boolean,
-    index: number,
     numInHour: number
 }
 
-const TimetableSession = (({session, clash, numInHour}: TimetableSessionProps) => {
+const TimetableSession = memo(({session, clash, numInHour}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'has-text-info',
         'TUT': 'has-text-success',
@@ -42,7 +41,10 @@ const TimetableSession = (({session, clash, numInHour}: TimetableSessionProps) =
     const setHighlight = UIStore.useStoreActions(s => s.setHighlight);
 
     const thisHighlighted = isHighlighted(session, highlight);
-    const onClick = () => {
+    const onClick = (ev: React.MouseEvent) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+
         if (highlight && thisHighlighted) {
             selectHighlightedGroup(session.group);
             setHighlight(null);
@@ -59,10 +61,12 @@ const TimetableSession = (({session, clash, numInHour}: TimetableSessionProps) =
     let positionClass = '';
     const topPercent = session.time.minute * 100 / 60;
     
+    const hours = Math.min(END_HOUR + 1 - session.time.hour, session.duration / 60);
+
     const positionStyle = {
         // left: `${100*index/numInHour}%`,
         width: `${100/numInHour}%`,
-        height: `${session.duration * 100 / 60}%`, 
+        height: `${hours * 100}%`, 
         top: `${topPercent}%`, 
     };
 
@@ -94,23 +98,40 @@ const makeHeaderCells = () => {
     ];
 }
 
-const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
+const makeTimeElements = () => HOURS.map(
     h => <div key={"t"+h} className={`th cell has-text-right col-time`}><b>{h}</b></div>
 );
 
-const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
-    return _.range(START_HOUR, END_HOUR+1).map((h) =>
+type CustomEvent = { day: number, hour: number, duration: number, label: string };
+type AddCustomEvent = (arg: CustomEvent) => any;
+
+
+const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][], addCustomEvent: AddCustomEvent) => {
+    const onClickEmpty = (hour: number) => () => {
+        const input = prompt('Enter label and (optional) duration for custom activity (e.g. "Work 60"):')?.trim();
+        if (!input) return;
+
+        let durationInput = NaN;
+        let label = input;
+        const match = /(\d+)$/.exec(input);
+        if (match) {
+            durationInput = parseInt(match[1]);
+            label = input.slice(0, -match[1].length).trimRight();
+        }
+        const duration = isNaN(durationInput) ? 60 : durationInput;
+        
+        addCustomEvent({ day, hour, label: label || 'activity', duration });
+    };
+
+    return HOURS.map((h) =>
     <div className={"td py-0 col-day"} key={`day:${day},hour:${h}`}>
-        <div className="hour">
+        <div className="hour" onClick={onClickEmpty(h)} title="Click to add a custom event here">
         {daySessions[h].map((s, i) => 
             (s == null || s.time.hour !== h)
             ? <div className="session cell empty" key={"empty-" + i}
                 style={{width: `${100/daySessions[h].length}%`}}></div>
             : <TimetableSession key={makeSessionKey(s)} 
-                    hour={h} session={s} clash={daySessions[h].length > 1}
-                    left={daySessions[h][i-1] == null} 
-                    right={daySessions[h][i+1] == null}
-                    index={i}
+                    session={s} clash={daySessions[h].length > 1}
                     numInHour={daySessions[h].length}/>
         )}
         </div>
@@ -122,6 +143,7 @@ const Timetable = () => {
     const timetable = useStoreState(s => s.currentTimetable);
     const activities = useStoreState(s => s.activities);
     const isSessionVisible = useStoreState(s => s.isSessionVisible);
+    const addCustomEvent = useStoreActions(s => s.addCustomEvent);
     
     const highlight = UIStore.useStoreState(s => s.highlight);
     const weekStart = UIStore.useStoreState(s => s.weekStart);
@@ -137,13 +159,15 @@ const Timetable = () => {
     const byDayTime = useMemo(() => computeDayTimeArrays(visibleSessions), 
         [visibleSessions]); 
 
-    const timeCells = makeTimeElements();
+    const timeCells = useMemo(makeTimeElements, []);
     // dayCells[d][h]
-    const dayCells = _.range(5).map(i => makeDayCells(i, byDayTime[i]));
+    const dayCells = useMemo(
+        () => DAYS.map(i => makeDayCells(i, byDayTime[i], addCustomEvent)), 
+        [addCustomEvent, byDayTime]);
 
     return <div className="timetable">
         {makeHeaderCells()}
-        {_.range(START_HOUR, END_HOUR+1).map((h, i) => 
+        {HOURS.map((h, i) => 
         <React.Fragment key={h}>
             {timeCells[i]}
             {dayCells.map(day => day[i])}

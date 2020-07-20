@@ -14,9 +14,8 @@ import { WeekSelector } from './components/WeekSelector';
 
 const Main = () => {
 
-
   const replaceActivityGroup = useStoreActions(s => s.replaceOneSelectedGroup);
-  const updateSessions = useStoreActions(s => s.updateSessions);
+  const updateSessions = useStoreActions(s => s.updateCourseSessions);
   
   const [importError, setImportError] = useState<string | null>(null);
   
@@ -40,7 +39,7 @@ const Main = () => {
     }
     setImportError(null);
   };
-
+  
   //console.log(visibleSessions);
 
   return <>

@@ -1,8 +1,8 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
+import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, thunk, Thunk } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { coerceToArray } from '../logic/functions';
+import { coerceToArray, makeActivityKey, makeCustomSession, CUSTOM_COURSE } from '../logic/functions';
 import _ from 'lodash';
 
 export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
@@ -21,12 +21,15 @@ export type PersistModel = PersistState & {
   rename: Action<PersistModel, string>,
   copy: Action<PersistModel>,
 
-  updateSessions: Action<PersistModel, CourseEvent[]>,
+  updateCourseSessions: Action<PersistModel, CourseEvent[]>,
+  updateActivitySessions: Action<PersistModel, CourseEvent[]>,
   deleteCourse: Action<PersistModel, string>,
   setCourseVisibility: Action<PersistModel, { course: string, visible: boolean }>,
   setSelectedGroups: Action<PersistModel, CourseActivity & { group: string[] }>,
   setOneSelectedGroup: Action<PersistModel, CourseActivityGroup & { selected: boolean }>,
   replaceOneSelectedGroup: Action<PersistModel, CourseActivity & { old: string, new: string }>,
+
+  addCustomEvent: Action<PersistModel, { day: number, hour: number, duration: number, label: string }>,
 
   isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>
 };
@@ -116,9 +119,9 @@ export const model: PersistModel = {
   }),
 
 
-  updateSessions: action((s, sessions) => {
+  updateCourseSessions: action((s, sessions) => {
     const newCourses = new Set(sessions.map(x => x.course));
-   //console.log('newActivities', newActivities);
+    //console.log('newActivities', newActivities);
     const oldSessions = s.timetables[s.current]!.allSessions;
     s.timetables[s.current]!.allSessions = [
       ...sessions,
@@ -132,10 +135,45 @@ export const model: PersistModel = {
     }
   }),
 
+  updateActivitySessions: action((s, sessions) => {
+    const newActivities = new Set(sessions.map(makeActivityKey));
+    //console.log('newActivities', newActivities);
+    const oldSessions = s.timetables[s.current]!.allSessions;
+    s.timetables[s.current]!.allSessions = [
+      ...sessions,
+      ...oldSessions.filter(x => !newActivities.has(makeActivityKey(x)))
+    ];
+
+    for (const x of sessions) {
+      if (s.timetables[s.current]!.selectedGroups?.[x.course]?.[x.activity] == null) {
+        _.set(s.timetables[s.current]!.selectedGroups, [x.course, x.activity], [x.group]);
+      }
+    }
+  }),
+
+  addCustomEvent: action((s, { day, hour, label, duration }) => {
+    const sessions = Object.keys(s.activities[CUSTOM_COURSE]?.[label] ?? []);
+    if (sessions.length === 0)
+      sessions.push('0');
+    const max = Math.max(...sessions.map(x => parseInt(x)));
+
+    const newGroup = `${max+1}`;
+    s.timetables[s.current]!.allSessions.push(
+      makeCustomSession(label, day, hour, duration, newGroup));
+
+    if (s.timetables[s.current]!.selectedGroups?.[CUSTOM_COURSE]?.[label] == null) {
+      _.set(s.timetables[s.current]!.selectedGroups, [CUSTOM_COURSE, label], []);
+    }
+
+    // @ts-ignore
+    s.timetables[s.current]!.selectedGroups[CUSTOM_COURSE]![label]!.push(newGroup);
+  }),
+
   deleteCourse: action((s, course) => {
     s.timetables[s.current]!.allSessions = s.timetables[s.current]!.allSessions.filter(
       x => x.course !== course
     );
+    s.timetables[s.current]!.selectedGroups[course] = {};
   }),
 
   setCourseVisibility: action((s, {course, visible}) => {
@@ -198,7 +236,7 @@ export const useTimetableActions = () => ({
 });
 
 export const mapCurrentTimetableActions = (a: Actions<PersistModel>) => ({
-  updateSessions: a.updateSessions,
+  updateSessions: a.updateCourseSessions,
   deleteCourse: a.deleteCourse,
   setCourseVisibility: a.setCourseVisibility,
   setSelectedGroups: a.setSelectedGroups,

@@ -70,7 +70,7 @@ const CourseSessionSelector = memo(({ course }: Course) => {
 
   const setCourseVisibility = useStoreActions(s => s.setCourseVisibility);
   const deleteCourse = useStoreActions(s => s.deleteCourse);
-  const updateSessions = useStoreActions(s => s.updateSessions);
+  const updateSessions = useStoreActions(s => s.updateCourseSessions);
   
   const setVisibleCallback = useCallback(() => {
     setCourseVisibility({ course, visible: !visible });
@@ -81,7 +81,7 @@ const CourseSessionSelector = memo(({ course }: Course) => {
   }, [deleteCourse, course]);
 
  //console.log(activities);
-  const activityTypes = useMemo(() => Object.keys(activities), [activities]);
+  const activityTypes = useMemo(() => Object.keys(activities).sort(), [activities]);
 
 
   const [updating, setUpdating] = useState<UpdatingState>(UpdatingState.IDLE);
@@ -157,7 +157,7 @@ const SessionSelectors = memo(() => {
   const courses = useMemo(() => Object.keys(activitiesByCourse).sort(), [activitiesByCourse]);
 
   return <div className="columns is-multiline">
-    {courses.map(c => <div key={c} className="column is-narrow">
+    {courses.map(c => <div key={c} className="column is-narrow" style={{maxWidth: '100%'}}>
       <CourseSessionSelector course={c}/>
     </div>)}
   </div>;
