@@ -4,7 +4,7 @@ import './App.scss';
 
 import StateErrorBoundary from './components/StateErrorBoundary';
 import Main from './Main';
-import { FaSignInAlt, FaSignOutAlt, FaCoffee, FaUser } from 'react-icons/fa';
+import { FaSignInAlt, FaSignOutAlt, FaUser } from 'react-icons/fa';
 import { auth, userFirestoreDocRef, mergeAnonymousData } from './state/firebase';
 import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSignIn';
 import { Modal, ModalCard } from './components/Modal';
