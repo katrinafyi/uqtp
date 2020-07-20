@@ -1,23 +1,19 @@
-import _ from 'lodash';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 import FileInput from './components/FileInput';
-import { isHighlighted } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './components/MyTimetableHelp';
 import SessionSelectors from './components/SessionSelectors';
 import Timetable from './components/Timetable';
 import TimetableSelector from './components/TimetableSelector';
 import CourseSearcher from './components/CourseSearcher';
-import { useStoreState, useStoreActions } from './state/persistState';
+import { useStoreActions } from './state/persistState';
 import { UIStore } from './state/uiState';
+import { WeekSelector } from './components/WeekSelector';
 
 
 const Main = () => {
-  const timetable = useStoreState(s => s.currentTimetable);
-  const activities = useStoreState(s => s.activities);
 
-  const isSessionVisible = useStoreState(s => s.isSessionVisible);
 
   const replaceActivityGroup = useStoreActions(s => s.replaceOneSelectedGroup);
   const updateSessions = useStoreActions(s => s.updateSessions);
@@ -85,7 +81,12 @@ const Main = () => {
           <SessionSelectors></SessionSelectors>
 
           <h4 className="title is-4">Timetable</h4>
+
+          <div className="mb-5">
+            <WeekSelector></WeekSelector>
+          </div>
           <Timetable></Timetable>
+
           <div className="content">
             <ul>
               <li>Changes to your timetable and classes are saved automatically.</li>

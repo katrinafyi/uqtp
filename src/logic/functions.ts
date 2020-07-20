@@ -1,6 +1,7 @@
 import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
+import { differenceInCalendarDays } from "date-fns";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     const byDayTime = _.range(7)
@@ -145,3 +146,12 @@ export const isHighlighted = (session: CourseActivityGroup, highlight: CourseAct
 
 export const coerceToArray = <T>(arg?: T | T[]) => 
     arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);
+
+const parseDate = memo((d: string) => new Date(d), 10);
+
+export const isInWeek = (weekStart: Date, session: CourseEvent) => {
+    if (!session.startDate || !session.weekPattern) return true;
+    const diff = differenceInCalendarDays(weekStart, parseDate(session.startDate));
+    const index = Math.floor(diff / 7);
+    return (session.weekPattern[index] ?? '1') === '1';
+}

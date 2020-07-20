@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from '../state/types';
-import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime } from '../logic/functions';
+import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime, isInWeek } from '../logic/functions';
 
 import { FaLock } from 'react-icons/fa';
 
@@ -124,12 +124,15 @@ const Timetable = () => {
     const isSessionVisible = useStoreState(s => s.isSessionVisible);
     
     const highlight = UIStore.useStoreState(s => s.highlight);
+    const weekStart = UIStore.useStoreState(s => s.weekStart);
+    const allWeeks = UIStore.useStoreState(s => s.allWeeks);
 
     const visibleSessions = useMemo(() => {
         return timetable.allSessions
-          .filter(x => isSessionVisible(x) || isHighlighted(x, highlight))
-          .map(x => ({...x, numGroups: Object.keys(activities?.[x.course]?.[x.activity] ?? {}).length}));
-      }, [timetable.allSessions, isSessionVisible, highlight, activities]);
+        .filter(x => (isSessionVisible(x) || isHighlighted(x, highlight))
+            && (allWeeks || isInWeek(weekStart, x)))
+        .map(x => ({...x, numGroups: Object.keys(activities?.[x.course]?.[x.activity] ?? {}).length}));
+    }, [timetable.allSessions, isSessionVisible, highlight, allWeeks, weekStart, activities]);
 
     const byDayTime = useMemo(() => computeDayTimeArrays(visibleSessions), 
         [visibleSessions]); 

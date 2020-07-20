@@ -49,7 +49,7 @@ const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
         </summary>
 
         <div style={{ margin: '0 -0.25rem' }}>
-          {groupKeys.map(group => <ActivityGroupCheckbox key={group} course={course} 
+          {groupKeys.sort().map(group => <ActivityGroupCheckbox key={group} course={course} 
             activity={activity} group={group} selected={selected.includes(group)}/>)}
         </div>
 

@@ -70,7 +70,7 @@ export const CourseSearcher = memo(() => {
         </div>
 
         <div className="control">
-          <button className={"button is-info " + (isLoading ? 'is-loading' : '')} type="submit" onClick={search}>
+          <button className={"button is-link " + (isLoading ? 'is-loading' : '')} type="submit" onClick={search}>
             <span className="icon"><FaSearch></FaSearch></span>
           </button>
         </div>

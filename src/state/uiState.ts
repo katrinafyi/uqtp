@@ -1,10 +1,14 @@
 import { action, computed, Computed, Action, createContextStore } from 'easy-peasy';
 import { CourseActivity, CourseActivityGroup } from './types';
-import _ from 'lodash';
 import { PersistModel } from './persistState';
+import { addWeeks, startOfWeek } from 'date-fns';
+
+export const WEEK_START_MONDAY = { weekStartsOn: 1 } as const;
 
 export type UIState = {
   highlight: CourseActivityGroup | null,
+  weekStart: Date,
+  allWeeks: boolean,
   
   replaceActivityGroup: (payload: PersistModel['replaceOneSelectedGroup']['payload']) => any
 };
@@ -13,13 +17,19 @@ export type UIModel = UIState & {
   setHighlight: Action<UIModel, CourseActivityGroup | null>,
   isHighlighted: Computed<UIModel, (c: CourseActivity) => boolean>,
 
+  setAllWeeks: Action<UIModel, boolean>,
+
+  setWeek: Action<UIModel, Date>,
+  shiftWeek: Action<UIModel, number>,
+
   selectHighlightedGroup: Computed<UIModel, (group: string) => any>
 };
 
 
 const initialState = {
   highlight: null,
-  setSelectedGroup: () => null,
+  weekStart: startOfWeek(new Date(), WEEK_START_MONDAY),
+  allWeeks: true,
 }
 
 export type UIModelParams = {
@@ -36,6 +46,19 @@ export const model = ({ replaceActivityGroup }: UIModelParams): UIModel => ({
 
   isHighlighted: computed((s) => (session) => {
     return session.course === s.highlight?.course && session.activity === s.highlight.activity;
+  }),
+
+  setAllWeeks: action((s, b) => {
+    s.allWeeks = b;
+  }),
+
+  setWeek: action((s, week) => {
+    s.weekStart = week;
+  }),
+
+  shiftWeek: action((s, n) => {
+    if (!s.weekStart) return;
+    s.weekStart = addWeeks(s.weekStart, n);
   }),
 
   selectHighlightedGroup: computed(s => group => {
