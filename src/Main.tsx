@@ -23,7 +23,8 @@ const Main = () => {
   const [importError, setImportError] = useState<string | null>(null);
   
   const importFile = async (file: File | undefined) => {
-    // ev.preventDefault();
+    if (!file) return;
+    
     try {
       const rows = await parseExcelFile(file!); 
       const parsed = parseSheetRows(rows);
