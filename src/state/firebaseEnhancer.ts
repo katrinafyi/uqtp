@@ -4,14 +4,15 @@ import { StoreEnhancer, AnyAction, Action, Reducer, PreloadedState } from "redux
 
 type DocRef = firebase.firestore.DocumentReference;
 
-export const makeFirestorePersistEnhancer = 
-  <T>(firebaseAuth: firebase.auth.Auth,
-    getDocRef: (user: firebase.User | null) => DocRef | null, 
-    setStateType: string,
-    blacklistTypes?: string[],
-    defaultState?: T,
-    migrateState?: (state: T) => T | null, 
-    ): StoreEnhancer => {
+export const makeFirestorePersistEnhancer = <T>(
+  firebaseAuth: firebase.auth.Auth,
+  getDocRef: (user: firebase.User | null) => DocRef | null, 
+  setStateType: string,
+  blacklistTypes?: string[],
+  defaultState?: T,
+  migrateState?: (state: T) => T | null, 
+  cleanState?: (state: any) => any,
+): StoreEnhancer => {
   
   const auth = firebaseAuth ?? globalAuth;
   const migrate = migrateState ?? (() => null);
@@ -38,8 +39,9 @@ export const makeFirestorePersistEnhancer =
         const newState = reducer(s, a as A);
         // @ts-ignore
         if (newState !== s && newState != null) {
-         //console.log("... uploading new state to firebase", newState);
-          getDocRef(user)!.set(newState)
+          //console.log("... uploading new state to firebase", newState);
+          // @ts-ignore
+          getDocRef(user)!.set(cleanState ? cleanState(newState) : newState);
         }
         return s;
       };

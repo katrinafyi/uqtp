@@ -183,12 +183,8 @@ export const model: PersistModel = {
   ),
 };
 
-// export const store = createStore(model);
-
-
 const typedHooks = createTypedHooks<PersistModel>();
 
-// 👇 export the typed hooks
 export const useStoreActions = typedHooks.useStoreActions;
 export const useStoreDispatch = typedHooks.useStoreDispatch;
 export const useStoreState = typedHooks.useStoreState;
@@ -208,3 +204,10 @@ export const mapCurrentTimetableActions = (a: Actions<PersistModel>) => ({
   setSelectedGroups: a.setSelectedGroups,
   replaceOneSelectedGroup: a.replaceOneSelectedGroup,
 });
+
+export const cleanState = (s: PersistModel) => {
+  delete s.isSessionVisible;
+  delete s.currentTimetable;
+  delete s.activities;
+  return s;
+}

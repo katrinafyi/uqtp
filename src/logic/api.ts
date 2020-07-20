@@ -1,4 +1,5 @@
 import { CourseEvent } from "../state/types";
+import { parse } from "date-fns";
 
 const ENDPOINT = 'https://asia-northeast1-uq-toilet-paper.cloudfunctions.net/proxy/even/rest/timetable/subjects';
 
@@ -47,6 +48,8 @@ const mappings = {
   campus: 'campus',
   location: 'location',
   duration: (data: any) => parseFloat(data.duration),
+  startDate: (data: any) => parse(data.start_date, 'd/M/yyyy', new Date()).toJSON(),
+  weekPattern: 'week_pattern',
 };
 
 const convertActivity = (data: any): CourseEvent => {

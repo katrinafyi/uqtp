@@ -1,17 +1,16 @@
 import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import './App.scss';
 import FileInput from './components/FileInput';
-import { HighlightContext } from './components/HightlightContext';
-import { isHighlighted, coerceToArray, makeActivityKey } from './logic/functions';
+import { isHighlighted } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './components/MyTimetableHelp';
 import SessionSelectors from './components/SessionSelectors';
-import { CourseEvent, CourseActivityGroup } from './state/types';
 import Timetable from './components/Timetable';
 import TimetableSelector from './components/TimetableSelector';
 import CourseSearcher from './components/CourseSearcher';
 import { useStoreState, useStoreActions } from './state/persistState';
+import { UIStore } from './state/uiState';
 
 
 const Main = () => {
@@ -46,32 +45,7 @@ const Main = () => {
     setImportError(null);
   };
 
-  const [highlight, setHighlight] = useState<CourseActivityGroup | null>(null);
-  
-
-  const visibleSessions = useMemo(() => {
-
-    return timetable.allSessions
-      .filter(x => isSessionVisible(x) || isHighlighted(x, highlight))
-      .map(x => ({...x, numGroups: Object.keys(activities?.[x.course]?.[x.activity] ?? {}).length}));
-
-  }, [timetable.allSessions, isSessionVisible, highlight, activities]);
-
-  const selectHighlightedGroup = useCallback((group: string | null) => {
-    if (highlight == null) {
-      throw new Error('Attempting to set highlight group but nothing is highlighted.');
-    }
-
-    const {course, activity, group: old} = highlight;
-    if (group != null) {
-      replaceActivityGroup({course, activity, old, new: group});
-    }
-  }, [highlight, replaceActivityGroup]);
-
-  
-
- //console.log(visibleSessions);
-
+  //console.log(visibleSessions);
 
   return <>
       <div className="container">
@@ -106,12 +80,12 @@ const Main = () => {
             Changes to your selected classes are saved automatically. 
         </div></div> */}
 
-        <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup: selectHighlightedGroup}}>
+        <UIStore.Provider initialData={{replaceActivityGroup}}>
           {/* <h4 className="title is-4">Selected Classes</h4> */}
           <SessionSelectors></SessionSelectors>
 
           <h4 className="title is-4">Timetable</h4>
-          <Timetable selectedSessions={visibleSessions}></Timetable>
+          <Timetable></Timetable>
           <div className="content">
             <ul>
               <li>Changes to your timetable and classes are saved automatically.</li>
@@ -120,7 +94,7 @@ const Main = () => {
               <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just click the update button.</li>
             </ul>
           </div>
-        </HighlightContext.Provider>
+        </UIStore.Provider>
       </div>
     </>;
   ;

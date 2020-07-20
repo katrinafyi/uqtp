@@ -1,19 +1,16 @@
-import React, { memo, useContext } from 'react';
+import React, { memo, useMemo } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from '../state/types';
 import { computeDayTimeArrays, makeSessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime } from '../logic/functions';
 
-import { HighlightContext } from './HightlightContext';
 import { FaLock } from 'react-icons/fa';
 
 // @ts-ignore
 import LongPress from 'react-long';
 
 import './Timetable.scss';
-
-export type Props = {
-    selectedSessions: CourseEvent[],
-}
+import { UIStore } from '../state/uiState';
+import { useStoreState } from '../state/persistState';
 
 const START_HOUR = 8;
 const END_HOUR = 19;
@@ -28,7 +25,7 @@ type TimetableSessionProps = {
     numInHour: number
 }
 
-const TimetableSession = (({hour, session, clash, left, right, index, numInHour}: TimetableSessionProps) => {
+const TimetableSession = (({session, clash, numInHour}: TimetableSessionProps) => {
     const activityCSS: {[type: string]: string} = {
         'LEC': 'has-text-info',
         'TUT': 'has-text-success',
@@ -40,11 +37,14 @@ const TimetableSession = (({hour, session, clash, left, right, index, numInHour}
     const activityClass = (activityCSS[session.activityType!]) ?? defaultCSS;
 
 
-    const {highlight, setHighlight, setSelectedGroup} = useContext(HighlightContext);
+    const highlight = UIStore.useStoreState(s => s.highlight);
+    const selectHighlightedGroup = UIStore.useStoreState(s => s.selectHighlightedGroup);
+    const setHighlight = UIStore.useStoreActions(s => s.setHighlight);
+
     const thisHighlighted = isHighlighted(session, highlight);
     const onClick = () => {
         if (highlight && thisHighlighted) {
-            setSelectedGroup(session.group);
+            selectHighlightedGroup(session.group);
             setHighlight(null);
         } else {
             setHighlight({...session});
@@ -99,7 +99,7 @@ const makeTimeElements = () => _.range(START_HOUR, END_HOUR+1).map(
 );
 
 const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
-    return _.range(START_HOUR, END_HOUR+1).map((h, i) =>
+    return _.range(START_HOUR, END_HOUR+1).map((h) =>
     <div className={"td py-0 col-day"} key={`day:${day},hour:${h}`}>
         <div className="hour">
         {daySessions[h].map((s, i) => 
@@ -117,9 +117,22 @@ const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][]) => {
     </div>);
 };
 
-const Timetable: React.FC<Props> = ({selectedSessions}) => {
+const Timetable = () => {
 
-    const byDayTime = computeDayTimeArrays(selectedSessions); 
+    const timetable = useStoreState(s => s.currentTimetable);
+    const activities = useStoreState(s => s.activities);
+    const isSessionVisible = useStoreState(s => s.isSessionVisible);
+    
+    const highlight = UIStore.useStoreState(s => s.highlight);
+
+    const visibleSessions = useMemo(() => {
+        return timetable.allSessions
+          .filter(x => isSessionVisible(x) || isHighlighted(x, highlight))
+          .map(x => ({...x, numGroups: Object.keys(activities?.[x.course]?.[x.activity] ?? {}).length}));
+      }, [timetable.allSessions, isSessionVisible, highlight, activities]);
+
+    const byDayTime = useMemo(() => computeDayTimeArrays(visibleSessions), 
+        [visibleSessions]); 
 
     const timeCells = makeTimeElements();
     // dayCells[d][h]
