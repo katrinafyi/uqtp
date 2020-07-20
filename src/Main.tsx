@@ -16,6 +16,9 @@ import { useStoreState, useStoreActions } from './state/persistState';
 
 const Main = () => {
   const timetable = useStoreState(s => s.currentTimetable);
+  const activities = useStoreState(s => s.activities);
+
+  const isSessionVisible = useStoreState(s => s.isSessionVisible);
 
   const replaceActivityGroup = useStoreActions(s => s.replaceOneSelectedGroup);
   const updateSessions = useStoreActions(s => s.updateSessions);
@@ -44,26 +47,19 @@ const Main = () => {
   };
 
   const [highlight, setHighlight] = useState<CourseActivityGroup | null>(null);
-  const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
   
-  const activitiesByGroup = useMemo(
-    () => _.groupBy(timetable.allSessions, makeActivityKey), 
-    [timetable.allSessions]);
 
-  useEffect(() => {
-    const isSessionSelected = (x: CourseEvent) => 
-      coerceToArray(_.get(timetable.selectedGroups, [x.course, x.activity], null)).includes(x.group);
+  const visibleSessions = useMemo(() => {
 
-    setVisibleSessions(timetable.allSessions
-    .filter(x => (isSessionSelected(x) && (timetable.courseVisibility?.[x.course] ?? true))
-      || isHighlighted(x, highlight))
-    .map(x => ({...x, numGroups: activitiesByGroup[makeActivityKey(x)]?.length ?? 0})));
+    return timetable.allSessions
+      .filter(x => isSessionVisible(x) || isHighlighted(x, highlight))
+      .map(x => ({...x, numGroups: Object.keys(activities?.[x.course]?.[x.activity] ?? {}).length}));
 
-  }, [highlight, timetable.selectedGroups, timetable.allSessions, timetable.courseVisibility, activitiesByGroup]);
+  }, [timetable.allSessions, isSessionVisible, highlight, activities]);
 
   const selectHighlightedGroup = useCallback((group: string | null) => {
     if (highlight == null) {
-      throw new Error('setting highlight group but nothing is highlighted.');
+      throw new Error('Attempting to set highlight group but nothing is highlighted.');
     }
 
     const {course, activity, group: old} = highlight;

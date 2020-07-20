@@ -1,11 +1,17 @@
 import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
-import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities } from './types';
+import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { coerceToArray } from '../logic/functions';
 import _ from 'lodash';
+import { ActivitiesNested } from './persistState';
 
-export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
+export type UiState = {
+  highlight: CourseActivityGroup | null,
+  setHighlight: (highlight: CourseActivityGroup | null) => any,
+
+  setSelectedGroup: (group: string | null) => any,
+}
 
 export type PersistModel = PersistState & {
   setState: Action<PersistModel, PersistState>,
@@ -28,7 +34,6 @@ export type PersistModel = PersistState & {
   setOneSelectedGroup: Action<PersistModel, CourseActivityGroup & { selected: boolean }>,
   replaceOneSelectedGroup: Action<PersistModel, CourseActivity & { old: string, new: string }>,
 
-  isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>
 };
 
 
@@ -169,18 +174,7 @@ export const model: PersistModel = {
       [payload.course, payload.activity],
       oldGroups.map(x => x === payload.old ? payload.new : x)
     );
-  }),
-
-  isSessionVisible: computed([
-    s => s.timetables[s.current]!.selectedGroups,
-    s => s.timetables[s.current]!.courseVisibility,
-  ], memo((selected: SelectedActivities, visibilities?: CourseVisibility) => (c: CourseEvent) => {
-
-      return coerceToArray(selected?.[c.course]?.[c.activity] ?? null).includes(c.group) 
-        && (visibilities?.[c.course] ?? true);
-        
-    }, 1)
-  ),
+  })
 };
 
 // export const store = createStore(model);

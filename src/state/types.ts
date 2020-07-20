@@ -41,11 +41,13 @@ export type SelectedActivities = {
     [course: string]: { [activity: string]: string[] | string }
 }
 
+export type CourseVisibility = {[course: string]: boolean}
+
 export type Timetable = {
     name: string,
     allSessions: CourseEvent[],
     selectedGroups: SelectedActivities,
-    courseVisibility?: {[course: string]: boolean}
+    courseVisibility?: CourseVisibility
 }
 
 export const EMPTY_TIMETABLE: Timetable = {
