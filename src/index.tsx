@@ -5,7 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
-import { model } from './state/easy-peasy';
+import { model, cleanState } from './state/persistState';
 import { createStore, StoreProvider } from 'easy-peasy';
 import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
 import { userFirestoreDocRef, auth } from './state/firebase';
@@ -42,7 +42,7 @@ const initialState = migratedState ?? previousState;
 const firestoreEnhancer = makeFirestorePersistEnhancer(
   // @ts-ignore
   auth, userFirestoreDocRef, '@action.setState', ['@action.setUser'],
-  DEFAULT_PERSIST, migratePeristState);
+  DEFAULT_PERSIST, migratePeristState, cleanState);
 
 const rootStore = createStore(model, 
   { initialState, enhancers: [firestoreEnhancer] });

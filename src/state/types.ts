@@ -10,6 +10,9 @@ export enum DayOfWeek {
 export const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 export type DayNames = typeof DAY_NAMES;
 
+export const DEFAULT_WEEK_PATTERN = '1'.repeat(65);
+
+
 export type Course = {
     course: string,
 }
@@ -35,17 +38,22 @@ export type CourseEvent = CourseActivityGroup & {
     location: string, 
     /** Duration of activity is in minutes. */
     duration: number,
+
+    startDate?: string,
+    weekPattern?: string,
 }
 
 export type SelectedActivities = {
     [course: string]: { [activity: string]: string[] | string }
 }
 
+export type CourseVisibility = {[course: string]: boolean}
+
 export type Timetable = {
     name: string,
     allSessions: CourseEvent[],
     selectedGroups: SelectedActivities,
-    courseVisibility?: {[course: string]: boolean}
+    courseVisibility?: CourseVisibility
 }
 
 export const EMPTY_TIMETABLE: Timetable = {

@@ -1,5 +1,5 @@
 import React from "react"
-import { useStoreState } from "../state/easy-peasy";
+import { useStoreState } from "../state/persistState";
 
 const UserInfoView = () => {
   const user = useStoreState(s => s.user);

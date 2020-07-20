@@ -1,6 +1,6 @@
 import { Timetable, CourseEvent, SelectedActivities } from "./types";
 import { StateMetadata, PersistState, CURRENT_VERSION } from "./schema";
-import { UserState } from "./ducks/user";
+import { UserState } from "./schema";
 import _ from "lodash";
 import uuidv4 from 'uuid/v4';
 

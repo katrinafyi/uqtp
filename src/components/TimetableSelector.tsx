@@ -2,7 +2,7 @@ import React, { useState, createRef, useEffect, memo, useMemo } from "react"
 import { FaSave, FaPencilAlt, FaCopy, FaPlus, FaTrash } from "react-icons/fa";
 import { Timetable } from "../state/types";
 import _ from "lodash";
-import { useStoreState, useTimetableActions } from "../state/easy-peasy";
+import { useStoreState, useTimetableActions } from "../state/persistState";
 
 type TimetableTagProps = {
   id: string,

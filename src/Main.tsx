@@ -1,21 +1,19 @@
-import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 import FileInput from './components/FileInput';
-import { HighlightContext } from './components/HightlightContext';
-import { isHighlighted, coerceToArray, makeActivityKey } from './logic/functions';
 import { parseExcelFile, parseSheetRows } from './logic/importer';
 import { MyTimetableHelp } from './components/MyTimetableHelp';
 import SessionSelectors from './components/SessionSelectors';
-import { CourseEvent, CourseActivityGroup } from './state/types';
 import Timetable from './components/Timetable';
 import TimetableSelector from './components/TimetableSelector';
 import CourseSearcher from './components/CourseSearcher';
-import { useStoreState, useStoreActions } from './state/easy-peasy';
+import { useStoreActions } from './state/persistState';
+import { UIStore } from './state/uiState';
+import { WeekSelector } from './components/WeekSelector';
 
 
 const Main = () => {
-  const timetable = useStoreState(s => s.currentTimetable);
+
 
   const replaceActivityGroup = useStoreActions(s => s.replaceOneSelectedGroup);
   const updateSessions = useStoreActions(s => s.updateSessions);
@@ -43,39 +41,7 @@ const Main = () => {
     setImportError(null);
   };
 
-  const [highlight, setHighlight] = useState<CourseActivityGroup | null>(null);
-  const [visibleSessions, setVisibleSessions] = useState<CourseEvent[]>([]);
-  
-  const activitiesByGroup = useMemo(
-    () => _.groupBy(timetable.allSessions, makeActivityKey), 
-    [timetable.allSessions]);
-
-  useEffect(() => {
-    const isSessionSelected = (x: CourseEvent) => 
-      coerceToArray(_.get(timetable.selectedGroups, [x.course, x.activity], null)).includes(x.group);
-
-    setVisibleSessions(timetable.allSessions
-    .filter(x => (isSessionSelected(x) && (timetable.courseVisibility?.[x.course] ?? true))
-      || isHighlighted(x, highlight))
-    .map(x => ({...x, numGroups: activitiesByGroup[makeActivityKey(x)]?.length ?? 0})));
-
-  }, [highlight, timetable.selectedGroups, timetable.allSessions, timetable.courseVisibility, activitiesByGroup]);
-
-  const selectHighlightedGroup = useCallback((group: string | null) => {
-    if (highlight == null) {
-      throw new Error('setting highlight group but nothing is highlighted.');
-    }
-
-    const {course, activity, group: old} = highlight;
-    if (group != null) {
-      replaceActivityGroup({course, activity, old, new: group});
-    }
-  }, [highlight, replaceActivityGroup]);
-
-  
-
- //console.log(visibleSessions);
-
+  //console.log(visibleSessions);
 
   return <>
       <div className="container">
@@ -110,12 +76,17 @@ const Main = () => {
             Changes to your selected classes are saved automatically. 
         </div></div> */}
 
-        <HighlightContext.Provider value={{highlight, setHighlight, setSelectedGroup: selectHighlightedGroup}}>
+        <UIStore.Provider initialData={{replaceActivityGroup}}>
           {/* <h4 className="title is-4">Selected Classes</h4> */}
           <SessionSelectors></SessionSelectors>
 
           <h4 className="title is-4">Timetable</h4>
-          <Timetable selectedSessions={visibleSessions}></Timetable>
+
+          <div className="mb-5">
+            <WeekSelector></WeekSelector>
+          </div>
+          <Timetable></Timetable>
+
           <div className="content">
             <ul>
               <li>Changes to your timetable and classes are saved automatically.</li>
@@ -124,7 +95,7 @@ const Main = () => {
               <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just click the update button.</li>
             </ul>
           </div>
-        </HighlightContext.Provider>
+        </UIStore.Provider>
       </div>
     </>;
   ;

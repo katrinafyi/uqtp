@@ -1,6 +1,15 @@
 import { EMPTY_TIMETABLE, TimetablesState } from "./types"
-import { UserState } from "./ducks/user";
 import uuidv4 from 'uuid/v4';
+
+export type UserState = {
+    uid: string,
+    name: string | null,
+    email: string | null,
+    photo: string | null,
+    phone: string | null,
+    providers: string[] | null,
+    isAnon: boolean,
+} | null;
 
 export type StateMetadata<T = number> = {
     _meta?: {
