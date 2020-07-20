@@ -10,7 +10,7 @@ import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSi
 import { Modal, ModalCard } from './components/Modal';
 import UserInfoView from './components/UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useStoreState, useStoreActions } from './state/easy-peasy';
+import { useStoreState, useStoreActions } from './state/persistState';
 
 
 const App = () => {

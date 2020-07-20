@@ -5,7 +5,7 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
-import { model } from './state/easy-peasy';
+import { model } from './state/persistState';
 import { createStore, StoreProvider } from 'easy-peasy';
 import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
 import { userFirestoreDocRef, auth } from './state/firebase';

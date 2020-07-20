@@ -11,7 +11,7 @@ import { CourseEvent, CourseActivityGroup } from './state/types';
 import Timetable from './components/Timetable';
 import TimetableSelector from './components/TimetableSelector';
 import CourseSearcher from './components/CourseSearcher';
-import { useStoreState, useStoreActions } from './state/easy-peasy';
+import { useStoreState, useStoreActions } from './state/persistState';
 
 
 const Main = () => {

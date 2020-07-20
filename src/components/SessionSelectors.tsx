@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState, memo } from 'react';
 import { CourseActivityGroup, CourseActivity, Course } from '../state/types';
 import { coerceToArray } from '../logic/functions';
-import { useStoreActions, useStoreState } from '../state/easy-peasy';
+import { useStoreActions, useStoreState } from '../state/persistState';
 import { searchCourses } from '../logic/api';
 import { FaSyncAlt, FaCheck, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
 import classNames from 'classnames';
