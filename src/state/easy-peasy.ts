@@ -116,13 +116,19 @@ export const model: PersistModel = {
 
 
   updateSessions: action((s, sessions) => {
-    const newActivities = new Set(sessions.map(makeActivityGroupKey));
+    const newCourses = new Set(sessions.map(x => x.course));
    //console.log('newActivities', newActivities);
     const oldSessions = s.timetables[s.current]!.allSessions;
     s.timetables[s.current]!.allSessions = [
       ...sessions,
-      ...oldSessions.filter(x => !newActivities.has(makeActivityGroupKey(x)))
+      ...oldSessions.filter(x => !newCourses.has(x.course))
     ];
+
+    for (const x of sessions) {
+      if (s.timetables[s.current]!.selectedGroups?.[x.course]?.[x.activity] == null) {
+        _.set(s.timetables[s.current]!.selectedGroups, [x.course, x.activity], [x.group]);
+      }
+    }
   }),
 
   deleteCourse: action((s, course) => {
