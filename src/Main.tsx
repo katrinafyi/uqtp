@@ -39,7 +39,7 @@ const Main = () => {
     }
     setImportError(null);
   };
-  
+
   //console.log(visibleSessions);
 
   return <>
@@ -92,6 +92,7 @@ const Main = () => {
               <li>Be careful not to mix up semester 1 and semester 2!</li>
               <li>Some classes do not run every week. Always double check with your personal timetable.</li>
               <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just click the update button.</li>
+              <li>Click in a black space to add a custom timetable activity. You can use this to plan things like lunch and work hours.</li>
             </ul>
           </div>
         </UIStore.Provider>

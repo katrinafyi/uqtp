@@ -1,4 +1,4 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, thunk, Thunk } from 'easy-peasy';
+import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities } from './types';
 import { v4 as uuidv4 } from 'uuid';
