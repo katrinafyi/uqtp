@@ -136,9 +136,11 @@ const App = () => {
           <a href="https://kentonlam.xyz">Kenton Lam</a>.
           The source code is available on <a href="https://github.com/kentonlam/uqtp">GitHub</a>.
         </p>
-        <a href="https://paypal.me/kentonlam" className="button is-text">
-          <span className="icon"><FaCoffee></FaCoffee></span> <span>Buy me a coffee!</span>
-        </a>
+        <p>
+          <small>
+            {process.env.REACT_APP_BUILD_TIME} / {process.env.REACT_APP_COMMIT}
+          </small>
+        </p>
       </div>
     </footer></>;
   ;
