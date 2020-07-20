@@ -121,7 +121,7 @@ const Main = () => {
               <li>Changes to your timetable and classes are saved automatically.</li>
               <li>Be careful not to mix up semester 1 and semester 2!</li>
               <li>Some classes do not run every week. Always double check with your personal timetable.</li>
-              <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just search and add the course again.</li>
+              <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just click the update button.</li>
             </ul>
           </div>
         </HighlightContext.Provider>

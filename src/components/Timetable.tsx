@@ -16,7 +16,7 @@ export type Props = {
 }
 
 const START_HOUR = 8;
-const END_HOUR = 18;
+const END_HOUR = 19;
 
 type TimetableSessionProps = {
     hour: number,
