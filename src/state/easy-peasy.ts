@@ -2,7 +2,7 @@ import { action, computed, Computed, Action, createTypedHooks, Actions, memo, St
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { makeActivityGroupKey, coerceToArray } from '../logic/functions';
+import { coerceToArray } from '../logic/functions';
 import _ from 'lodash';
 
 export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
