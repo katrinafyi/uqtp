@@ -6,12 +6,12 @@ Timetable planner for UQ classes, made in Typescript and React. Uses React Redux
 
 ### Features
 - Sign-in using Google Firebase, saving to an online database.
-- Searching for courses from UQ's public timetable.
-- Managing multiple timetable profiles.
-- Displaying and selecting from all options for a class.
+- Easily search for courses from UQ's public timetable.
+- Manage multiple timetable profiles.
+- Display and select from all options for a class.
 - Select any number of options for a particular course activity.
 - Colours labels depending on class type.
-- Parsing classes from exported Excel file.
+- Manually import classes from exported Excel file.
 
 ## Usage
 The app can be built using a simple command:
