@@ -39,6 +39,10 @@
   overflow: hidden;
   // white-space: nowrap;
   // text-overflow: ellipsis;
+
+  &.col-time {
+    border: 1px solid transparent;
+  }
 }
 
 .hour {
