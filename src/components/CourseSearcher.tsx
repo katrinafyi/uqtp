@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { FaSearch } from "react-icons/fa";
 import { searchCourses, FullSearchResult, CourseSearchResult, compareSearchResultSemesters } from "../logic/api";
 import _ from "lodash";
@@ -29,7 +29,7 @@ enum SearchState {
   LOADING, ERROR, DONE,
 }
 
-export const CourseSearcher = () => {
+export const CourseSearcher = memo(() => {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState<SearchState>(SearchState.DONE);
   const [results, setResults] = useState<FullSearchResult | null>(null);
@@ -93,6 +93,6 @@ export const CourseSearcher = () => {
       Search for your courses here. You can also include the semester or delivery mode, e.g. &ldquo;MATH1051 S2 EX&rdquo;.
     </div>}
   </>;
-};
+});
 
 export default CourseSearcher;

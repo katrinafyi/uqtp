@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, memo } from 'react';
 import { CourseActivityGroup, CourseActivity, Course } from '../state/types';
 import { coerceToArray } from '../logic/functions';
 import { useStoreActions, useStoreState } from '../state/easy-peasy';
@@ -12,21 +12,23 @@ const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActi
   const setOneSelectedGroup = useStoreActions(s => s.setOneSelectedGroup);
   
   const onChange = (ev: React.ChangeEvent<HTMLInputElement>) => 
-    setOneSelectedGroup({ course, activity, group, selected: ev.target.checked})
+    setOneSelectedGroup({ course, activity, group, selected: ev.target.checked});
 
-  return <label style={{ margin: '0 0.25rem' }} className="checkbox" key={group} htmlFor={group}>
-    <input type="checkbox" id={group} value={group}
+  const id = `${course}-${activity}-${group}`;
+
+  return <label style={{ margin: '0 0.25rem' }} className="checkbox" key={group} htmlFor={id}>
+    <input type="checkbox" id={id} value={group}
       checked={selected} onChange={onChange}
     /> {group}
   </label>;
 };
 
 // component for selecting groups of a particular activity, e.g. LEC1 01 02 03...
-const ActivityGroupSelector = ({ course, activity }: CourseActivity) => {
+const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
   const selected = coerceToArray(useStoreState(s => s.currentTimetable.selectedGroups?.[course]?.[activity]));
   const groups = useStoreState(s => s.activities?.[course]?.[activity] ?? {});
 
-  const groupKeys = Object.keys(groups);
+  const groupKeys = useMemo(() => Object.keys(groups), [groups]);
 
   const numSelected = selected.length;
 
@@ -54,16 +56,16 @@ const ActivityGroupSelector = ({ course, activity }: CourseActivity) => {
       </details>
     </div>
   );
-};
+});
 
 enum UpdatingState {
   IDLE, UPDATING, DONE, ERROR
 }
 
 
-const CourseSessionSelector = ({ course }: Course) => {
+const CourseSessionSelector = memo(({ course }: Course) => {
 
-  const activities = useStoreState(s => s.activities[course]);
+  const activities = useStoreState(s => s.activities[course]) ?? {};
   const visible = useStoreState(s => s.currentTimetable.courseVisibility?.[course]) ?? true;
 
   const setCourseVisibility = useStoreActions(s => s.setCourseVisibility);
@@ -85,7 +87,7 @@ const CourseSessionSelector = ({ course }: Course) => {
   const [updating, setUpdating] = useState<UpdatingState>(UpdatingState.IDLE);
   const [updateError, setUpdateError] = useState('');
 
-  const update = async () => {
+  const update = useCallback(async () => {
     try {
         setUpdating(UpdatingState.UPDATING);
         setUpdateError('');
@@ -100,24 +102,20 @@ const CourseSessionSelector = ({ course }: Course) => {
         setUpdating(UpdatingState.ERROR);
         console.error(e);
     }
-  }
+  }, [course, updateSessions]);
 
-  let icon = null;
-  let iconClass = null;
-  switch (updating) {
-    case UpdatingState.IDLE:
-      icon = <FaSyncAlt></FaSyncAlt>;
-      break;
-    case UpdatingState.UPDATING:
-      iconClass = 'is-loading';
-      break;
-    case UpdatingState.DONE:
-      icon = <FaCheck></FaCheck>;
-      break;
-    case UpdatingState.ERROR:
-      icon = <FaExclamationTriangle></FaExclamationTriangle>;
-      iconClass = 'is-danger';
-  }
+  const [icon, iconClass] = useMemo(() => {
+    switch (updating) {
+      case UpdatingState.IDLE:
+        return [<FaSyncAlt></FaSyncAlt>, null];
+      case UpdatingState.UPDATING:
+        return [null, 'is-loading'];
+      case UpdatingState.DONE:
+        return [<FaCheck></FaCheck>, null];
+      case UpdatingState.ERROR:
+        return [<FaExclamationTriangle></FaExclamationTriangle>, 'is-danger'];
+    }
+  }, [updating]);
 
   return (
     <div className="message session-selector">
@@ -127,7 +125,7 @@ const CourseSessionSelector = ({ course }: Course) => {
             onChange={setVisibleCallback}
           ></input> {course}
         </label>
-        <p className="buttons">
+        <div className="buttons">
           <button className={classNames('button is-small is-dark', iconClass)} type="button"
             title={updateError || "Update this course"} onClick={update}>
             <span className="icon is-small">
@@ -140,7 +138,7 @@ const CourseSessionSelector = ({ course }: Course) => {
               <FaTimes></FaTimes>
             </span>
           </button>
-        </p>
+        </div>
       </div>
 
       <div className="message-body">
@@ -151,9 +149,9 @@ const CourseSessionSelector = ({ course }: Course) => {
       </div>
 
     </div>);
-}
+});
 
-const SessionSelectors = () => {
+const SessionSelectors = memo(() => {
 
   const activitiesByCourse = useStoreState(s => s.activities);
   const courses = useMemo(() => Object.keys(activitiesByCourse).sort(), [activitiesByCourse]);
@@ -163,6 +161,6 @@ const SessionSelectors = () => {
       <CourseSessionSelector course={c}/>
     </div>)}
   </div>;
-}
+});
 
 export default SessionSelectors;

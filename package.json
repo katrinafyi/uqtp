@@ -11,6 +11,7 @@
     "@types/node": "^12.12.48",
     "@types/react": "^16.9.41",
     "@types/react-dom": "^16.9.8",
+    "@welldone-software/why-did-you-render": "^4.2.6",
     "a11y-react-emoji": "^1.1.2",
     "bulma": "^0.9.0",
     "classnames": "^2.2.6",

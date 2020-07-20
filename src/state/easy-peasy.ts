@@ -1,4 +1,4 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions } from 'easy-peasy';
+import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup } from './types';
 import { v4 as uuidv4 } from 'uuid';
@@ -54,16 +54,18 @@ export const model: PersistModel = {
     };
   }),
 
-  currentTimetable: computed(s => {
+  currentTimetable: computed(memo((s: State<PersistModel>) => {
    //console.log('timetable', s);
    //console.log(s.currentTimetable);
     // debugger;
     return s.timetables[s.current];
-  }),
+  }, 2)),
 
   activities: computed(
     [s => s.timetables[s.current]!.allSessions],
-    sessions => {
+    memo((sessions: CourseEvent[]) => {
+      // console.error("recomputing activities");
+      
       const activities: ActivitiesNested = {};
       for (const s of sessions) {
         if (activities?.[s.course]?.[s.activity]?.[s.group] == null) {
@@ -72,7 +74,7 @@ export const model: PersistModel = {
         activities[s.course][s.activity][s.group].push(s);
       }
       return activities;
-    }
+    }, 2)
   ),
 
   new: action((s, name) => {
