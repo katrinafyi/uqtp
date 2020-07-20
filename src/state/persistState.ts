@@ -165,15 +165,17 @@ export const model: PersistModel = {
       _.set(s.timetables[s.current]!.selectedGroups, [CUSTOM_COURSE, label], []);
     }
 
-    // @ts-ignore
-    s.timetables[s.current]!.selectedGroups[CUSTOM_COURSE]![label]!.push(newGroup);
+    if (!s.timetables[s.current]!.selectedGroups[CUSTOM_COURSE]![label]!.includes(newGroup)) {
+      // @ts-ignore
+      s.timetables[s.current]!.selectedGroups[CUSTOM_COURSE]![label]!.push(newGroup);
+    }
   }),
 
   deleteCourse: action((s, course) => {
     s.timetables[s.current]!.allSessions = s.timetables[s.current]!.allSessions.filter(
       x => x.course !== course
     );
-    s.timetables[s.current]!.selectedGroups[course] = {};
+    // s.timetables[s.current]!.selectedGroups[course] = {};
   }),
 
   setCourseVisibility: action((s, {course, visible}) => {
