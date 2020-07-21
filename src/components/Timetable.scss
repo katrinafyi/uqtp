@@ -110,7 +110,8 @@
   // color: black;
 
   &.highlighted {
-    background-color: hsl(219, 70%, 96%); //hsl(0; 0%; 99.9%);
+    // background-color: hsl(219, 70%, 96%) !important; //hsl(0; 0%; 99.9%);
+    border-color: $grey-dark;
     // overflow: visible;
     z-index: 10;
   }
