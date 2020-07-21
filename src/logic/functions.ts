@@ -118,7 +118,7 @@ export const getCourseGroups = memo((events: CourseEvent[]) => {
 }, 10);
 
 // returns a string like CSSE2310|PRA1
-export const makeActivityKey = (session: CourseEvent) => 
+export const makeActivityKey = (session: CourseActivity) => 
     session.course + '|' + session.activity;
 
 export const sessionEndTime = (e: CourseEvent) => {
@@ -134,11 +134,11 @@ export const formatTime = (t: ClockTime) => {
     return d.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric'});
 }
 
-export const makeActivityGroupKey = (session: CourseEvent) =>
-    [session.course, session.activity, session.group].join('|');
+export const makeActivityGroupKey = (g: CourseActivityGroup) =>
+    `${g.course}|${g.activity}|${g.group}`;
 
-export const makeSessionKey = (session: CourseEvent) => 
-    [session.course, session.activity, session.group, session.day, session.time.hour].join('|');
+export const makeActivitySessionKey = (s: CourseEvent) => 
+    `${s.course}|${s.activity}|${s.group}|${s.day}${s.time.hour}|${s.time.minute}`;
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 

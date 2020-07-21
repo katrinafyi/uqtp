@@ -1,11 +1,12 @@
 import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
-import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities } from './types';
+import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities, Course } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { coerceToArray, makeActivityKey, makeCustomSession, CUSTOM_COURSE } from '../logic/functions';
+import { coerceToArray, makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
 import _ from 'lodash';
 
 export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
+export type SelectedNested = {[course: string]: {[activity: string]: string[]}};
 
 export type PersistModel = PersistState & {
   setState: Action<PersistModel, PersistState>,
@@ -14,6 +15,7 @@ export type PersistModel = PersistState & {
 
   currentTimetable: Computed<PersistModel, Timetable>,
   activities: Computed<PersistModel, ActivitiesNested>,
+  selected: Computed<PersistModel, SelectedNested>,
 
   new: Action<PersistModel, string | undefined | void>,
   select: Action<PersistModel, string>,
@@ -24,7 +26,8 @@ export type PersistModel = PersistState & {
   updateCourseSessions: Action<PersistModel, CourseEvent[]>,
   updateActivitySessions: Action<PersistModel, CourseEvent[]>,
   deleteCourse: Action<PersistModel, string>,
-  setCourseVisibility: Action<PersistModel, { course: string, visible: boolean }>,
+  deleteActivitySession: Action<PersistModel, CourseEvent>,
+  setCourseVisibility: Action<PersistModel, Course & { visible: boolean }>,
   setSelectedGroups: Action<PersistModel, CourseActivity & { group: string[] }>,
   setOneSelectedGroup: Action<PersistModel, CourseActivityGroup & { selected: boolean }>,
   replaceOneSelectedGroup: Action<PersistModel, CourseActivity & { old: string, new: string }>,
@@ -80,6 +83,26 @@ export const model: PersistModel = {
       return activities;
     }, 2)
   ),
+
+  selected: computed([
+    s => s.currentTimetable.selectedGroups,
+    s => s.activities,
+  ], memo((selected: SelectedActivities, activities: ActivitiesNested) => {
+
+    const out: SelectedNested = {};
+
+    for (const c of Object.keys(activities)) {
+      out[c] = {};
+      for (const a of Object.keys(activities[c])) {
+        // get selected groups for this course+activity, then filter groups to
+        // those which actually have activities.
+        out[c][a] = coerceToArray(selected?.[c]?.[a])
+          .filter(g => activities?.[c]?.[a]?.[g]?.length);
+      }
+    }
+
+    return out;
+  }, 1)),
 
   new: action((s, name) => {
     const id = uuidv4();
@@ -151,6 +174,12 @@ export const model: PersistModel = {
     }
   }),
 
+  deleteActivitySession: action((s, c) => {
+    const key = makeActivitySessionKey(c);
+    s.timetables[s.current]!.allSessions = s.currentTimetable.allSessions
+      .filter(x => makeActivitySessionKey(x) !== key);
+  }),
+
   addCustomEvent: action((s, { day, hour, label, duration }) => {
     const sessions = Object.keys(s.activities[CUSTOM_COURSE]?.[label] ?? []);
     if (sessions.length === 0)
@@ -212,8 +241,8 @@ export const model: PersistModel = {
   }),
 
   isSessionVisible: computed([
-    s => s.timetables[s.current]!.selectedGroups,
-    s => s.timetables[s.current]!.courseVisibility,
+    s => s.currentTimetable.selectedGroups,
+    s => s.currentTimetable.courseVisibility,
   ], memo((selected: SelectedActivities, visibilities?: CourseVisibility) => (c: CourseEvent) => {
 
       return coerceToArray(selected?.[c.course]?.[c.activity] ?? null).includes(c.group) 

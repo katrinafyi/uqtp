@@ -25,18 +25,19 @@ const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActi
 
 // component for selecting groups of a particular activity, e.g. LEC1 01 02 03...
 const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
-  const selected = coerceToArray(useStoreState(s => s.currentTimetable.selectedGroups?.[course]?.[activity]));
+  const selected = useStoreState(s => s.selected?.[course]?.[activity]) ?? [];
   const groups = useStoreState(s => s.activities?.[course]?.[activity]) ?? {};
 
+  const numSelected = selected.length;
   const groupKeys = useMemo(() => Object.keys(groups), [groups]);
-
-  const numSelected = selected.filter(g => groups[g] != null).length;
 
   let countClass = 'has-text-success-dark	has-text-weight-medium ';
   if (numSelected === 0)
     countClass = 'has-text-danger-dark has-text-weight-medium ';
   else if (numSelected === 1 && groupKeys.length === 1)
     countClass = 'has-text-grey ';
+
+  const countText = `(${numSelected}/${groupKeys.length})`;
 
   return (
     <div className="column is-narrow py-0" key={activity}>
@@ -45,7 +46,7 @@ const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
         <summary style={{ cursor: 'pointer' }}>
           <span className="has-text-weight-medium">{activity}</span>
           &nbsp;
-          <span className={countClass}>({numSelected}/{groupKeys.length})</span>
+          <span className={countClass}>{countText}</span>
         </summary>
 
         <div style={{ margin: '0 -0.25rem' }}>
