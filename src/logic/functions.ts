@@ -175,5 +175,5 @@ export const makeCustomSession = (label: string, day: number, hour: number, dura
     };
 };
 
-export const toCSSColour = (c?: RGBAColour) => 
-    c && `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a ?? 1})`;
+export const toCSSColour = (c?: RGBAColour) => c;
+    // c && `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a ?? 1})`;

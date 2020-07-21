@@ -38,7 +38,7 @@ export type PersistModel = PersistState & {
   setCourseVisibility: Action<PersistModel, Course & { visible: boolean }>,
   isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>,
 
-  setCourseColour: Action<PersistModel, Course & { colour: RGBAColour }>,
+  setCourseColour: Action<PersistModel, Course & { colour?: RGBAColour }>,
 };
 
 
@@ -258,7 +258,10 @@ export const model: PersistModel = {
   setCourseColour: action((s, {course, colour}) => {
     if (s.timetables[s.current]!.courseColours == null)
       s.timetables[s.current]!.courseColours = {};
-    s.timetables[s.current]!.courseColours![course] = colour;
+    if (colour)
+      s.timetables[s.current]!.courseColours![course] = colour;
+    else 
+      delete s.timetables[s.current]!.courseColours![course];
   }),
 };
 

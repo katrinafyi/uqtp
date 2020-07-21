@@ -12,7 +12,7 @@ export type DayNames = typeof DAY_NAMES;
 
 export const DEFAULT_WEEK_PATTERN = '1'.repeat(65);
 
-export const DEFAULT_COURSE_COLOUR: RGBAColour = { r: 250, g: 250, b: 250 };
+export const DEFAULT_COURSE_COLOUR: RGBAColour = '#fafafa';
 
 
 export type Course = {
@@ -51,7 +51,8 @@ export type SelectedActivities = {
 
 export type CourseVisibility = {[course: string]: boolean};
 
-export type RGBAColour = {r: number, g: number, b: number, a?: number};
+// export type RGBAColour = {r: number, g: number, b: number, a?: number};
+export type RGBAColour = string;
 export type CourseColours = {[course: string]: RGBAColour};
 
 export type Timetable = {

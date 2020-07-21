@@ -23,7 +23,6 @@
     "lodash": "^4.17.19",
     "node-sass": "^4.14.1",
     "react": "^16.13.1",
-    "react-color": "^2.18.1",
     "react-dom": "^16.13.1",
     "react-firebase-hooks": "^2.2.0",
     "react-icons": "^3.10.0",

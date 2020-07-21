@@ -1,57 +1,41 @@
-import React, { useState, useCallback, useMemo } from 'react';
-// @ts-ignore
-import TwitterPicker from 'react-color/lib/Twitter';
-import { RGBAColour } from '../state/types';
-import { FaSquare } from 'react-icons/fa';
-import { toCSSColour } from '../logic/functions';
+import React, { useRef, useEffect } from 'react';
+import { RGBAColour, DEFAULT_COURSE_COLOUR } from '../state/types';
 
-const popover = {
-  position: 'absolute',
-  zIndex: 20,
-} as const;
+const inputStyle = {
+  width: '30px',
+  padding: '1px',
+};
 
-const cover = {
-  position: 'fixed',
-  top: '0px',
-  right: '0px',
-  bottom: '0px',
-  left: '0px',
-} as const;
-
-const colours = [
-  '#ff6663', '#feb144', '#fdfd97', '#9ee09e', '#9ec1cf', '#cc99c9',  '#dbdbdb',
-  '#ff9aa2', '#ffb7b2', '#ffdac1', '#e2f0cb', '#b5ead7', '#c7ceea',  '#fafafa',
-  ...['#fbedff', '#d8e6ff', '#eef6fc', '#ebfffc', '#effaf3', '#fffbeb', '#feecf0',].reverse()
-];
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 export type ColourPickerProps = {
   colour: RGBAColour,
   setColour: (c: RGBAColour) => any
-}
+};
 
 export const ColourPickerButton = ({ colour, setColour }: ColourPickerProps) => {
+  
+  const ref = useRef<HTMLInputElement>(null);
 
-  const [show, setShow] = useState(false);
-  // const [tempColour, setTempColour] = useState<RGBAColour>(colour);
+  useEffect(() => {
+    const onChange = (e: any) => setColour(e.target.value);
 
-  const clickButton = useCallback(() => !show && setShow(true), [show]);
-  const colourStyle = useMemo(() => ({ color: toCSSColour(colour) }), [colour]);
+    const el = ref.current!;
+    el.addEventListener('change', onChange);
+    return () => el.removeEventListener('change', onChange);
+  }, [setColour]);
 
-  const close = (ev: React.MouseEvent) => {
-    ev.stopPropagation();
-    // setColour(tempColour);
-    setShow(false);
-  };
+  const value = typeof colour == 'string' ? colour : DEFAULT_COURSE_COLOUR;
 
   return <>
-    <button className="button is-small is-dark" onClick={clickButton}>
-      <span className="icon is-small" style={colourStyle}><FaSquare></FaSquare></span>
-    </button>
-    {show && <div style={popover}>
+    <input type="color" className="button is-small is-dark" ref={ref} style={inputStyle}
+      defaultValue={value} title="Choose a colour for this course (default #fafafa)"/>
+    {/* <button type="button" className="button is-small is-dark" onClick={clickButton}>
+    {/* {show && <div style={popover}>
       <div style={cover} onClick={close} />
       <TwitterPicker color={colour} colors={colours} triangle="hide"
         onChange={(c: any) => setColour(c.rgb)} 
         styles={{default: {card: {left: '-154px', top: '94px'}}}}></TwitterPicker>
-    </div>}
+    </div>} */}
   </>;
 }
