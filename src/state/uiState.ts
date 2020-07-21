@@ -18,17 +18,18 @@ export type UIModel = UIState & {
   isHighlighted: Computed<UIModel, (c: CourseActivity) => boolean>,
 
   setAllWeeks: Action<UIModel, boolean>,
-
-  setWeek: Action<UIModel, Date>,
+  setWeek: Action<UIModel, Date | null>,
   shiftWeek: Action<UIModel, number>,
+  reset: Action<UIModel>,
 
   selectHighlightedGroup: Computed<UIModel, (group: string) => any>
 };
 
+const DEFAULT_WEEK_START = startOfWeek(new Date(), WEEK_START_MONDAY);
 
 const initialState = {
   highlight: null,
-  weekStart: startOfWeek(new Date(), WEEK_START_MONDAY),
+  weekStart: DEFAULT_WEEK_START,
   allWeeks: true,
 }
 
@@ -53,12 +54,18 @@ export const model = ({ replaceActivityGroup }: UIModelParams): UIModel => ({
   }),
 
   setWeek: action((s, week) => {
-    s.weekStart = week;
+    s.weekStart = week ?? DEFAULT_WEEK_START;
   }),
 
   shiftWeek: action((s, n) => {
     if (!s.weekStart) return;
     s.weekStart = addWeeks(s.weekStart, n);
+  }),
+
+  reset: action(s => {
+    s.weekStart = DEFAULT_WEEK_START;
+    s.allWeeks = true;
+    s.highlight = null;
   }),
 
   selectHighlightedGroup: computed(s => group => {
