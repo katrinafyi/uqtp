@@ -1,4 +1,4 @@
-import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime } from "../state/types";
+import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime, RGBAColour } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
 import { differenceInCalendarDays } from "date-fns";
@@ -173,4 +173,7 @@ export const makeCustomSession = (label: string, day: number, hour: number, dura
         campus: '',
         location: '',
     };
-}
+};
+
+export const toCSSColour = (c?: RGBAColour) => 
+    c && `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a ?? 1})`;

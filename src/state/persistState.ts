@@ -1,6 +1,6 @@
 import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
-import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities, Course } from './types';
+import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities, Course, RGBAColour } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { coerceToArray, makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
 import _ from 'lodash';
@@ -25,16 +25,20 @@ export type PersistModel = PersistState & {
 
   updateCourseSessions: Action<PersistModel, CourseEvent[]>,
   updateActivitySessions: Action<PersistModel, CourseEvent[]>,
+
   deleteCourse: Action<PersistModel, string>,
   deleteActivitySession: Action<PersistModel, CourseEvent>,
-  setCourseVisibility: Action<PersistModel, Course & { visible: boolean }>,
+
   setSelectedGroups: Action<PersistModel, CourseActivity & { group: string[] }>,
   setOneSelectedGroup: Action<PersistModel, CourseActivityGroup & { selected: boolean }>,
   replaceOneSelectedGroup: Action<PersistModel, CourseActivity & { old: string, new: string }>,
-
+  
   addCustomEvent: Action<PersistModel, { day: number, hour: number, duration: number, label: string }>,
+  
+  setCourseVisibility: Action<PersistModel, Course & { visible: boolean }>,
+  isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>,
 
-  isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>
+  setCourseColour: Action<PersistModel, Course & { colour: RGBAColour }>,
 };
 
 
@@ -250,6 +254,12 @@ export const model: PersistModel = {
         
     }, 1)
   ),
+
+  setCourseColour: action((s, {course, colour}) => {
+    if (s.timetables[s.current]!.courseColours == null)
+      s.timetables[s.current]!.courseColours = {};
+    s.timetables[s.current]!.courseColours![course] = colour;
+  }),
 };
 
 const typedHooks = createTypedHooks<PersistModel>();

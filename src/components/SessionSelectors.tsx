@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback, useState, memo } from 'react';
-import { CourseActivityGroup, CourseActivity, Course } from '../state/types';
+import { CourseActivityGroup, CourseActivity, Course, RGBAColour, DEFAULT_COURSE_COLOUR } from '../state/types';
 import { CUSTOM_COURSE } from '../logic/functions';
 import { useStoreActions, useStoreState } from '../state/persistState';
 import { searchCourses } from '../logic/api';
@@ -7,6 +7,7 @@ import { FaSyncAlt, FaCheck, FaExclamationTriangle, FaTimes } from 'react-icons/
 import classNames from 'classnames';
 
 import './SessionSelectors.scss';
+import { ColourPickerButton } from './ColourPickerButton';
 
 const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActivityGroup & { selected: boolean }) => {
   const setOneSelectedGroup = useStoreActions(s => s.setOneSelectedGroup);
@@ -63,7 +64,6 @@ enum UpdatingState {
   IDLE, UPDATING, DONE, ERROR
 }
 
-
 const CourseSessionSelector = memo(({ course }: Course) => {
 
   const activities = useStoreState(s => s.activities[course]) ?? {};
@@ -72,6 +72,11 @@ const CourseSessionSelector = memo(({ course }: Course) => {
   const setCourseVisibility = useStoreActions(s => s.setCourseVisibility);
   const deleteCourse = useStoreActions(s => s.deleteCourse);
   const updateSessions = useStoreActions(s => s.updateCourseSessions);
+
+  const colour = useStoreState(s => s.currentTimetable.courseColours?.[course]) ?? DEFAULT_COURSE_COLOUR;
+  const setCourseColour = useStoreActions(s => s.setCourseColour);
+
+  const setColour = useCallback((colour: RGBAColour) => setCourseColour({ course, colour }), [course, setCourseColour]);
 
   const setVisibleCallback = useCallback(() => {
     setCourseVisibility({ course, visible: !visible });
@@ -127,13 +132,14 @@ const CourseSessionSelector = memo(({ course }: Course) => {
           ></input> {course}
         </label>
         <div className="buttons">
-          {course !== CUSTOM_COURSE
-            && <button className={classNames('button is-small is-dark', iconClass)} type="button"
-              title={updateError || "Update this course"} onClick={update}>
-              <span className="icon is-small">
-                {icon}
-              </span>
-            </button>}
+          {<button className={classNames('button is-small is-dark', iconClass)}
+            type="button" disabled={course === CUSTOM_COURSE}
+            title={updateError || "Update this course"} onClick={update}>
+            <span className="icon is-small">
+              {icon}
+            </span>
+          </button>}
+          <ColourPickerButton colour={colour} setColour={setColour}></ColourPickerButton>
           <button className="button is-small is-dark" type="button"
             title="Delete this course" onClick={deleteCourseCallback}>
             <span className="icon is-small">

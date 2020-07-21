@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import _ from 'lodash';
-import { CourseEvent, DAY_NAMES } from '../state/types';
-import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime, isInWeek, CUSTOM_COURSE } from '../logic/functions';
+import { CourseEvent, DAY_NAMES, DEFAULT_COURSE_COLOUR } from '../state/types';
+import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime, isInWeek, CUSTOM_COURSE, toCSSColour } from '../logic/functions';
 
 import { FaLock } from 'react-icons/fa';
 
@@ -33,6 +33,7 @@ const ACTIVITY_CLASSES: { [type: string]: string } = {
 
 const TimetableSession = memo(({ session, clash, numInHour }: TimetableSessionProps) => {
 
+  const colour = useStoreState(s => s.currentTimetable.courseColours?.[session.course]) ?? DEFAULT_COURSE_COLOUR;
   const deleteSession = useStoreActions(s => s.deleteActivitySession);
 
   const highlight = UIStore.useStoreState(s => s.highlight);
@@ -61,12 +62,13 @@ ${s.location}${customHelp}`;
   const startMinute = session.time.minute;
   const minutes = Math.min(60 * (END_HOUR + 1 - session.time.hour), session.duration);
 
-  const positionStyle = useMemo(() => ({
+  const styles = useMemo(() => ({
     // left: `${100*index/numInHour}%`,
     width: `${100 / numInHour}%`,
     height: `${minutes * 100 / 60}%`,
     top: `${startMinute * 100 / 60}%`,
-  }), [minutes, numInHour, startMinute]);
+    backgroundColor: toCSSColour(colour),
+  }), [minutes, numInHour, startMinute, colour]);
 
 
   const onClick = useCallback((ev: React.MouseEvent) => {
@@ -89,7 +91,7 @@ ${s.location}${customHelp}`;
 
   return (
     <div className={highlightClass + "session cell"} onClick={onClick}
-      style={positionStyle} title={text} {...longPressProps}>
+      style={styles} title={text} {...longPressProps}>
 
       <span className="has-text-weight-medium">
         {getCourseCode(session.course)}

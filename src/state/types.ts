@@ -12,6 +12,8 @@ export type DayNames = typeof DAY_NAMES;
 
 export const DEFAULT_WEEK_PATTERN = '1'.repeat(65);
 
+export const DEFAULT_COURSE_COLOUR: RGBAColour = { r: 250, g: 250, b: 250 };
+
 
 export type Course = {
     course: string,
@@ -47,13 +49,17 @@ export type SelectedActivities = {
     [course: string]: { [activity: string]: string[] | string }
 }
 
-export type CourseVisibility = {[course: string]: boolean}
+export type CourseVisibility = {[course: string]: boolean};
+
+export type RGBAColour = {r: number, g: number, b: number, a?: number};
+export type CourseColours = {[course: string]: RGBAColour};
 
 export type Timetable = {
     name: string,
     allSessions: CourseEvent[],
     selectedGroups: SelectedActivities,
-    courseVisibility?: CourseVisibility
+    courseVisibility?: CourseVisibility,
+    courseColours?: CourseColours
 }
 
 export const EMPTY_TIMETABLE: Timetable = {
@@ -61,6 +67,7 @@ export const EMPTY_TIMETABLE: Timetable = {
     allSessions: [],
     selectedGroups: {},
     courseVisibility: {},
+    courseColours: {},
 }
 
 export type TimetablesState = {
