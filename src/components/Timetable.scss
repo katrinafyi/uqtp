@@ -51,7 +51,16 @@
   height: 100%;
   overflow-y: visible;
   background: linear-gradient(to top, $border-light 0px 1px, transparent 1px),
-    linear-gradient(to bottom, $border-light 0px 1px, transparent 1px),;
+    linear-gradient(to bottom, $border-light 0px 1px, transparent 1px);
+
+  // cursor: pointer;
+
+  &:hover {
+    background: linear-gradient(to top, $border 0px 1px, transparent 1px),
+      linear-gradient(to bottom, $border 0px 1px, transparent 1px),
+      linear-gradient(to left, $border 0px 1px, transparent 1px),
+      linear-gradient(to right, $border 0px 1px, transparent 1px);
+  }
 }
 
 .session {
@@ -101,7 +110,8 @@
   // color: black;
 
   &.highlighted {
-    background-color: hsl(219, 70%, 96%); //hsl(0; 0%; 99.9%);
+    // background-color: hsl(219, 70%, 96%) !important; //hsl(0; 0%; 99.9%);
+    border-color: $grey-dark;
     // overflow: visible;
     z-index: 10;
   }

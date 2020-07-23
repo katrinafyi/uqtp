@@ -5,7 +5,7 @@ import _ from "lodash";
 import { useStoreActions } from "../state/persistState";
 
 export const SearchResult = (props: { result: CourseSearchResult }) => {
-  const updateSessions = useStoreActions(s => s.updateSessions);
+  const updateSessions = useStoreActions(s => s.updateCourseSessions);
 
   const result = props.result;
 

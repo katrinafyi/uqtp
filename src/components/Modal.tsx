@@ -3,6 +3,8 @@ import React, { ReactNode } from "react"
 type Props = {
     visible: boolean,
     setVisible: (visible: boolean) => any,
+    narrow?: boolean,
+
     title?: ReactNode,
     children?: ReactNode,
     footer?: ReactNode,
@@ -28,12 +30,14 @@ export const ModalCard = ({ visible, setVisible, title, children, footer }: Prop
     </div>;
 }
 
-export const Modal = ({ visible, setVisible, children }: Props) => {
+export const Modal = ({ visible, setVisible, narrow, children }: Props) => {
     const hideModal = () => setVisible(false);
+
+    const style = (narrow ?? false) ? { width: 'fit-content' } : undefined;
 
     return <div className={"modal " + (visible ? 'is-active' : '')}>
         <div className="modal-background" onClick={hideModal}></div>
-        <div className="modal-content">
+        <div className="modal-content"  style={style}>
             {children}
         </div>
         <button className="modal-close is-large" aria-label="close" onClick={hideModal}></button>

@@ -3,6 +3,7 @@ import { FaSave, FaPencilAlt, FaCopy, FaPlus, FaTrash } from "react-icons/fa";
 import { Timetable } from "../state/types";
 import _ from "lodash";
 import { useStoreState, useTimetableActions } from "../state/persistState";
+import { UIStore } from "../state/uiState";
 
 type TimetableTagProps = {
   id: string,
@@ -27,6 +28,8 @@ export const TimetableSelector = memo(() => {
   const current = useStoreState(s => s.current);
   const { select, new: new_, copy, delete: delete_, rename } = useTimetableActions();
 
+  const reset = UIStore.useStoreActions(s => s.reset);
+
   const savedValid = !!current;
 
   const renameRef = createRef<HTMLInputElement>();
@@ -42,7 +45,11 @@ export const TimetableSelector = memo(() => {
   const callbacks = useMemo(() => {
     const onClickTag = (ev: React.MouseEvent<HTMLButtonElement>) => {
       setIsRenaming(false);
-      select((ev.target as HTMLButtonElement).value);
+      const newTimetable = (ev.target as HTMLButtonElement).value;
+      if (newTimetable !== current) {
+        select(newTimetable);
+        reset();
+      }
     };
 
     const onClickRename = (ev: React.MouseEvent<HTMLElement>) => {
@@ -78,7 +85,7 @@ export const TimetableSelector = memo(() => {
     };
 
     return {onClickTag, onClickRename, onClickNew, onClickDuplicate, onClickDelete, onClickCancel};
-  }, [confirmDelete, copy, current, currentName, delete_, isRenaming, name, new_, rename, renameRef, select]);
+  }, [confirmDelete, copy, current, currentName, delete_, isRenaming, name, new_, rename, renameRef, reset, select]);
 
   return <form className="form">
     <div className="field">

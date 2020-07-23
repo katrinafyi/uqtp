@@ -14,9 +14,8 @@ import { WeekSelector } from './components/WeekSelector';
 
 const Main = () => {
 
-
   const replaceActivityGroup = useStoreActions(s => s.replaceOneSelectedGroup);
-  const updateSessions = useStoreActions(s => s.updateSessions);
+  const updateSessions = useStoreActions(s => s.updateCourseSessions);
   
   const [importError, setImportError] = useState<string | null>(null);
   
@@ -43,8 +42,9 @@ const Main = () => {
 
   //console.log(visibleSessions);
 
-  return <>
-      <div className="container">
+  return (
+    <div className="container">
+      <UIStore.Provider initialData={{replaceActivityGroup}}>
         {/* <div className="message is-warning is-small"><div className="message-body">
             Managing multiple timetables is currently <strong>not supported</strong>. The buttons below do nothing.
         </div></div> */}
@@ -75,30 +75,28 @@ const Main = () => {
         {/* <div className="message is-info is-small"><div className="message-body">
             Changes to your selected classes are saved automatically. 
         </div></div> */}
+        {/* <h4 className="title is-4">Selected Classes</h4> */}
+        <SessionSelectors></SessionSelectors>
 
-        <UIStore.Provider initialData={{replaceActivityGroup}}>
-          {/* <h4 className="title is-4">Selected Classes</h4> */}
-          <SessionSelectors></SessionSelectors>
+        <h4 className="title is-4">Timetable</h4>
 
-          <h4 className="title is-4">Timetable</h4>
+        <div className="mb-5">
+          <WeekSelector></WeekSelector>
+        </div>
+        <Timetable></Timetable>
 
-          <div className="mb-5">
-            <WeekSelector></WeekSelector>
-          </div>
-          <Timetable></Timetable>
-
-          <div className="content">
-            <ul>
-              <li>Changes to your timetable and classes are saved automatically.</li>
-              <li>Be careful not to mix up semester 1 and semester 2!</li>
-              <li>Some classes do not run every week. Always double check with your personal timetable.</li>
-              <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just click the update button.</li>
-            </ul>
-          </div>
-        </UIStore.Provider>
-      </div>
-    </>;
-  ;
+        <div className="content">
+          <ul>
+            <li>Changes to your timetable and classes are saved automatically.</li>
+            <li>Be careful not to mix up semester 1 and semester 2!</li>
+            <li>Some classes do not run every week. Always double check with your personal timetable.</li>
+            <li>Sometimes, timetables for a course are updated or changed by UQ. To update a course in UQTP, just click the update button.</li>
+            <li>Click in a black space to add a custom timetable activity. You can use this to plan things like lunch and work hours.</li>
+          </ul>
+        </div>
+      </UIStore.Provider>
+    </div>
+  );
 }
 
 export default Main;

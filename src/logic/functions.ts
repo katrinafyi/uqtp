@@ -1,4 +1,4 @@
-import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime } from "../state/types";
+import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime, RGBAColour } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
 import { differenceInCalendarDays } from "date-fns";
@@ -20,6 +20,7 @@ export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
         if (next == null || next.day > currentDay 
                 || next.time.hour > currentHour + matrix.length - 1) {
             for (let r = 0; r < matrix.length; r++) {
+                if (r + currentHour >= 24) break;
                 for (let c = 0; c < matrixColumns; c++) {
                     byDayTime[currentDay][r + currentHour][c] = matrix[r][c]; //c === 0 ? matrix[r][c] : null;
                 }
@@ -117,7 +118,7 @@ export const getCourseGroups = memo((events: CourseEvent[]) => {
 }, 10);
 
 // returns a string like CSSE2310|PRA1
-export const makeActivityKey = (session: CourseEvent) => 
+export const makeActivityKey = (session: CourseActivity) => 
     session.course + '|' + session.activity;
 
 export const sessionEndTime = (e: CourseEvent) => {
@@ -133,11 +134,11 @@ export const formatTime = (t: ClockTime) => {
     return d.toLocaleTimeString(undefined, {hour: 'numeric', minute: 'numeric'});
 }
 
-export const makeActivityGroupKey = (session: CourseEvent) =>
-    [session.course, session.activity, session.group].join('|');
+export const makeActivityGroupKey = (g: CourseActivityGroup) =>
+    `${g.course}|${g.activity}|${g.group}`;
 
-export const makeSessionKey = (session: CourseEvent) => 
-    [session.course, session.activity, session.group, session.day, session.time.hour].join('|');
+export const makeActivitySessionKey = (s: CourseEvent) => 
+    `${s.course}|${s.activity}|${s.group}|${s.day}${s.time.hour}|${s.time.minute}`;
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 
@@ -154,4 +155,25 @@ export const isInWeek = (weekStart: Date, session: CourseEvent) => {
     const diff = differenceInCalendarDays(weekStart, parseDate(session.startDate));
     const index = Math.floor(diff / 7);
     return (session.weekPattern[index] ?? '1') === '1';
-}
+};
+
+export const CUSTOM_COURSE = '(custom)';
+
+export const makeCustomSession = (label: string, day: number, hour: number, duration: number, group: string): CourseEvent => {
+    return {
+        course: CUSTOM_COURSE,
+        activity: label,
+        group,
+        day,
+        time: {hour: hour, minute: 0},
+        duration,
+
+        description: '',
+        dates: '',
+        campus: '',
+        location: '',
+    };
+};
+
+export const toCSSColour = (c?: RGBAColour) => c;
+    // c && `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a ?? 1})`;
