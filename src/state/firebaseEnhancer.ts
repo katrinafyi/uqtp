@@ -2,7 +2,7 @@ import { auth as globalAuth } from "./firebase";
 import type firebase from "firebase";
 import { StoreEnhancer, AnyAction, Action, Reducer, PreloadedState } from "redux";
 
-type DocRef = firebase.firestore.DocumentReference;
+type DocRef = firebase.database.Reference;
 
 export const makeFirestorePersistEnhancer = <T>(
   firebaseAuth: firebase.auth.Auth,
@@ -41,7 +41,7 @@ export const makeFirestorePersistEnhancer = <T>(
         if (newState !== s && newState != null) {
           //console.log("... uploading new state to firebase", newState);
           // @ts-ignore
-          getDocRef(user)!.set(cleanState ? cleanState(newState) : newState);
+          setImmediate(() => getDocRef(user)!.set(cleanState ? cleanState(newState) : newState));
         }
         return s;
       };
@@ -63,11 +63,11 @@ export const makeFirestorePersistEnhancer = <T>(
      //console.log(user);
       if (user) {
         const docRef = getDocRef(user);
-        unsubSnapshot = docRef!.onSnapshot((doc) => {
-          if (doc?.exists) {
+        unsubSnapshot = docRef!.on('value', doc => {
+          if (doc.exists()) {
            //console.log('... got snapshot from firebase');
             // previous data exists. load from online.
-            const data = doc.data()! as T;
+            const data = doc.val()! as T;
             const migrated = migrate(data);
             if (migrated)
               docRef?.set(migrated);

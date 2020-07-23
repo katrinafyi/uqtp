@@ -107,6 +107,10 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
         return a.time.hour - b.time.hour;
     if (a.time.minute !== b.time.minute)
         return a.time.minute - b.time.minute;
+    if (a.duration !== b.duration)
+        return a.duration - b.duration;
+    if (a.course !== b.course)
+        return a.course.localeCompare(b.course);
     return 0;
 };
 

@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import 'firebase/firestore';
+// import 'firebase/firestore';
+import 'firebase/database';
 import { PersistState } from './schema';
 import 'firebase/analytics';
 
@@ -16,8 +17,8 @@ export const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-// export const database = firebase.database();
-export const firestore = firebase.firestore();
+export const database = firebase.database();
+// export const firestore = firebase.firestore();
 export const auth = firebase.auth();
 firebase.analytics();
 
@@ -32,7 +33,7 @@ export const userFirestoreDocRef = (userOrUid: firebase.User | string | null) =>
         uid = userOrUid.uid;
     }
     console.assert(uid != null);
-    return firestore.collection('users').doc(uid);
+    return database.ref('data/' + uid);
 };
 
 export const mergeData = (oldData: PersistState, newData: PersistState) => {
@@ -49,12 +50,12 @@ export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCreden
         return;
     }
 
-    const oldData = await oldDocRef.get().then(doc => doc.data()) as PersistState;
+    const oldData = (await oldDocRef.once('value')).val() as PersistState;
     
     const newUser = await auth.signInWithCredential(newCredential);
     
     const newDocRef = userFirestoreDocRef(newUser.user)!;
-    const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
+    const newData = (await newDocRef.once('value')).val() as PersistState;
   
     await newDocRef.set(mergeData(oldData ?? {}, newData ?? {}));
   };

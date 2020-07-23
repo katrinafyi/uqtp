@@ -1,4 +1,4 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State } from 'easy-peasy';
+import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, actionOn, ActionOn } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities, Course, RGBAColour } from './types';
 import { v4 as uuidv4 } from 'uuid';
@@ -46,6 +46,10 @@ export const model: PersistModel = {
   ...BLANK_PERSIST,
 
   setState: action((_, s) => {
+    if (!s.timetables[s.current]!.allSessions)
+      s.timetables[s.current]!.allSessions = [];
+    if (!s.timetables[s.current]!.selectedGroups)
+      s.timetables[s.current]!.selectedGroups = {};    
     return s as any;
   }),
 
@@ -288,8 +292,7 @@ export const mapCurrentTimetableActions = (a: Actions<PersistModel>) => ({
 });
 
 export const cleanState = (s: PersistModel) => {
-  delete s.isSessionVisible;
-  delete s.currentTimetable;
-  delete s.activities;
-  return s;
+  return {
+    timetables: s.timetables, user: s.user, current: s.current, _meta: s._meta
+  };
 }

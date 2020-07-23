@@ -4,6 +4,7 @@ import { useStoreState } from "../state/persistState";
 const UserInfoView = () => {
   const user = useStoreState(s => s.user);
   const state = useStoreState(s => s);
+  // debugger;
 
   if (!user) {
     console.warn("Attempting to render UserInfoView with no user set.");

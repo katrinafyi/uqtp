@@ -31,7 +31,7 @@ const App = () => {
     try {
       const ref = userFirestoreDocRef(user?.uid ?? null);
       if ((user?.isAnon ?? false) && ref)
-        await ref.delete();
+        await ref.remove();
     } catch (e) {
       console.error('failed to delete anonymous data', e);
     }
