@@ -56,7 +56,8 @@ ${s.location}${customHelp}`;
   const locked = (session.numGroups ?? 10) <= 1;
   let highlightClass = locked ? 'locked ' : '';
   highlightClass += clash ? 'clash ' : '';
-  highlightClass += thisHighlighted ? 'highlighted ' : '';
+  if (highlight)
+    highlightClass += thisHighlighted ? 'highlighted ' : 'not-highlighted ';
 
   const activityClass = ACTIVITY_CLASSES[session.activityType!] ?? 'has-text-dark';
 

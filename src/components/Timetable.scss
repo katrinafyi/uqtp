@@ -106,12 +106,22 @@
 
   border-radius: 0px;
   background-color: $white-bis;
+
+  transition: background-color 500ms;
+  transition: border-color 500ms;
+  transition: color 500ms;
   
   // color: black;
 
+  &.not-highlighted {
+    color: $black !important;
+    border-color: $border !important;
+    background-color: #fafafa !important;
+  }
+
   &.highlighted {
     // background-color: hsl(219, 70%, 96%) !important; //hsl(0; 0%; 99.9%);
-    border-color: $grey-dark;
+    // border-color: $grey-dark;
     // overflow: visible;
     z-index: 10;
   }
