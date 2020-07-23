@@ -12,7 +12,7 @@ export type DayNames = typeof DAY_NAMES;
 
 export const DEFAULT_WEEK_PATTERN = '1'.repeat(65);
 
-export const DEFAULT_COURSE_COLOUR: RGBAColour = '#fafafa';
+export const DEFAULT_COURSE_COLOUR: RGBAColour = '#FAFAFA';
 
 
 export type Course = {

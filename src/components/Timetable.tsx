@@ -10,6 +10,7 @@ import { UIStore } from '../state/uiState';
 import { useStoreState, useStoreActions } from '../state/persistState';
 
 import useLongPress from 'react-use/lib/useLongPress';
+import tinycolor from 'tinycolor2';
 
 const START_HOUR = 8;
 const END_HOUR = 19;
@@ -62,13 +63,26 @@ ${s.location}${customHelp}`;
   const startMinute = session.time.minute;
   const minutes = Math.min(60 * (END_HOUR + 1 - session.time.hour), session.duration);
 
-  const styles = useMemo(() => ({
-    // left: `${100*index/numInHour}%`,
-    width: `${100 / numInHour}%`,
-    height: `${minutes * 100 / 60}%`,
-    top: `${startMinute * 100 / 60}%`,
-    backgroundColor: toCSSColour(colour),
-  }), [minutes, numInHour, startMinute, colour]);
+  const styles = useMemo(() => {
+    const amount = 10;
+    const fg = tinycolor(colour);
+    const text = tinycolor.mostReadable(fg, ['#fff', '#363636']);
+    
+    if (fg.isDark())
+      fg.brighten(amount);
+    else
+      fg.darken(amount);
+
+    return {
+      // left: `${100*index/numInHour}%`,
+      width: `${100 / numInHour}%`,
+      height: `${minutes * 100 / 60}%`,
+      top: `${startMinute * 100 / 60}%`,
+      backgroundColor: toCSSColour(colour),
+      borderColor: fg.toRgbString(),
+      color: text.toRgbString(),
+    };
+  }, [minutes, numInHour, startMinute, colour]);
 
 
   const onClick = useCallback((ev: React.MouseEvent) => {
@@ -87,7 +101,6 @@ ${s.location}${customHelp}`;
       setHighlight(session);
     }
   }, [deleteSession, highlight, isCustom, selectHighlightedGroup, session, setHighlight, thisHighlighted]);
-
 
   return (
     <div className={highlightClass + "session cell"} onClick={onClick}
