@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from '../state/types';
-import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, isHighlighted, formatTime, sessionEndTime, isInWeek, CUSTOM_COURSE } from '../logic/functions';
+import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, formatTime, sessionEndTime, CUSTOM_COURSE } from '../logic/functions';
 
 import { FaLock } from 'react-icons/fa';
 
@@ -10,7 +10,7 @@ import { UIStore } from '../state/uiState';
 import { useStoreState, useStoreActions } from '../state/persistState';
 
 import useLongPress from 'react-use/lib/useLongPress';
-import { useCourseColours, CourseColoursContainer } from './styles/CourseColours';
+import { CourseColoursContainer } from './styles/CourseColours';
 
 
 const START_HOUR = 8;
@@ -154,21 +154,33 @@ const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][], addCus
 
 const Timetable = () => {
 
-  const timetable = useStoreState(s => s.currentTimetable);
-  const activities = useStoreState(s => s.activities);
+  const sessions = useStoreState(s => s.currentTimetable.sessions);
   const isSessionVisible = useStoreState(s => s.isSessionVisible);
   const addCustomEvent = useStoreActions(s => s.addCustomEvent);
 
+  const isHighlighted = UIStore.useStoreState(s => s.isHighlighted);
   const highlight = UIStore.useStoreState(s => s.highlight);
-  const weekStart = UIStore.useStoreState(s => s.weekStart);
-  const allWeeks = UIStore.useStoreState(s => s.allWeeks);
 
   const visibleSessions = useMemo(() => {
-    return timetable.allSessions
-      .filter(x => (isSessionVisible(x) || isHighlighted(x, highlight))
-        && (allWeeks || isInWeek(weekStart, x)))
-      .map(x => ({ ...x, numGroups: Object.keys(activities?.[x.course]?.[x.activity] ?? {}).length }));
-  }, [timetable.allSessions, isSessionVisible, highlight, allWeeks, weekStart, activities]);
+    const visible = [];
+
+    for (const c of Object.keys(sessions)) {
+      for (const a of Object.keys(sessions[c])) {
+        for (const g of Object.keys(sessions[c][a])) {
+
+          const vals = Object.values(sessions[c][a][g]);
+          if (vals.length === 0) continue;
+
+          const first = vals[0];
+          if (isSessionVisible(first) || isHighlighted(first)) {
+            visible.push(...vals);
+          }
+
+        }
+      }
+    }
+    return visible;
+  }, [sessions, isSessionVisible, isHighlighted]);
 
   const byDayTime = useMemo(() => computeDayTimeArrays(visibleSessions),
     [visibleSessions]);

@@ -27,10 +27,10 @@ const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActi
 
 // component for selecting groups of a particular activity, e.g. LEC1 01 02 03...
 const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
-  const selected = useStoreState(s => s.selected?.[course]?.[activity]) ?? [];
-  const groups = useStoreState(s => s.activities?.[course]?.[activity]) ?? {};
+  const selected = useStoreState(s => s.selected?.[course]?.[activity]) ?? {};
+  const groups = useStoreState(s => s.currentTimetable.sessions?.[course]?.[activity]) ?? {};
 
-  const numSelected = selected.length;
+  const numSelected = Object.keys(selected).length;
   const groupKeys = useMemo(() => Object.keys(groups), [groups]);
 
   let countClass = 'has-text-success-dark	has-text-weight-medium ';
@@ -53,7 +53,7 @@ const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
 
         <div style={{ margin: '0 -0.25rem' }}>
           {groupKeys.sort().map(group => <ActivityGroupCheckbox key={group} course={course}
-            activity={activity} group={group} selected={selected.includes(group)} />)}
+            activity={activity} group={group} selected={selected[group] != null} />)}
         </div>
 
       </details>

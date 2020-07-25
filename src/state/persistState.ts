@@ -1,13 +1,13 @@
 import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, actionOn, ActionOn, Thunk, thunk } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
-import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectionsByGroup, Course, RGBAColour, SessionsByGroup, CourseMap } from './types';
+import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectionsByGroup, Course, RGBAColour, SessionsByGroup, CourseMap, CourseActivityGroupMap } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
 import _ from 'lodash';
 import { userFirestoreDocRef, auth } from './firebase';
 
 
-export type ActivitiesNested = { [course: string]: { [activity: string]: { [group: string]: CourseEvent[] } } };
+export type ActivitiesNested = CourseActivityGroupMap<CourseEvent[]>;
 export type SelectedNested = SelectionsByGroup;
 
 
@@ -112,7 +112,22 @@ export const model: PersistModel = {
 
   selected: computed([
     s => s.currentTimetable.selections,
-  ], memo((selected: SelectionsByGroup) => {
+    s => s.currentTimetable.sessions,
+  ], memo((selections: SelectionsByGroup, sessions: SessionsByGroup) => {
+    
+    const selected: SelectionsByGroup = {};
+
+    for (const c of Object.keys(selections)) {
+      selected[c] = {};
+      for (const a of Object.keys(selections[c])) {
+        selected[c][a] = {};
+        for (const g of Object.keys(selections[c][a])) {
+          if (selections[c][a][g] && sessions?.[c]?.[a]?.[g])
+            selected[c][a][g] = true;
+        }
+      }
+    }
+
     return selected;
   }, 1)),
 
@@ -187,7 +202,7 @@ export const model: PersistModel = {
   }),
 
   deleteActivitySession: action((s, c) => {
-    // i am very sorry
+    // i am sorry for the length
     if (s.timetables[s.current]?.sessions?.[c.course]?.[c.activity]?.[c.group]?.[makeActivitySessionKey(c)] != null) {
       delete s.timetables[s.current].sessions[c.course][c.activity][c.group][makeActivitySessionKey(c)];
     }
