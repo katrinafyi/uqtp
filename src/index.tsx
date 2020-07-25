@@ -7,8 +7,7 @@ import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
 import { model, cleanState } from './state/persistState';
 import { createStore, StoreProvider } from 'easy-peasy';
-import { makeFirestorePersistEnhancer, firebaseModel } from './state/firebaseEnhancer';
-import { userFirestoreDocRef, auth } from './state/firebase';
+import { attachFirebasePersistListener, firebaseModel } from './state/firebaseEnhancer';
 import _ from 'lodash';
 
 const LOCALSTORAGE_KEY = 'timetableState';
@@ -39,10 +38,12 @@ if (migratedState) {
 
 const initialState = migratedState ?? previousState;
 // debugger;
-const firestoreEnhancer = makeFirestorePersistEnhancer(DEFAULT_PERSIST, cleanState);
 
 const rootStore = createStore({ ...firebaseModel, ...model }, 
-  { initialState, enhancers: [firestoreEnhancer] });
+  { initialState });
+  
+attachFirebasePersistListener(rootStore, DEFAULT_PERSIST, cleanState,
+  rootStore.getActions().onSetState);
 
 // attachFirebaseListeners(rootStore);
 

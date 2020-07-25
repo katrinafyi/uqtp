@@ -23,7 +23,7 @@ const ensureSelectionExists = (s: PersistState, x: CourseEvent, force?: true) =>
 
 
 export type PersistModel = PersistState & {
-  onSetState: ActionOn<PersistModel & FirebaseModel>,
+  onSetState: Action<PersistModel & FirebaseModel>,
 
   setUser: Thunk<PersistModel, firebase.User | null>,
 
@@ -60,20 +60,20 @@ export type PersistModel = PersistState & {
 export const model: PersistModel = {
   ...BLANK_PERSIST,
 
-  onSetState: actionOn(
-    a => a.__setFirebaseState,
-    (s) => {
-      const current = s.timetables[s.current]!;
+  onSetState: action((s) => {
+      // const current = s.timetables[s.current]!;
 
-      if (!current.sessions) {
+      if (!s.timetables[s.current]!.sessions) {
         // @ts-ignore
-        current.sessions = current.session ?? {};
+        s.timetables[s.current]!.sessions = s.timetables[s.current]!.session ?? {};
       }
       // @ts-ignore
-      delete current.session;
+      delete s.timetables[s.current]!.session;
 
-      if (!current.selections)
-        current.selections = {};
+      if (!s.timetables[s.current]!.selections)
+        s.timetables[s.current]!.selections = {};
+
+      console.log("on set state", s.timetables[s.current]);
     }
   ),
 
@@ -94,10 +94,10 @@ export const model: PersistModel = {
   }),
 
   currentTimetable: computed(memo((s: State<PersistModel>) => {
-    //console.log('timetable', s);
-    //console.log(s.currentTimetable);
+    // console.log('timetable', s);
+    // console.log(s.currentTimetable);
     // debugger;
-    return s.timetables[s.current];
+    return s.timetables?.[s.current];
   }, 2)),
 
   activities: computed(
@@ -107,7 +107,7 @@ export const model: PersistModel = {
 
       const activities: ActivitiesNested = {};
 
-      for (const c of Object.keys(sessions)) {
+      for (const c of Object.keys(coerceToObject(sessions))) {
         activities[c] = {};
         for (const a of Object.keys(sessions[c])) {
           activities[c][a] = {};
@@ -123,7 +123,7 @@ export const model: PersistModel = {
   ),
 
   sessions: computed(
-    [s => s.timetables[s.current]!.sessions],
+    [s => s?.timetables?.[s.current]?.sessions],
     memo((sessions: SessionsByGroup) => {
       // console.error("recomputing activities");
 
@@ -145,7 +145,7 @@ export const model: PersistModel = {
   ),
 
   selected: computed([
-    s => s.currentTimetable.selections,
+    s => s.currentTimetable?.selections,
     s => s.sessions,
   ], memo((selections: SelectionsByGroup, sessions: SessionsByGroup) => {
     
@@ -205,11 +205,11 @@ export const model: PersistModel = {
 
   updateCourseSessions: firebaseAction((s, sessions) => {
     const courses = new Set(sessions.map(x => x.course));
-    console.assert(courses.size === 1);
-
-    const x = sessions[0];
-    _.setWith(s.timetables[s.current]!.sessions, [x.course], {}, Object);
-
+    // console.assert(courses.size === 1);
+    for (const c of courses.values()) {
+      _.setWith(s.timetables[s.current]!.sessions, [c], {}, Object);
+    }
+    // debugger;
     for (const x of sessions) {
       _.setWith(s.timetables[s.current].sessions[x.course],
         [x.activity, x.group, makeActivitySessionKey(x)], x, Object);
@@ -287,9 +287,9 @@ export const model: PersistModel = {
   }),
 
   isSessionVisible: computed([
-    s => s.currentTimetable.selections,
-    s => s.currentTimetable.courseVisibility,
-  ], memo((selected: SelectionsByGroup, visibilities?: CourseVisibility) => (c: CourseEvent) => {
+    s => s.currentTimetable?.selections,
+    s => s.currentTimetable?.courseVisibility,
+  ], memo((selected?: SelectionsByGroup, visibilities?: CourseVisibility) => (c: CourseEvent) => {
     return (selected?.[c.course]?.[c.activity]?.[c.group] ?? false) 
       && (visibilities?.[c.course] ?? true);
   }, 1)
@@ -329,6 +329,6 @@ export const mapCurrentTimetableActions = (a: Actions<PersistModel>) => ({
 
 export const cleanState = (s: PersistModel) => {
   return {
-    timetables: s.timetables, user: s.user, current: s.current, _meta: s._meta
+    timetables: s.timetables, user: s.user ?? null, current: s.current, _meta: s._meta
   };
 }

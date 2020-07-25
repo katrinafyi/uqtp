@@ -4,6 +4,7 @@ import 'firebase/auth';
 import 'firebase/database';
 import { PersistState } from './schema';
 import 'firebase/analytics';
+import { migratePeristState } from './migrations';
 
 export const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -37,7 +38,7 @@ export const userFirestoreDocRef = (userOrUid: firebase.User | string | null) =>
 };
 
 export const mergeData = (oldData: PersistState, newData: PersistState) => {
-    return {...oldData, ...newData, timetables: { ...newData.timetables, ...oldData.timetables }};
+    return {...newData, ...oldData, timetables: { ...newData.timetables, ...oldData.timetables }};
 }
 
 export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
@@ -50,12 +51,19 @@ export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCreden
         return;
     }
 
-    const oldData = (await oldDocRef.once('value')).val() as PersistState;
+    let oldData = (await oldDocRef.once('value')).val() as PersistState;
+    const oldMigrated = oldData && migratePeristState(oldData);
+    if (oldMigrated)
+        oldData = oldMigrated;
+    await oldDocRef.remove();
     
     const newUser = await auth.signInWithCredential(newCredential);
     
     const newDocRef = userFirestoreDocRef(newUser.user)!;
-    const newData = (await newDocRef.once('value')).val() as PersistState;
+    let newData = (await newDocRef.once('value')).val() as PersistState;
+    const newMigrated = newData && migratePeristState(newData);
+    if (newMigrated)
+        newData = newMigrated;
   
     await newDocRef.set(mergeData(oldData ?? {}, newData ?? {}));
   };
