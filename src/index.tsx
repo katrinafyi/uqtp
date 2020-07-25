@@ -38,10 +38,10 @@ if (migratedState) {
 }
 
 const initialState = migratedState ?? previousState;
-
+// debugger;
 const firestoreEnhancer = makeFirestorePersistEnhancer(
   // @ts-ignore
-  auth, userFirestoreDocRef, '@action.setState', ['@action.setUser'],
+  auth, userFirestoreDocRef, '@action.setState', ['@action.setUser', '@action.select'],
   DEFAULT_PERSIST, migratePeristState, cleanState);
 
 const rootStore = createStore(model, 

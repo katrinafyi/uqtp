@@ -56,11 +56,12 @@
   // cursor: pointer;
 
   &:hover {
-    background: linear-gradient(to top, $border 0px 1px, transparent 1px),
-      linear-gradient(to bottom, $border 0px 1px, transparent 1px),
-      linear-gradient(to left, $border 0px 1px, transparent 1px),
-      linear-gradient(to right, $border 0px 1px, transparent 1px);
+    background: linear-gradient(to top, $border 0px 2px, transparent 2px),
+      linear-gradient(to bottom, $border 0px 2px, transparent 2px),
+      linear-gradient(to left, $border 0px 2px, transparent 2px),
+      linear-gradient(to right, $border 0px 2px, transparent 2px);
   }
+  
 }
 
 .highlighting .session:not(.highlighted) {

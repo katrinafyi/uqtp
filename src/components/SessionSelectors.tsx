@@ -8,6 +8,7 @@ import classNames from 'classnames';
 
 import './SessionSelectors.scss';
 import { ColourPickerButton } from './ColourPickerButton';
+import { CourseColoursContainer } from './styles/CourseColours';
 
 const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActivityGroup & { selected: boolean }) => {
   const setOneSelectedGroup = useStoreActions(s => s.setOneSelectedGroup);

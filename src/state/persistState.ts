@@ -1,9 +1,10 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, actionOn, ActionOn } from 'easy-peasy';
+import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, actionOn, ActionOn, Thunk, thunk } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities, Course, RGBAColour } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { coerceToArray, makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
 import _ from 'lodash';
+import { userFirestoreDocRef, auth } from './firebase';
 
 export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
 export type SelectedNested = {[course: string]: {[activity: string]: string[]}};
@@ -18,7 +19,7 @@ export type PersistModel = PersistState & {
   selected: Computed<PersistModel, SelectedNested>,
 
   new: Action<PersistModel, string | undefined | void>,
-  select: Action<PersistModel, string>,
+  select: Thunk<PersistModel, string>,
   delete: Action<PersistModel, string>,
   rename: Action<PersistModel, string>,
   copy: Action<PersistModel>,
@@ -119,8 +120,8 @@ export const model: PersistModel = {
     s.current = id;
   }),
 
-  select: action((s, id) => {
-    s.current = id;
+  select: thunk((_, id) => {
+    return userFirestoreDocRef(auth.currentUser)?.child('current').set(id);
   }),
 
   delete: action((s, id) => {
@@ -240,6 +241,7 @@ export const model: PersistModel = {
   }),
 
   replaceOneSelectedGroup: action((s, payload) => {
+    if (payload.old === payload.new) return;
     const oldGroups = coerceToArray(s.timetables[s.current]!.selectedGroups?.[payload.course]?.[payload.activity]);
     _.set(
       s.timetables[s.current]!.selectedGroups, 

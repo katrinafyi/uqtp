@@ -9,21 +9,19 @@ import tinycolor from "tinycolor2";
 import { createContainer } from 'unstated-next';
 import { Helmet } from "react-helmet";
 import { CourseColours } from "../../state/types";
+import { toCSSColour } from "../../logic/functions";
 
 jss.setup(preset());
 
-const hoverAmount = 4;
-const borderAmount = 20;
+const hoverAmount = 3;
+const borderAmount = 9;
 
 const makeStylesForColour = (c: string) => {
 
   const colour = tinycolor(c);
   const text = tinycolor.mostReadable(colour, ['#fff', '#363636']).toRgbString();
 
-  if (colour.isDark())
-    colour.brighten(hoverAmount);
-  else
-    colour.darken(hoverAmount);
+  colour.darken(hoverAmount);
   const hover = colour.toRgbString();
 
   colour.darken(borderAmount);
@@ -37,7 +35,7 @@ const makeStylesForColour = (c: string) => {
       borderColor: border,
     },
     '& .background, &.background': {
-      background: c,
+      background: toCSSColour(c),
     },
     '& .hover:hover, &.hover:hover': {
       background: hover,
@@ -45,28 +43,31 @@ const makeStylesForColour = (c: string) => {
   };
 };
 
-const createStyleSheetForCourses = (colours?: CourseColours) => {
+const createCourseColoursState = (colours?: CourseColours) => {
   const styles: any = {
     'default': makeStylesForColour('#fafafa'),
   };
+  const isDark: {[c: string]: boolean} = {};
   for (const course of Object.keys(colours ?? {})) {
     styles[course] = makeStylesForColour(colours![course]);
+    isDark[course] = tinycolor(colours![course]).isDark();
   }
 
-  return jss.createStyleSheet(styles);
+  const sheet = jss.createStyleSheet(styles);
+  return { sheet: sheet, classes: sheet.classes, isDark };
 }
 
 export const useCourseColours = () => {
 
   const colours = useStoreState(s => s.currentTimetable.courseColours);
 
-  const [sheet, setSheet] = useState(() => createStyleSheetForCourses(colours));
+  const [data, setData] = useState(() => createCourseColoursState(colours));
 
   useEffect(() => {
-    setSheet(createStyleSheetForCourses(colours));
+    setData(createCourseColoursState(colours));
   }, [colours]);
 
-  return { sheet, classes: sheet.classes };
+  return data;
 }
 
 export const CourseColoursContainer = createContainer(useCourseColours);
