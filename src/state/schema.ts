@@ -21,7 +21,7 @@ export type PersistState = {
     timetables: TimetablesState,
     current: string,
     user: UserState,
-} & StateMetadata;
+} & StateMetadata<13>;
 
 export const CURRENT_VERSION = 13;
 

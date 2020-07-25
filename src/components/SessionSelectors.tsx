@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useState, memo } from 'react';
 import { CourseActivityGroup, CourseActivity, Course, RGBAColour, DEFAULT_COURSE_COLOUR } from '../state/types';
-import { CUSTOM_COURSE } from '../logic/functions';
+import { CUSTOM_COURSE, coerceToObject } from '../logic/functions';
 import { useStoreActions, useStoreState } from '../state/persistState';
 import { searchCourses } from '../logic/api';
 import { FaSyncAlt, FaCheck, FaExclamationTriangle, FaTimes } from 'react-icons/fa';
@@ -28,7 +28,7 @@ const ActivityGroupCheckbox = ({ course, activity, group, selected }: CourseActi
 // component for selecting groups of a particular activity, e.g. LEC1 01 02 03...
 const ActivityGroupSelector = memo(({ course, activity }: CourseActivity) => {
   const selected = useStoreState(s => s.selected?.[course]?.[activity]) ?? {};
-  const groups = useStoreState(s => s.currentTimetable.sessions?.[course]?.[activity]) ?? {};
+  const groups = coerceToObject(useStoreState(s => s.currentTimetable.sessions?.[course]?.[activity]) ?? {});
 
   const numSelected = Object.keys(selected).length;
   const groupKeys = useMemo(() => Object.keys(groups), [groups]);
@@ -162,8 +162,8 @@ const CourseSessionSelector = memo(({ course }: Course) => {
 
 const SessionSelectors = memo(() => {
 
-  const activitiesByCourse = useStoreState(s => s.activities);
-  const courses = useMemo(() => Object.keys(activitiesByCourse).sort(), [activitiesByCourse]);
+  const sessions = useStoreState(s => s.sessions);
+  const courses = useMemo(() => Object.keys(sessions).sort(), [sessions]);
 
   return <div className="columns is-multiline">
     {courses.map(c => <div key={c} className="column is-narrow" style={{ maxWidth: '100%' }}>

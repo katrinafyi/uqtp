@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from '../state/types';
-import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, formatTime, sessionEndTime, CUSTOM_COURSE } from '../logic/functions';
+import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, formatTime, sessionEndTime, CUSTOM_COURSE, coerceToObject } from '../logic/functions';
 
 import { FaLock } from 'react-icons/fa';
 
@@ -29,6 +29,7 @@ type TimetableSessionProps = {
 const TimetableSession = memo(({ session, clash, numInHour }: TimetableSessionProps) => {
 
   const deleteSession = useStoreActions(s => s.deleteActivitySession);
+  const numGroups = useStoreState(s => Object.keys(s.sessions[session.course]?.[session.activity] ?? {}).length);
 
   const highlight = UIStore.useStoreState(s => s.highlight);
   const thisHighlighted = UIStore.useStoreState(s => s.isHighlighted(session));
@@ -48,7 +49,7 @@ ${s.location}${customHelp}`;
   const onLongPress = useCallback(() => alert(text), [text]);
   const longPressProps = useLongPress(onLongPress, { isPreventDefault: false });
 
-  const locked = (session.numGroups ?? 10) <= 1;
+  const locked = numGroups <= 1;
   let highlightClass = locked ? 'locked ' : '';
   highlightClass += clash ? 'clash ' : '';
   highlightClass += thisHighlighted ? 'highlighted ' : '';
@@ -154,7 +155,7 @@ const makeDayCells = (day: number, daySessions: (CourseEvent | null)[][], addCus
 
 const Timetable = () => {
 
-  const sessions = useStoreState(s => s.currentTimetable.sessions);
+  const sessions = useStoreState(s => s.sessions);
   const isSessionVisible = useStoreState(s => s.isSessionVisible);
   const addCustomEvent = useStoreActions(s => s.addCustomEvent);
 

@@ -15,7 +15,7 @@ const LOCALSTORAGE_KEY = 'timetableState';
 
 const previousJSON = localStorage.getItem(LOCALSTORAGE_KEY);
 
-let previousState = DEFAULT_PERSIST;
+let previousState: any = DEFAULT_PERSIST;
 try {
   if (previousJSON != null) {
     const parsed = JSON.parse(previousJSON);

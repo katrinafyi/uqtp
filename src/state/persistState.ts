@@ -2,7 +2,7 @@ import { action, computed, Computed, Action, createTypedHooks, Actions, memo, St
 import { PersistState, BLANK_PERSIST } from './schema';
 import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectionsByGroup, Course, RGBAColour, SessionsByGroup, CourseMap, CourseActivityGroupMap } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
+import { makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey, coerceToObject } from '../logic/functions';
 import _ from 'lodash';
 import { userFirestoreDocRef, auth } from './firebase';
 
@@ -13,7 +13,7 @@ export type SelectedNested = SelectionsByGroup;
 
 const ensureSelectionExists = (s: PersistState, x: CourseEvent, force?: true) => {
   if (s.timetables[s.current]!.selections?.[x.course]?.[x.activity] == null) {
-    _.set(s.timetables[s.current].selections, [x.course, x.activity, x.group], true);
+    _.setWith(s.timetables[s.current].selections, [x.course, x.activity, x.group], true, Object);
   }
   if (force ?? false) {
     s.timetables[s.current].selections[x.course][x.activity][x.group] = true;
@@ -28,6 +28,7 @@ export type PersistModel = PersistState & {
 
   currentTimetable: Computed<PersistModel, Timetable>,
   activities: Computed<PersistModel, ActivitiesNested>,
+  sessions: Computed<PersistModel, SessionsByGroup>,
   selected: Computed<PersistModel, SelectedNested>,
 
   new: Action<PersistModel, string | undefined | void>,
@@ -59,10 +60,18 @@ export const model: PersistModel = {
   ...BLANK_PERSIST,
 
   setState: action((_, s) => {
-    if (!s.timetables[s.current]!.sessions)
-      s.timetables[s.current]!.sessions = {};
-    if (!s.timetables[s.current]!.selections)
-      s.timetables[s.current]!.selections = {};
+    const current = s.timetables[s.current]!;
+
+    if (!current.sessions) {
+      // @ts-ignore
+      current.sessions = current.session ?? {};
+    }
+    // @ts-ignore
+    delete current.session;
+
+    if (!current.selections)
+      current.selections = {};
+
     return s as any;
   }),
 
@@ -90,7 +99,7 @@ export const model: PersistModel = {
   }, 2)),
 
   activities: computed(
-    [s => s.timetables[s.current]!.sessions],
+    [s => s.sessions],
     memo((sessions: SessionsByGroup) => {
       // console.error("recomputing activities");
 
@@ -101,6 +110,7 @@ export const model: PersistModel = {
         for (const a of Object.keys(sessions[c])) {
           activities[c][a] = {};
           for (const g of Object.keys(sessions[c][a])) {
+            if (!sessions[c][a][g]) continue;
             activities[c][a][g] = Object.values(sessions[c][a][g]);
           }
         }
@@ -110,9 +120,31 @@ export const model: PersistModel = {
     }, 1)
   ),
 
+  sessions: computed(
+    [s => s.timetables[s.current]!.sessions],
+    memo((sessions: SessionsByGroup) => {
+      // console.error("recomputing activities");
+
+      const out: SessionsByGroup = {};
+
+      for (const c of Object.keys(coerceToObject(sessions))) {
+        out[c] = {};
+        for (const a of Object.keys(coerceToObject(sessions[c]))) {
+          out[c][a] = {};
+          for (const g of Object.keys(coerceToObject(sessions[c][a]))) {
+            if (!sessions[c][a][g]) continue;
+            out[c][a][g] = coerceToObject(sessions[c][a][g]);
+          }
+        }
+      }
+
+      return out;
+    }, 1)
+  ),
+
   selected: computed([
     s => s.currentTimetable.selections,
-    s => s.currentTimetable.sessions,
+    s => s.sessions,
   ], memo((selections: SelectionsByGroup, sessions: SessionsByGroup) => {
     
     const selected: SelectionsByGroup = {};
@@ -122,7 +154,7 @@ export const model: PersistModel = {
       for (const a of Object.keys(selections[c])) {
         selected[c][a] = {};
         for (const g of Object.keys(selections[c][a])) {
-          if (selections[c][a][g] && sessions?.[c]?.[a]?.[g])
+          if (selections[c][a][g] && sessions?.[c]?.[a]?.[g] != null)
             selected[c][a][g] = true;
         }
       }
@@ -174,11 +206,11 @@ export const model: PersistModel = {
     console.assert(courses.size === 1);
 
     const x = sessions[0];
-    _.set(s.timetables[s.current]!.sessions, [x.course], {});
+    _.setWith(s.timetables[s.current]!.sessions, [x.course], {}, Object);
 
     for (const x of sessions) {
-      _.set(s.timetables[s.current].sessions[x.course],
-        [x.activity, x.group, makeActivitySessionKey(x)], x);
+      _.setWith(s.timetables[s.current].sessions[x.course],
+        [x.activity, x.group, makeActivitySessionKey(x)], x, Object);
 
       ensureSelectionExists(s, x);
     }
@@ -190,11 +222,11 @@ export const model: PersistModel = {
 
 
     const x = sessions[0];
-    _.set(s.timetables[s.current]!.sessions, [x.course, x.activity], {});
+    _.setWith(s.timetables[s.current]!.sessions, [x.course, x.activity], {}, Object);
 
     for (const x of sessions) {
-      _.set(s.timetables[s.current].sessions[x.course][x.activity],
-        [x.group, makeActivitySessionKey(x)], x);
+      _.setWith(s.timetables[s.current].sessions[x.course][x.activity],
+        [x.group, makeActivitySessionKey(x)], x, Object);
 
       ensureSelectionExists(s, x);
     }
@@ -209,17 +241,17 @@ export const model: PersistModel = {
   }),
 
   addCustomEvent: action((s, { day, hour, label, duration }) => {
-    const customGroups = Object.keys(s.activities[CUSTOM_COURSE]?.[label] ?? []);
+    const customGroups = Object.keys(s.activities?.[CUSTOM_COURSE]?.[label] ?? []);
     if (customGroups.length === 0) {
       customGroups.push('0');
-      _.set(s.timetables[s.current].sessions, [CUSTOM_COURSE, label], {});
     }
     const max = Math.max(...customGroups.map(x => parseInt(x)));
 
-    const newGroup = `${max + 1}`;
+    const newGroup = `${max + 1}`.padStart(2, '0');
     const newEvent = makeCustomSession(label, day, hour, duration, newGroup);
     const key = makeActivitySessionKey(newEvent);
-    s.timetables[s.current]!.sessions[CUSTOM_COURSE][label][newGroup][key] = newEvent;
+    _.setWith(s.timetables[s.current]!.sessions, 
+      [CUSTOM_COURSE, label, newGroup, key], newEvent, Object);
 
     ensureSelectionExists(s, newEvent, true);
   }),
@@ -236,12 +268,12 @@ export const model: PersistModel = {
 
   setSelectedGroups: action((s, { course, activity, group }) => {
     for (const g of group) {
-      _.set(s.timetables[s.current]!.selections, [course, activity, g], true);
+      _.setWith(s.timetables[s.current]!.selections, [course, activity, g], true, Object);
     }
   }),
 
   setOneSelectedGroup: action((s, { course, activity, group, selected }) => {
-    _.set(s.timetables[s.current]!.selections, [course, activity, group], selected);
+    _.setWith(s.timetables[s.current]!.selections, [course, activity, group], selected, Object);
   }),
 
   replaceOneSelectedGroup: action((s, payload) => {
@@ -249,7 +281,7 @@ export const model: PersistModel = {
     if (old === new_) return;
 
     _.unset(s.timetables[s.current]!.selections, [course, activity, old]);
-    _.set(s.timetables[s.current]!.selections, [course, activity, new_], true);
+    _.setWith(s.timetables[s.current]!.selections, [course, activity, new_], true, Object);
   }),
 
   isSessionVisible: computed([

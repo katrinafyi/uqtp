@@ -152,6 +152,9 @@ export const isHighlighted = (session: CourseActivityGroup, highlight: CourseAct
 export const coerceToArray = <T>(arg?: T | T[]) => 
     arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);
 
+export const coerceToObject = <T>(arg: {[k: string]: T} | T[]): {[k: string]: T} => 
+    Array.isArray(arg) ? Object.assign(arg) : arg;
+
 const parseDate = memo((d: string) => new Date(d), 10);
 
 export const isInWeek = (weekStart: Date, session: CourseEvent) => {

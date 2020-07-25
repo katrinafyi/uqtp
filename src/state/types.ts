@@ -22,7 +22,7 @@ export type Course = {
 export type CourseActivity = Course & {
     activity: string,
     activityType?: string,
-    numGroups?: number
+    // numGroups?: number
 }
 
 export type CourseActivityGroup = CourseActivity & {

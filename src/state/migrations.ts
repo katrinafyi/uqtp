@@ -71,11 +71,11 @@ const migrate12To13 = (state: Schema12): Schema13 => {
         const timetable = state.timetables[id];
         const sessions: SessionsByGroup = {};
         
-        for (const s of timetable.allSessions) {
+        for (const s of timetable.allSessions ?? []) {
             _.set(sessions, [s.course, s.activity, s.group, makeActivitySessionKey(s)], s);
         }
 
-        for (const c of Object.keys(timetable.selectedGroups)) {
+        for (const c of Object.keys(timetable.selectedGroups ?? {})) {
             for (const a of Object.keys(timetable.selectedGroups[c])) {
                 const selected: { [g: string]: boolean } = {};
                 for (const g of timetable.selectedGroups[c][a]) {
@@ -86,7 +86,7 @@ const migrate12To13 = (state: Schema12): Schema13 => {
         }
 
         // @ts-ignore
-        timetable.session = sessions;
+        timetable.sessions = sessions;
         delete timetable.allSessions;
         delete timetable.selectedGroups;
     }
