@@ -2,5 +2,4 @@
   command = "source variables.sh && npm run build"
 
 [context.branch-deploy]
-  [context.branch-deploy.environment]
-    CI = ""
+  environment = { CI = "" }
