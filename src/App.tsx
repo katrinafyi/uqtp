@@ -40,6 +40,7 @@ const App = () => {
   };
 
   useEffect(() => {
+    // debugger;
     if (!authLoading && !authError)
       setUser(authUser ?? null);
   }, [authUser, authLoading, authError, setUser]);

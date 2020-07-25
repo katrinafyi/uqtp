@@ -164,7 +164,7 @@ const removeNullValues = <T>(arg: T): T => {
 
 export const coerceToObject = <T>(arg: {[k: string]: T} | T[]): {[k: string]: T} => 
     // @ts-ignore
-    Array.isArray(arg) ? removeNullValues(Object.assign({}, arg)) : arg;
+    Array.isArray(arg) ? removeNullValues(Object.assign({}, arg)) : (arg ?? {});
 
 const parseDate = memo((d: string) => new Date(d), 10);
 

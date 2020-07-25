@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey, coerceToObject } from '../logic/functions';
 import _ from 'lodash';
 import { userFirestoreDocRef, auth } from './firebase';
+import { firebaseAction, FirebaseModel, FirebaseThunk } from './firebaseEnhancer';
 
 
 export type ActivitiesNested = CourseActivityGroupMap<CourseEvent[]>;
@@ -22,60 +23,61 @@ const ensureSelectionExists = (s: PersistState, x: CourseEvent, force?: true) =>
 
 
 export type PersistModel = PersistState & {
-  setState: Action<PersistModel, PersistState>,
+  onSetState: ActionOn<PersistModel & FirebaseModel>,
 
-  setUser: Action<PersistModel, firebase.User | null>,
+  setUser: Thunk<PersistModel, firebase.User | null>,
 
   currentTimetable: Computed<PersistModel, Timetable>,
   activities: Computed<PersistModel, ActivitiesNested>,
   sessions: Computed<PersistModel, SessionsByGroup>,
   selected: Computed<PersistModel, SelectedNested>,
 
-  new: Action<PersistModel, string | undefined | void>,
+  new: Thunk<PersistModel, string | undefined | void>,
   select: Thunk<PersistModel, string>,
-  delete: Action<PersistModel, string>,
-  rename: Action<PersistModel, string>,
-  copy: Action<PersistModel>,
+  delete: Thunk<PersistModel, string>,
+  rename: Thunk<PersistModel, string>,
+  copy: Thunk<PersistModel>,
 
-  updateCourseSessions: Action<PersistModel, CourseEvent[]>,
-  updateActivitySessions: Action<PersistModel, CourseEvent[]>,
+  updateCourseSessions: Thunk<PersistModel, CourseEvent[]>,
+  updateActivitySessions: Thunk<PersistModel, CourseEvent[]>,
 
-  deleteCourse: Action<PersistModel, string>,
-  deleteActivitySession: Action<PersistModel, CourseEvent>,
+  deleteCourse: Thunk<PersistModel, string>,
+  deleteActivitySession: Thunk<PersistModel, CourseEvent>,
 
-  setSelectedGroups: Action<PersistModel, CourseActivity & { group: string[] }>,
-  setOneSelectedGroup: Action<PersistModel, CourseActivityGroup & { selected: boolean }>,
-  replaceOneSelectedGroup: Action<PersistModel, CourseActivity & { old: string, new: string }>,
+  setSelectedGroups: Thunk<PersistModel, CourseActivity & { group: string[] }>,
+  setOneSelectedGroup: Thunk<PersistModel, CourseActivityGroup & { selected: boolean }>,
+  replaceOneSelectedGroup: Thunk<PersistModel, CourseActivity & { old: string, new: string }>,
 
-  addCustomEvent: Action<PersistModel, { day: number, hour: number, duration: number, label: string }>,
+  addCustomEvent: Thunk<PersistModel, { day: number, hour: number, duration: number, label: string }>,
 
-  setCourseVisibility: Action<PersistModel, Course & { visible: boolean }>,
+  setCourseVisibility: Thunk<PersistModel, Course & { visible: boolean }>,
   isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>,
 
-  setCourseColour: Action<PersistModel, Course & { colour?: RGBAColour }>,
+  setCourseColour: Thunk<PersistModel, Course & { colour?: RGBAColour }>,
 };
 
 
 export const model: PersistModel = {
   ...BLANK_PERSIST,
 
-  setState: action((_, s) => {
-    const current = s.timetables[s.current]!;
+  onSetState: actionOn(
+    a => a.__setFirebaseState,
+    (s) => {
+      const current = s.timetables[s.current]!;
 
-    if (!current.sessions) {
+      if (!current.sessions) {
+        // @ts-ignore
+        current.sessions = current.session ?? {};
+      }
       // @ts-ignore
-      current.sessions = current.session ?? {};
+      delete current.session;
+
+      if (!current.selections)
+        current.selections = {};
     }
-    // @ts-ignore
-    delete current.session;
+  ),
 
-    if (!current.selections)
-      current.selections = {};
-
-    return s as any;
-  }),
-
-  setUser: action((s, user) => {
+  setUser: firebaseAction((s, user) => {
     if (!user) {
       s.user = null;
       return;
@@ -149,11 +151,11 @@ export const model: PersistModel = {
     
     const selected: SelectionsByGroup = {};
 
-    for (const c of Object.keys(selections)) {
+    for (const c of Object.keys(coerceToObject(selections))) {
       selected[c] = {};
-      for (const a of Object.keys(selections[c])) {
+      for (const a of Object.keys(coerceToObject(selections[c]))) {
         selected[c][a] = {};
-        for (const g of Object.keys(selections[c][a])) {
+        for (const g of Object.keys(coerceToObject(selections[c][a]))) {
           if (selections[c][a][g] && sessions?.[c]?.[a]?.[g] != null)
             selected[c][a][g] = true;
         }
@@ -163,18 +165,18 @@ export const model: PersistModel = {
     return selected;
   }, 1)),
 
-  new: action((s, name) => {
+  new: firebaseAction((s, name) => {
     const id = uuidv4();
     s.timetables[id] = EMPTY_TIMETABLE;
     s.timetables[id].name = name ? name : "new timetable";
     s.current = id;
   }),
 
-  select: thunk((_, id) => {
-    return userFirestoreDocRef(auth.currentUser)?.child('current').set(id);
+  select: firebaseAction((s, id) => {
+    s.current = id;
   }),
 
-  delete: action((s, id) => {
+  delete: firebaseAction((s, id) => {
     if (Object.keys(s.timetables).length === 1) {
       console.error("refusing to delete the last timetable");
       return;
@@ -188,11 +190,11 @@ export const model: PersistModel = {
     s.current = newID!;
   }),
 
-  rename: action((s, name) => {
+  rename: firebaseAction((s, name) => {
     s.timetables[s.current]!.name = name;
   }),
 
-  copy: action(s => {
+  copy: firebaseAction(s => {
     const old = s.currentTimetable;
     const newID = uuidv4();
     s.timetables[newID] = { ...old };
@@ -201,7 +203,7 @@ export const model: PersistModel = {
   }),
 
 
-  updateCourseSessions: action((s, sessions) => {
+  updateCourseSessions: firebaseAction((s, sessions) => {
     const courses = new Set(sessions.map(x => x.course));
     console.assert(courses.size === 1);
 
@@ -216,7 +218,7 @@ export const model: PersistModel = {
     }
   }),
 
-  updateActivitySessions: action((s, sessions) => {
+  updateActivitySessions: firebaseAction((s, sessions) => {
     const newActivities = new Set(sessions.map(makeActivityKey));
     console.assert(newActivities.size === 1);
 
@@ -233,14 +235,14 @@ export const model: PersistModel = {
 
   }),
 
-  deleteActivitySession: action((s, c) => {
+  deleteActivitySession: firebaseAction((s, c) => {
     // i am sorry for the length
     if (s.timetables[s.current]?.sessions?.[c.course]?.[c.activity]?.[c.group]?.[makeActivitySessionKey(c)] != null) {
       delete s.timetables[s.current].sessions[c.course][c.activity][c.group][makeActivitySessionKey(c)];
     }
   }),
 
-  addCustomEvent: action((s, { day, hour, label, duration }) => {
+  addCustomEvent: firebaseAction((s, { day, hour, label, duration }) => {
     const customGroups = Object.keys(s.activities?.[CUSTOM_COURSE]?.[label] ?? []);
     if (customGroups.length === 0) {
       customGroups.push('0');
@@ -256,27 +258,27 @@ export const model: PersistModel = {
     ensureSelectionExists(s, newEvent, true);
   }),
 
-  deleteCourse: action((s, course) => {
+  deleteCourse: firebaseAction((s, course) => {
     _.unset(s.timetables[s.current]!.sessions, [course]);
   }),
 
-  setCourseVisibility: action((s, { course, visible }) => {
+  setCourseVisibility: firebaseAction((s, { course, visible }) => {
     if (s.timetables[s.current]!.courseVisibility == null)
       s.timetables[s.current]!.courseVisibility = {};
     s.timetables[s.current]!.courseVisibility![course] = visible;
   }),
 
-  setSelectedGroups: action((s, { course, activity, group }) => {
+  setSelectedGroups: firebaseAction((s, { course, activity, group }) => {
     for (const g of group) {
       _.setWith(s.timetables[s.current]!.selections, [course, activity, g], true, Object);
     }
   }),
 
-  setOneSelectedGroup: action((s, { course, activity, group, selected }) => {
+  setOneSelectedGroup: firebaseAction((s, { course, activity, group, selected }) => {
     _.setWith(s.timetables[s.current]!.selections, [course, activity, group], selected, Object);
   }),
 
-  replaceOneSelectedGroup: action((s, payload) => {
+  replaceOneSelectedGroup: firebaseAction((s, payload) => {
     const {course, activity, old, new: new_} = payload;
     if (old === new_) return;
 
@@ -293,7 +295,7 @@ export const model: PersistModel = {
   }, 1)
   ),
 
-  setCourseColour: action((s, { course, colour }) => {
+  setCourseColour: firebaseAction((s, { course, colour }) => {
     if (s.timetables[s.current]!.courseColours == null)
       s.timetables[s.current]!.courseColours = {};
     if (colour)

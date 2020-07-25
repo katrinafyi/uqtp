@@ -7,7 +7,7 @@ import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
 import { model, cleanState } from './state/persistState';
 import { createStore, StoreProvider } from 'easy-peasy';
-import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
+import { makeFirestorePersistEnhancer, firebaseModel } from './state/firebaseEnhancer';
 import { userFirestoreDocRef, auth } from './state/firebase';
 import _ from 'lodash';
 
@@ -39,20 +39,17 @@ if (migratedState) {
 
 const initialState = migratedState ?? previousState;
 // debugger;
-const firestoreEnhancer = makeFirestorePersistEnhancer(
-  // @ts-ignore
-  auth, userFirestoreDocRef, '@action.setState', ['@action.setUser', '@action.select'],
-  DEFAULT_PERSIST, migratePeristState, cleanState);
+const firestoreEnhancer = makeFirestorePersistEnhancer(DEFAULT_PERSIST, cleanState);
 
-const rootStore = createStore(model, 
+const rootStore = createStore({ ...firebaseModel, ...model }, 
   { initialState, enhancers: [firestoreEnhancer] });
 
 // attachFirebaseListeners(rootStore);
 
 rootStore.subscribe(_.throttle(() => {
-  const s = rootStore.getState();
+  const s = rootStore.getState() as any;
  //console.log("subscribed to state: ", s);
-  saveLocalStorage(s);
+  saveLocalStorage(cleanState(s));
 }, 2000));
 
 ReactDOM.render(

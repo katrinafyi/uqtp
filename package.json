@@ -20,7 +20,7 @@
     "easy-peasy": "^3.3.1",
     "firebase": "^7.15.5",
     "firebaseui": "^4.5.2",
-    "immer": "^5.3.6",
+    "immer": "^7.0.7",
     "jss": "^10.3.0",
     "jss-preset-default": "^10.3.0",
     "lodash": "^4.17.19",
