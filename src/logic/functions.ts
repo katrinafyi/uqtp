@@ -152,8 +152,19 @@ export const isHighlighted = (session: CourseActivityGroup, highlight: CourseAct
 export const coerceToArray = <T>(arg?: T | T[]) => 
     arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);
 
+const removeNullValues = <T>(arg: T): T => {
+    for (const key of Object.keys(arg)) {
+        // @ts-ignore
+        if (arg[key] == null)
+            // @ts-ignore
+            delete arg[key];
+    }
+    return arg;
+}
+
 export const coerceToObject = <T>(arg: {[k: string]: T} | T[]): {[k: string]: T} => 
-    Array.isArray(arg) ? Object.assign(arg) : arg;
+    // @ts-ignore
+    Array.isArray(arg) ? removeNullValues(Object.assign({}, arg)) : arg;
 
 const parseDate = memo((d: string) => new Date(d), 10);
 
