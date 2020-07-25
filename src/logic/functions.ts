@@ -142,7 +142,7 @@ export const makeActivityGroupKey = (g: CourseActivityGroup) =>
     `${g.course}|${g.activity}|${g.group}`;
 
 export const makeActivitySessionKey = (s: CourseEvent) => 
-    `${s.course}|${s.activity}|${s.group}|${s.day}${s.time.hour}|${s.time.minute}`;
+    `${s.course}|${s.activity}|${s.group}|${s.day}${s.time.hour}|${s.time.minute}|${s.duration}|${s.campus}`;
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 

@@ -45,28 +45,33 @@ export type CourseEvent = CourseActivityGroup & {
     weekPattern?: string,
 }
 
-export type SelectedActivities = {
-    [course: string]: { [activity: string]: string[] | string }
-}
-
-export type CourseVisibility = {[course: string]: boolean};
-
-// export type RGBAColour = {r: number, g: number, b: number, a?: number};
 export type RGBAColour = string;
-export type CourseColours = {[course: string]: RGBAColour};
+// export type RGBAColour = {r: number, g: number, b: number, a?: number};
+
+// helper classes for various levels of data structures.
+export type CourseMap<V> = { [course: string]: V };
+export type CourseActivityMap<V> = CourseMap<{ [activity: string]: V }>
+export type CourseActivityGroupMap<V> = CourseActivityMap<{ [group: string]: V }>
+
+export type SelectionsByGroup = CourseActivityGroupMap<boolean>;
+export type SessionsByGroup = CourseActivityGroupMap<{ [sessionId: string]: CourseEvent }>
+
+export type CourseVisibility = CourseMap<boolean>;
+export type CourseColours = CourseMap<RGBAColour>;
+
 
 export type Timetable = {
     name: string,
-    allSessions: CourseEvent[],
-    selectedGroups: SelectedActivities,
+    sessions: SessionsByGroup,
+    selections: SelectionsByGroup,
     courseVisibility?: CourseVisibility,
     courseColours?: CourseColours
 }
 
 export const EMPTY_TIMETABLE: Timetable = {
     name: 'empty timetable',
-    allSessions: [],
-    selectedGroups: {},
+    sessions: {},
+    selections: {},
     courseVisibility: {},
     courseColours: {},
 }

@@ -1,13 +1,25 @@
 import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, actionOn, ActionOn, Thunk, thunk } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
-import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectedActivities, Course, RGBAColour } from './types';
+import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectionsByGroup, Course, RGBAColour, SessionsByGroup, CourseMap } from './types';
 import { v4 as uuidv4 } from 'uuid';
-import { coerceToArray, makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
+import { makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey } from '../logic/functions';
 import _ from 'lodash';
 import { userFirestoreDocRef, auth } from './firebase';
 
-export type ActivitiesNested = {[course: string]: {[activity: string]: {[group: string]: CourseEvent[]}}};
-export type SelectedNested = {[course: string]: {[activity: string]: string[]}};
+
+export type ActivitiesNested = { [course: string]: { [activity: string]: { [group: string]: CourseEvent[] } } };
+export type SelectedNested = SelectionsByGroup;
+
+
+const ensureSelectionExists = (s: PersistState, x: CourseEvent, force?: true) => {
+  if (s.timetables[s.current]!.selections?.[x.course]?.[x.activity] == null) {
+    _.set(s.timetables[s.current].selections, [x.course, x.activity, x.group], true);
+  }
+  if (force ?? false) {
+    s.timetables[s.current].selections[x.course][x.activity][x.group] = true;
+  }
+}
+
 
 export type PersistModel = PersistState & {
   setState: Action<PersistModel, PersistState>,
@@ -33,9 +45,9 @@ export type PersistModel = PersistState & {
   setSelectedGroups: Action<PersistModel, CourseActivity & { group: string[] }>,
   setOneSelectedGroup: Action<PersistModel, CourseActivityGroup & { selected: boolean }>,
   replaceOneSelectedGroup: Action<PersistModel, CourseActivity & { old: string, new: string }>,
-  
+
   addCustomEvent: Action<PersistModel, { day: number, hour: number, duration: number, label: string }>,
-  
+
   setCourseVisibility: Action<PersistModel, Course & { visible: boolean }>,
   isSessionVisible: Computed<PersistModel, (c: CourseEvent) => boolean>,
 
@@ -47,10 +59,10 @@ export const model: PersistModel = {
   ...BLANK_PERSIST,
 
   setState: action((_, s) => {
-    if (!s.timetables[s.current]!.allSessions)
-      s.timetables[s.current]!.allSessions = [];
-    if (!s.timetables[s.current]!.selectedGroups)
-      s.timetables[s.current]!.selectedGroups = {};    
+    if (!s.timetables[s.current]!.sessions)
+      s.timetables[s.current]!.sessions = {};
+    if (!s.timetables[s.current]!.selections)
+      s.timetables[s.current]!.selections = {};
     return s as any;
   }),
 
@@ -71,46 +83,37 @@ export const model: PersistModel = {
   }),
 
   currentTimetable: computed(memo((s: State<PersistModel>) => {
-   //console.log('timetable', s);
-   //console.log(s.currentTimetable);
+    //console.log('timetable', s);
+    //console.log(s.currentTimetable);
     // debugger;
     return s.timetables[s.current];
   }, 2)),
 
   activities: computed(
-    [s => s.timetables[s.current]!.allSessions],
-    memo((sessions: CourseEvent[]) => {
+    [s => s.timetables[s.current]!.sessions],
+    memo((sessions: SessionsByGroup) => {
       // console.error("recomputing activities");
-      
+
       const activities: ActivitiesNested = {};
-      for (const s of sessions) {
-        if (activities?.[s.course]?.[s.activity]?.[s.group] == null) {
-          _.set(activities, [s.course, s.activity, s.group], []);
+
+      for (const c of Object.keys(sessions)) {
+        activities[c] = {};
+        for (const a of Object.keys(sessions[c])) {
+          activities[c][a] = {};
+          for (const g of Object.keys(sessions[c][a])) {
+            activities[c][a][g] = Object.values(sessions[c][a][g]);
+          }
         }
-        activities[s.course][s.activity][s.group].push(s);
       }
+
       return activities;
-    }, 2)
+    }, 1)
   ),
 
   selected: computed([
-    s => s.currentTimetable.selectedGroups,
-    s => s.activities,
-  ], memo((selected: SelectedActivities, activities: ActivitiesNested) => {
-
-    const out: SelectedNested = {};
-
-    for (const c of Object.keys(activities)) {
-      out[c] = {};
-      for (const a of Object.keys(activities[c])) {
-        // get selected groups for this course+activity, then filter groups to
-        // those which actually have activities.
-        out[c][a] = coerceToArray(selected?.[c]?.[a])
-          .filter(g => activities?.[c]?.[a]?.[g]?.length);
-      }
-    }
-
-    return out;
+    s => s.currentTimetable.selections,
+  ], memo((selected: SelectionsByGroup) => {
+    return selected;
   }, 1)),
 
   new: action((s, name) => {
@@ -131,13 +134,13 @@ export const model: PersistModel = {
     }
     delete s.timetables[id];
     const newID = _.minBy(
-      Object.keys(s.timetables), 
+      Object.keys(s.timetables),
       k => s.timetables[k].name
     );
     console.assert(newID != null, "next ID after deleting cannot be null");
     s.current = newID!;
   }),
-  
+
   rename: action((s, name) => {
     s.timetables[s.current]!.name = name;
   }),
@@ -152,121 +155,103 @@ export const model: PersistModel = {
 
 
   updateCourseSessions: action((s, sessions) => {
-    const newCourses = new Set(sessions.map(x => x.course));
-    //console.log('newActivities', newActivities);
-    const oldSessions = s.timetables[s.current]!.allSessions;
-    s.timetables[s.current]!.allSessions = [
-      ...sessions,
-      ...oldSessions.filter(x => !newCourses.has(x.course))
-    ];
+    const courses = new Set(sessions.map(x => x.course));
+    console.assert(courses.size === 1);
+
+    const x = sessions[0];
+    _.set(s.timetables[s.current]!.sessions, [x.course], {});
 
     for (const x of sessions) {
-      if (s.timetables[s.current]!.selectedGroups?.[x.course]?.[x.activity] == null) {
-        _.set(s.timetables[s.current]!.selectedGroups, [x.course, x.activity], [x.group]);
-      }
+      _.set(s.timetables[s.current].sessions[x.course],
+        [x.activity, x.group, makeActivitySessionKey(x)], x);
+
+      ensureSelectionExists(s, x);
     }
   }),
 
   updateActivitySessions: action((s, sessions) => {
     const newActivities = new Set(sessions.map(makeActivityKey));
-    //console.log('newActivities', newActivities);
-    const oldSessions = s.timetables[s.current]!.allSessions;
-    s.timetables[s.current]!.allSessions = [
-      ...sessions,
-      ...oldSessions.filter(x => !newActivities.has(makeActivityKey(x)))
-    ];
+    console.assert(newActivities.size === 1);
+
+
+    const x = sessions[0];
+    _.set(s.timetables[s.current]!.sessions, [x.course, x.activity], {});
 
     for (const x of sessions) {
-      if (s.timetables[s.current]!.selectedGroups?.[x.course]?.[x.activity] == null) {
-        _.set(s.timetables[s.current]!.selectedGroups, [x.course, x.activity], [x.group]);
-      }
+      _.set(s.timetables[s.current].sessions[x.course][x.activity],
+        [x.group, makeActivitySessionKey(x)], x);
+
+      ensureSelectionExists(s, x);
     }
+
   }),
 
   deleteActivitySession: action((s, c) => {
-    const key = makeActivitySessionKey(c);
-    s.timetables[s.current]!.allSessions = s.currentTimetable.allSessions
-      .filter(x => makeActivitySessionKey(x) !== key);
+    // i am very sorry
+    if (s.timetables[s.current]?.sessions?.[c.course]?.[c.activity]?.[c.group]?.[makeActivitySessionKey(c)] != null) {
+      delete s.timetables[s.current].sessions[c.course][c.activity][c.group][makeActivitySessionKey(c)];
+    }
   }),
 
   addCustomEvent: action((s, { day, hour, label, duration }) => {
-    const sessions = Object.keys(s.activities[CUSTOM_COURSE]?.[label] ?? []);
-    if (sessions.length === 0)
-      sessions.push('0');
-    const max = Math.max(...sessions.map(x => parseInt(x)));
-
-    const newGroup = `${max+1}`;
-    s.timetables[s.current]!.allSessions.push(
-      makeCustomSession(label, day, hour, duration, newGroup));
-
-    if (s.timetables[s.current]!.selectedGroups?.[CUSTOM_COURSE]?.[label] == null) {
-      _.set(s.timetables[s.current]!.selectedGroups, [CUSTOM_COURSE, label], []);
+    const customGroups = Object.keys(s.activities[CUSTOM_COURSE]?.[label] ?? []);
+    if (customGroups.length === 0) {
+      customGroups.push('0');
+      _.set(s.timetables[s.current].sessions, [CUSTOM_COURSE, label], {});
     }
+    const max = Math.max(...customGroups.map(x => parseInt(x)));
 
-    if (!s.timetables[s.current]!.selectedGroups[CUSTOM_COURSE]![label]!.includes(newGroup)) {
-      // @ts-ignore
-      s.timetables[s.current]!.selectedGroups[CUSTOM_COURSE]![label]!.push(newGroup);
-    }
+    const newGroup = `${max + 1}`;
+    const newEvent = makeCustomSession(label, day, hour, duration, newGroup);
+    const key = makeActivitySessionKey(newEvent);
+    s.timetables[s.current]!.sessions[CUSTOM_COURSE][label][newGroup][key] = newEvent;
+
+    ensureSelectionExists(s, newEvent, true);
   }),
 
   deleteCourse: action((s, course) => {
-    s.timetables[s.current]!.allSessions = s.timetables[s.current]!.allSessions.filter(
-      x => x.course !== course
-    );
-    // s.timetables[s.current]!.selectedGroups[course] = {};
+    _.unset(s.timetables[s.current]!.sessions, [course]);
   }),
 
-  setCourseVisibility: action((s, {course, visible}) => {
+  setCourseVisibility: action((s, { course, visible }) => {
     if (s.timetables[s.current]!.courseVisibility == null)
       s.timetables[s.current]!.courseVisibility = {};
     s.timetables[s.current]!.courseVisibility![course] = visible;
   }),
 
-  setSelectedGroups: action((s, {course, activity, group}) => {
-    _.set(s.timetables[s.current]!.selectedGroups, [course, activity], group);
-  }),
-
-  setOneSelectedGroup: action((s, {course, activity, group, selected}) => {
-    const oldSelected = coerceToArray(s.timetables[s.current]!.selectedGroups?.[course]?.[activity]);
-
-    if (oldSelected.includes(group) !== selected) {
-      if (!selected) {
-        _.set(s.timetables[s.current]!.selectedGroups, [course, activity], 
-          oldSelected.filter(x => x !== group));
-      } else {
-        _.set(s.timetables[s.current]!.selectedGroups, [course, activity], 
-          [...oldSelected, group]);
-      }
+  setSelectedGroups: action((s, { course, activity, group }) => {
+    for (const g of group) {
+      _.set(s.timetables[s.current]!.selections, [course, activity, g], true);
     }
   }),
 
+  setOneSelectedGroup: action((s, { course, activity, group, selected }) => {
+    _.set(s.timetables[s.current]!.selections, [course, activity, group], selected);
+  }),
+
   replaceOneSelectedGroup: action((s, payload) => {
-    if (payload.old === payload.new) return;
-    const oldGroups = coerceToArray(s.timetables[s.current]!.selectedGroups?.[payload.course]?.[payload.activity]);
-    _.set(
-      s.timetables[s.current]!.selectedGroups, 
-      [payload.course, payload.activity],
-      oldGroups.map(x => x === payload.old ? payload.new : x)
-    );
+    const {course, activity, old, new: new_} = payload;
+    if (old === new_) return;
+
+    _.unset(s.timetables[s.current]!.selections, [course, activity, old]);
+    _.set(s.timetables[s.current]!.selections, [course, activity, new_], true);
   }),
 
   isSessionVisible: computed([
-    s => s.currentTimetable.selectedGroups,
+    s => s.currentTimetable.selections,
     s => s.currentTimetable.courseVisibility,
-  ], memo((selected: SelectedActivities, visibilities?: CourseVisibility) => (c: CourseEvent) => {
-
-      return coerceToArray(selected?.[c.course]?.[c.activity] ?? null).includes(c.group) 
-        && (visibilities?.[c.course] ?? true);
-        
-    }, 1)
+  ], memo((selected: SelectionsByGroup, visibilities?: CourseVisibility) => (c: CourseEvent) => {
+    return (selected?.[c.course]?.[c.activity]?.[c.group] ?? false) 
+      && (visibilities?.[c.course] ?? true);
+  }, 1)
   ),
 
-  setCourseColour: action((s, {course, colour}) => {
+  setCourseColour: action((s, { course, colour }) => {
     if (s.timetables[s.current]!.courseColours == null)
       s.timetables[s.current]!.courseColours = {};
     if (colour)
       s.timetables[s.current]!.courseColours![course] = colour;
-    else 
+    else
       delete s.timetables[s.current]!.courseColours![course];
   }),
 };
@@ -277,7 +262,7 @@ export const useStoreActions = typedHooks.useStoreActions;
 export const useStoreDispatch = typedHooks.useStoreDispatch;
 export const useStoreState = typedHooks.useStoreState;
 
-export const useTimetableActions = () => ({ 
+export const useTimetableActions = () => ({
   select: useStoreActions(s => s.select),
   new: useStoreActions(s => s.new),
   copy: useStoreActions(s => s.copy),
