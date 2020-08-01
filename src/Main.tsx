@@ -11,6 +11,7 @@ import { useStoreActions } from './state/persistState';
 import { UIStore } from './state/uiState';
 import { WeekSelector } from './components/WeekSelector';
 import { CourseColoursContainer, CourseColoursStylesheet } from './components/styles/CourseColours';
+import { ModeSelector } from './components/ModeSelector';
 
 
 const Main = () => {
@@ -83,11 +84,14 @@ const Main = () => {
 
           <h4 className="title is-4">Timetable</h4>
 
-          <div className="mb-5">
-            <WeekSelector></WeekSelector>
+          <div style={{maxWidth: '70rem'}}>
+            <div className="is-flex mb-5" style={{justifyContent: 'space-between', flexWrap: 'wrap'}}>
+              <WeekSelector></WeekSelector>
+              <ModeSelector></ModeSelector>
+            </div>
+            <Timetable></Timetable>
           </div>
-          <Timetable></Timetable>
-
+          
           <div className="content">
             <ul>
               <li>Changes to your timetable and classes are saved automatically.</li>

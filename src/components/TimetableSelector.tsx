@@ -48,7 +48,7 @@ export const TimetableSelector = memo(() => {
       const newTimetable = (ev.target as HTMLButtonElement).value;
       if (newTimetable !== current) {
         select(newTimetable);
-        reset();
+        // reset();
       }
     };
 
@@ -67,7 +67,10 @@ export const TimetableSelector = memo(() => {
       ev.preventDefault();
     }
 
-    const onClickNew = () => new_();
+    const onClickNew = () => {
+      new_();
+      reset();
+    };
 
     const onClickDuplicate = () => copy();
 

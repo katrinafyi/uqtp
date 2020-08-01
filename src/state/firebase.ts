@@ -66,4 +66,4 @@ export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCreden
         newData = newMigrated;
   
     await newDocRef.set(mergeData(oldData ?? {}, newData ?? {}));
-  };
+};

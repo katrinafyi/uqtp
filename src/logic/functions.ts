@@ -166,15 +166,6 @@ export const coerceToObject = <T>(arg: {[k: string]: T} | T[]): {[k: string]: T}
     // @ts-ignore
     Array.isArray(arg) ? removeNullValues(Object.assign({}, arg)) : (arg ?? {});
 
-const parseDate = memo((d: string) => new Date(d), 10);
-
-export const isInWeek = (weekStart: Date, session: CourseEvent) => {
-    if (!session.startDate || !session.weekPattern) return true;
-    const diff = differenceInCalendarDays(weekStart, parseDate(session.startDate));
-    const index = Math.floor(diff / 7);
-    return (session.weekPattern[index] ?? '1') === '1';
-};
-
 export const CUSTOM_COURSE = '(custom)';
 
 export const makeCustomSession = (label: string, day: number, hour: number, duration: number, group: string): CourseEvent => {

@@ -1,12 +1,21 @@
-import { action, computed, Computed, Action, createContextStore } from 'easy-peasy';
-import { CourseActivity, CourseActivityGroup } from './types';
+import { action, computed, Computed, Action, createContextStore, memo } from 'easy-peasy';
+import { CourseActivity, CourseActivityGroup, CourseEvent } from './types';
 import { PersistModel } from './persistState';
-import { addWeeks, startOfWeek } from 'date-fns';
+import { addWeeks, startOfWeek, differenceInCalendarDays } from 'date-fns';
 
 export const WEEK_START_MONDAY = { weekStartsOn: 1 } as const;
 
+const parseDate = memo((d: string) => new Date(d), 3);
+
+export enum TimetableMode {
+  VIEW, EDIT, CUSTOM
+}
+
 export type UIState = {
+  timetableMode: TimetableMode,
+
   highlight: CourseActivityGroup | null,
+
   weekStart: Date,
   allWeeks: boolean,
   
@@ -14,15 +23,18 @@ export type UIState = {
 };
 
 export type UIModel = UIState & {
+  setTimetableMode: Action<UIModel, TimetableMode>,
+
   setHighlight: Action<UIModel, CourseActivityGroup | null>,
   isHighlighted: Computed<UIModel, (c: CourseActivity) => boolean>,
+  selectHighlightedGroup: Computed<UIModel, (group: string) => any>
 
   setAllWeeks: Action<UIModel, boolean>,
   setWeek: Action<UIModel, Date | null>,
   shiftWeek: Action<UIModel, number>,
-  reset: Action<UIModel>,
+  isWeekVisible: Computed<UIModel, (session: CourseEvent) => boolean>,
 
-  selectHighlightedGroup: Computed<UIModel, (group: string) => any>
+  reset: Action<UIModel>,
 };
 
 const DEFAULT_WEEK_START = startOfWeek(new Date(), WEEK_START_MONDAY);
@@ -31,6 +43,7 @@ const initialState = {
   highlight: null,
   weekStart: DEFAULT_WEEK_START,
   allWeeks: true,
+  timetableMode: TimetableMode.EDIT,
 }
 
 export type UIModelParams = {
@@ -40,6 +53,12 @@ export type UIModelParams = {
 export const model = ({ replaceActivityGroup }: UIModelParams): UIModel => ({
   ...initialState,
   replaceActivityGroup,
+
+  setTimetableMode: action((s, mode) => {
+    if (mode !== s.timetableMode)
+      s.highlight = null;
+    s.timetableMode = mode;
+  }),
 
   setHighlight: action((s, group) => {
     s.highlight = group;
@@ -62,10 +81,22 @@ export const model = ({ replaceActivityGroup }: UIModelParams): UIModel => ({
     s.weekStart = addWeeks(s.weekStart, n);
   }),
 
+  isWeekVisible: computed([
+      s => s.weekStart, 
+      s => s.allWeeks,
+  ], memo((start: Date, all: boolean) => (session: CourseEvent) => {
+      if (all || !session.startDate || !session.weekPattern) return true;
+
+      const diff = differenceInCalendarDays(start, parseDate(session.startDate));
+      const index = Math.floor(diff / 7);
+      return (session.weekPattern[index] ?? '1') === '1';
+  }, 1)),
+
   reset: action(s => {
     s.weekStart = DEFAULT_WEEK_START;
     s.allWeeks = true;
     s.highlight = null;
+    s.timetableMode = TimetableMode.EDIT;
   }),
 
   selectHighlightedGroup: computed(s => group => {
