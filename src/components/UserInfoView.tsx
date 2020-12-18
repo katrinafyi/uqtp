@@ -1,13 +1,31 @@
-import React from "react"
-import { useStoreState } from "../state/persistState";
+import React, { useEffect, useMemo } from "react"
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "../state/firebase";
+import { useStoreState, useStoreActions } from "../state/persistState";
 
 const UserInfoView = () => {
-  const user = useStoreState(s => s.user);
-  const state = useStoreState(s => s);
-  // debugger;
+  const [authUser] = useAuthState(auth);
+
+  const user = useMemo(() => {
+    if (!authUser) return;
+    return {
+      uid: authUser.uid,
+      name: authUser.displayName,
+      email: authUser.email,
+      photo: authUser.photoURL,
+      phone: authUser.phoneNumber,
+      providers: authUser.providerData?.map(x => x?.providerId ?? JSON.stringify(x)),
+      isAnon: authUser.isAnonymous,
+    }
+  }, [authUser]);
+
+  // useEffect(() => {
+  //   if (!authUser) return;
+  //   setUser(authUser);
+  // }, [setUser, authUser]);
 
   if (!user) {
-    console.warn("Attempting to render UserInfoView with no user set.");
+    // console.warn("Attempting to render UserInfoView with no user set.");
     return <></>;
   }
 
@@ -28,10 +46,10 @@ const UserInfoView = () => {
         <input type="text" className="input is-small" value={JSON.stringify(user)} readOnly/>
       </div>
     </div>
-    <div className="field">
+    {/* <div className="field">
       <label className="label">Raw Timetable Data</label>
       <input type="text" className="input is-small" value={JSON.stringify(state)} readOnly/>
-    </div>
+    </div> */}
     {/* {firebaseUI && <div className="field">
       <label className="label">Link Accounts</label>
       <div className="control">{firebaseUI}</div>

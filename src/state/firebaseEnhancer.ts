@@ -1,8 +1,7 @@
-import { auth as globalAuth, userFirestoreDocRef, auth } from "./firebase";
+import { userFirestoreDocRef, auth } from "./firebase";
 import firebase from "firebase";
-import { StoreEnhancer, AnyAction, Action as ReduxAction, Reducer, PreloadedState } from "redux";
 import { Thunk, Action, thunk, State, action, Store } from "easy-peasy";
-import { produceWithPatches, createDraft, finishDraft, enablePatches, isDraft } from 'immer';
+import { produceWithPatches, enablePatches } from 'immer';
 
 enablePatches();
 

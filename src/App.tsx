@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useReducer } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -18,6 +18,7 @@ const App = () => {
   // const setUser = useStoreActions(s => s.setUser);
 
   const [user, authLoading, authError] = useAuthState(auth);
+  const forceUpdate = useReducer(x => !x, false)[1];
   const showMainSignIn = user == null;
  //console.log({authUser, authLoading, authError});
 
@@ -40,15 +41,10 @@ const App = () => {
     await auth.signOut();
   };
 
-  // useEffect(() => {
-    // debugger;
-    // if (!authLoading && !authError)
-    //   setUser(authUser ?? null);
-  // }, [authUser, authLoading, authError, setUser]);
-
   const signInSuccess = () => {
     setShowUserInfo(false);
     setShowSignIn(false);
+    forceUpdate();
     return false;
   };
 
