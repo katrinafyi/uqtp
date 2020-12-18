@@ -69,7 +69,7 @@ const Main = () => {
             {importError && <div className="has-text-weight-bold my-2 has-text-danger-dark">{importError}</div>}
             <p className="mb-2">
               If you can't find your courses by searching, you can manually import specific classes from the
-              <a href="https://timetable.my.uq.edu.au/even/timetable/#subjects" target="_blank" rel="noopener noreferrer"> UQ Public Timetable</a>.
+              <a href="https://timetable.my.uq.edu.au/odd/timetable/#subjects" target="_blank" rel="noopener noreferrer"> UQ Public Timetable</a>.
             </p>
             <MyTimetableHelp></MyTimetableHelp>
           </details>
