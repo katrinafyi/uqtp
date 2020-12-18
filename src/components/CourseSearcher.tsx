@@ -61,6 +61,10 @@ export const CourseSearcher = memo(() => {
   const resultsPresent = results != null && !_.isEmpty(results);
 
   return <>
+    <p className="mb-3">
+      <i>Updated for Semester 1 2021!</i>
+    </p>
+
     <form className="form mb-3">
       <div className="field has-addons">
 
