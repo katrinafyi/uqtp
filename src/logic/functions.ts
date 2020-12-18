@@ -1,7 +1,6 @@
 import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime, RGBAColour } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
-import { differenceInCalendarDays } from "date-fns";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     const byDayTime = _.range(7)

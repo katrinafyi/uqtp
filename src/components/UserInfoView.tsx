@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo } from "react"
+import React, { useMemo } from "react"
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../state/firebase";
-import { useStoreState, useStoreActions } from "../state/persistState";
 
 const UserInfoView = () => {
   const [authUser] = useAuthState(auth);

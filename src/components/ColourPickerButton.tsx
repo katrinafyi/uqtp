@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, ReactPropTypes, Props, HTMLProps } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { RGBAColour, DEFAULT_COURSE_COLOUR } from '../state/types';
 
 const inputStyle = {

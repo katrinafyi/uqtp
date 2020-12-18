@@ -2,6 +2,7 @@ import { userFirestoreDocRef, auth } from "./firebase";
 import firebase from "firebase";
 import { Thunk, Action, thunk, State, action, Store } from "easy-peasy";
 import { produceWithPatches, enablePatches } from 'immer';
+import { IS_DEBUG } from "../isDebug";
 
 enablePatches();
 
@@ -20,7 +21,7 @@ export const firebaseModel: FirebaseModel = {
   __ref: null,
 
   __setFirebaseState: action((_, state) => {
-    // console.log("__setFirebaseState", state);    
+    //console.log("__setFirebaseState", state);    
     return state as State<FirebaseModel>;
   }),
 
@@ -51,7 +52,7 @@ export const attachFirebasePersistListener = <State, Model, Config>(
 
     user = newUser;
 
-    console.log('auth state changed: ' + user?.uid);
+  IS_DEBUG && console.log('auth state changed: ' + user?.uid);
     //console.log(user);
     docRef = userFirestoreDocRef(user);
     __setFirebaseRef(docRef);
@@ -63,14 +64,14 @@ export const attachFirebasePersistListener = <State, Model, Config>(
           // previous data exists. load from online.
           const data = doc.val()! as FirebaseState;
           data.__ref = docRef;
-          console.log('... got snapshot from firebase', data);
+        IS_DEBUG && console.log('... got snapshot from firebase', data);
           __setFirebaseState(data as FirebaseState);
           onSetState && onSetState();
         } else if (first) {
-          console.log('... no data on firebase, uploading.');
+        IS_DEBUG && console.log('... no data on firebase, uploading.');
           // no previous data exists. upload our data.
           const data = cleanState ? cleanState(store.getState() as Model) : store.getState();
-          console.log(data);
+        IS_DEBUG && console.log(data);
           docRef?.set(data);
           // store.dispatch(firebaseSnapshotAction(defaultState as unknown as S));
         }
@@ -101,10 +102,10 @@ export const firebaseAction = <M extends object, P>(actionFunction: ActionFuncti
       updates[path] = patch.op === 'remove' ? null : (patch.value ?? null);
     }
     
-    console.log("patches", patches);
-    console.log("update", updates);
+  IS_DEBUG && console.log("patches", patches);
+  IS_DEBUG && console.log("update", updates);
     // @ts-ignore
-    console.log(s.__ref);
+  IS_DEBUG && console.log(s.__ref);
     // debugger;
 
     if (Object.keys(updates)) {

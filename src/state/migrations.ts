@@ -1,4 +1,4 @@
-import { Timetable, CourseEvent, SelectionsByGroup, CourseVisibility, CourseColours, TimetablesState, SessionsByGroup } from "./types";
+import { CourseEvent, CourseVisibility, CourseColours, SessionsByGroup } from "./types";
 import { StateMetadata, PersistState, CURRENT_VERSION } from "./schema";
 import { UserState } from "./schema";
 import _ from "lodash";

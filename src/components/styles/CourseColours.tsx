@@ -1,8 +1,8 @@
 import React, { memo, useState } from "react";
 import { useStoreState } from "../../state/persistState"
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 
-import jss, { StyleSheet } from 'jss';
+import jss from 'jss';
 import preset from 'jss-preset-default';
 import tinycolor from "tinycolor2";
 

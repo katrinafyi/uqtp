@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useState, useReducer } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -10,14 +10,14 @@ import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSi
 import { Modal, ModalCard } from './components/Modal';
 import UserInfoView from './components/UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useStoreState, useStoreActions } from './state/persistState';
+import { IS_DEBUG } from './isDebug';
 
 
 const App = () => {
   // const user = useStoreState(s => s.user);
   // const setUser = useStoreActions(s => s.setUser);
 
-  const [user, authLoading, authError] = useAuthState(auth);
+  const [user, authLoading] = useAuthState(auth);
   const forceUpdate = useReducer(x => !x, false)[1];
   const showMainSignIn = user == null;
  //console.log({authUser, authLoading, authError});
@@ -31,7 +31,7 @@ const App = () => {
 
     try {
       const ref = userFirestoreDocRef(user?.uid ?? null);
-      console.log(user, ref);      
+    IS_DEBUG && console.log(user, ref);      
       if ((user?.isAnonymous ?? false) && ref)
         await ref.remove();
     } catch (e) {

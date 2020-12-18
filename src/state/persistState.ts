@@ -1,11 +1,11 @@
-import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, actionOn, ActionOn, Thunk, thunk } from 'easy-peasy';
+import { action, computed, Computed, Action, createTypedHooks, Actions, memo, State, Thunk } from 'easy-peasy';
 import { PersistState, BLANK_PERSIST } from './schema';
-import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectionsByGroup, Course, RGBAColour, SessionsByGroup, CourseMap, CourseActivityGroupMap } from './types';
+import { Timetable, CourseEvent, CourseActivity, EMPTY_TIMETABLE, CourseActivityGroup, CourseVisibility, SelectionsByGroup, Course, RGBAColour, SessionsByGroup, CourseActivityGroupMap } from './types';
 import { v4 as uuidv4 } from 'uuid';
 import { makeActivityKey, makeCustomSession, CUSTOM_COURSE, makeActivitySessionKey, coerceToObject } from '../logic/functions';
 import _ from 'lodash';
-import { userFirestoreDocRef, auth } from './firebase';
-import { firebaseAction, FirebaseModel, FirebaseThunk } from './firebaseEnhancer';
+import { firebaseAction, FirebaseModel } from './firebaseEnhancer';
+import { IS_DEBUG } from '../isDebug';
 
 
 export type ActivitiesNested = CourseActivityGroupMap<CourseEvent[]>;
@@ -73,7 +73,7 @@ export const model: PersistModel = {
       if (!s.timetables[s.current]!.selections)
         s.timetables[s.current]!.selections = {};
 
-      console.log("on set state", s.timetables[s.current]);
+    IS_DEBUG && console.log("on set state", s.timetables[s.current]);
     }
   ),
 
@@ -94,8 +94,8 @@ export const model: PersistModel = {
   }),
 
   currentTimetable: computed(memo((s: State<PersistModel>) => {
-    // console.log('timetable', s);
-    // console.log(s.currentTimetable);
+    //console.log('timetable', s);
+    //console.log(s.currentTimetable);
     // debugger;
     return s.timetables?.[s.current];
   }, 2)),

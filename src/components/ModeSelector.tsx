@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { FaEye, FaRegEdit, FaRegEye, FaEraser, FaCalendar, FaRegCalendar, FaRegCalendarAlt } from 'react-icons/fa';
+import React from 'react';
+import { FaRegEdit, FaRegEye, FaRegCalendarAlt } from 'react-icons/fa';
 import { UIStore, TimetableMode } from '../state/uiState';
 
 export const ModeSelector = () => {

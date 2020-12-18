@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import { CourseEvent, DAY_NAMES } from '../state/types';
-import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, formatTime, sessionEndTime, CUSTOM_COURSE, coerceToObject } from '../logic/functions';
+import { computeDayTimeArrays, makeActivitySessionKey, getCourseCode, formatTime, sessionEndTime, CUSTOM_COURSE } from '../logic/functions';
 
 import { FaLock } from 'react-icons/fa';
 
@@ -9,7 +9,6 @@ import './Timetable.scss';
 import { UIStore, TimetableMode } from '../state/uiState';
 import { useStoreState, useStoreActions } from '../state/persistState';
 
-import useLongPress from 'react-use/lib/useLongPress';
 import { CourseColoursContainer } from './styles/CourseColours';
 import classNames from 'classnames';
 
@@ -182,7 +181,6 @@ const HourCell = memo(({ day, hour, sessions }: HourCellProps) => {
 });
 
 type CustomEvent = { day: number, hour: number, duration: number, label: string };
-type AddCustomEvent = (arg: CustomEvent) => any;
 
 const Timetable = () => {
 
@@ -231,7 +229,7 @@ const Timetable = () => {
       <div key={d} className="th col-day cell"><b>{d}</b></div>
     )}
 
-    {HOURS.map((h, i) =>
+    {HOURS.map((h) =>
       <React.Fragment key={h}>
         <div className={`th cell has-text-right col-time`}><b>{h}</b></div>
         {DAYS.map(d => 
