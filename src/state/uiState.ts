@@ -89,6 +89,7 @@ export const model = ({ replaceActivityGroup }: UIModelParams): UIModel => ({
 
       const diff = differenceInCalendarDays(start, parseDate(session.startDate));
       const index = Math.floor(diff / 7);
+      if (index < 0) return false;
       return (session.weekPattern[index] ?? '1') === '1';
   }, 1)),
 
