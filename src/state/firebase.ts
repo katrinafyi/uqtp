@@ -1,8 +1,10 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import 'firebase/firestore';
+// import 'firebase/firestore';
+import 'firebase/database';
 import { PersistState } from './schema';
 import 'firebase/analytics';
+import { migratePeristState } from './migrations';
 
 export const firebaseConfig = {
     apiKey: process.env.REACT_APP_API_KEY,
@@ -16,8 +18,8 @@ export const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-// export const database = firebase.database();
-export const firestore = firebase.firestore();
+export const database = firebase.database();
+// export const firestore = firebase.firestore();
 export const auth = firebase.auth();
 firebase.analytics();
 
@@ -32,11 +34,11 @@ export const userFirestoreDocRef = (userOrUid: firebase.User | string | null) =>
         uid = userOrUid.uid;
     }
     console.assert(uid != null);
-    return firestore.collection('users').doc(uid);
+    return database.ref('data/' + uid);
 };
 
 export const mergeData = (oldData: PersistState, newData: PersistState) => {
-    return {...oldData, ...newData, timetables: { ...newData.timetables, ...oldData.timetables }};
+    return {...newData, ...oldData, timetables: { ...newData.timetables, ...oldData.timetables }};
 }
 
 export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCredential) => {
@@ -49,12 +51,19 @@ export const mergeAnonymousData = async (newCredential: firebase.auth.AuthCreden
         return;
     }
 
-    const oldData = await oldDocRef.get().then(doc => doc.data()) as PersistState;
+    let oldData = (await oldDocRef.once('value')).val() as PersistState;
+    const oldMigrated = oldData && migratePeristState(oldData);
+    if (oldMigrated)
+        oldData = oldMigrated;
+    await oldDocRef.remove();
     
     const newUser = await auth.signInWithCredential(newCredential);
     
     const newDocRef = userFirestoreDocRef(newUser.user)!;
-    const newData = await newDocRef.get().then(doc => doc.data()) as PersistState;
+    let newData = (await newDocRef.once('value')).val() as PersistState;
+    const newMigrated = newData && migratePeristState(newData);
+    if (newMigrated)
+        newData = newMigrated;
   
     await newDocRef.set(mergeData(oldData ?? {}, newData ?? {}));
-  };
+};

@@ -1,91 +1,124 @@
-import { auth as globalAuth } from "./firebase";
-import type firebase from "firebase";
-import { StoreEnhancer, AnyAction, Action, Reducer, PreloadedState } from "redux";
+import { userFirestoreDocRef, auth } from "./firebase";
+import firebase from "firebase";
+import { Thunk, Action, thunk, State, action, Store } from "easy-peasy";
+import { produceWithPatches, enablePatches } from 'immer';
+import { IS_DEBUG } from "../isDebug";
 
-type DocRef = firebase.firestore.DocumentReference;
+enablePatches();
 
-export const makeFirestorePersistEnhancer = <T>(
-  firebaseAuth: firebase.auth.Auth,
-  getDocRef: (user: firebase.User | null) => DocRef | null, 
-  setStateType: string,
-  blacklistTypes?: string[],
-  defaultState?: T,
-  migrateState?: (state: T) => T | null, 
-  cleanState?: (state: any) => any,
-): StoreEnhancer => {
-  
-  const auth = firebaseAuth ?? globalAuth;
-  const migrate = migrateState ?? (() => null);
+type FirebaseRef = firebase.database.Reference;
 
-  // @ts-ignore
-  return (createStore) => <S = any, A extends Action = AnyAction>(reducer: Reducer<S, A>, preloadedState?: PreloadedState<S>) => {
+export type FirebaseState = {
+  __ref: firebase.database.Reference | null,  
+};
 
-    const SET_STATE = setStateType;
+export type FirebaseModel = FirebaseState & {
+  __setFirebaseState: Action<FirebaseModel, any>,
+  __setFirebaseRef: Action<FirebaseModel, FirebaseRef | null>,
+};
 
-    const blacklist = new Set([...blacklistTypes ?? [], SET_STATE]);
+export const firebaseModel: FirebaseModel = {
+  __ref: null,
 
-    const setState = (s: S): any => ({
-      type: SET_STATE, payload: s,
-    });
-    console.assert(SET_STATE, 'set state type cannot be null');
-    blacklist.forEach(x => console.assert(x, 'blacklisted type should not be null'));
+  __setFirebaseState: action((_, state) => {
+    //console.log("__setFirebaseState", state);    
+    return state as State<FirebaseModel>;
+  }),
 
-    let unsubSnapshot: Function | null = null;
-    let user: firebase.User | null = null;
-
-    const firebaseReducer = (s: S, a: A) => {
-     //console.log("firebase reducer called with ", a, s);
-      if (!blacklist.has(a.type) && user != null) {
-        const newState = reducer(s, a as A);
-        // @ts-ignore
-        if (newState !== s && newState != null) {
-          //console.log("... uploading new state to firebase", newState);
-          // @ts-ignore
-          getDocRef(user)!.set(cleanState ? cleanState(newState) : newState);
-        }
-        return s;
-      };
-     //console.log("... action blacklisted: " + a.type);
-      return reducer(s, a as A);
-    };
-
-    // @ts-ignore
-    const store = createStore(firebaseReducer, preloadedState);
-
-    auth.onAuthStateChanged((newUser) => {
-
-      unsubSnapshot?.();
-      unsubSnapshot = null;
-
-      user = newUser;
-  
-     //console.log('auth state changed: ' + user?.uid);
-     //console.log(user);
-      if (user) {
-        const docRef = getDocRef(user);
-        unsubSnapshot = docRef!.onSnapshot((doc) => {
-          if (doc?.exists) {
-           //console.log('... got snapshot from firebase');
-            // previous data exists. load from online.
-            const data = doc.data()! as T;
-            const migrated = migrate(data);
-            if (migrated)
-              docRef?.set(migrated);
-            else
-              store.dispatch(setState(data as unknown as S));
-          } else {
-           //console.log('... no data on firebase, uploading.');
-            // no previous data exists. upload our data.
-            docRef?.set(store.getState());
-            // store.dispatch(firebaseSnapshotAction(defaultState as unknown as S));
-          }
-        });
-      } else {
-        // new user state is signed out. delete data.
-        store.dispatch(setState(defaultState as unknown as S));
-      }
-    });
-
-    return store;
-  };
+  __setFirebaseRef: action((s, ref) => {
+    s.__ref = ref;
+  }),
 }
+
+
+export const attachFirebasePersistListener = <State, Model, Config>(
+  store: Store<FirebaseModel, Config>,
+  defaultState?: State,
+  cleanState?: (t: Model) => State,
+  onSetState?: (x: void) => any,
+) => {
+  
+  const { __setFirebaseState, __setFirebaseRef } = store.getActions();
+
+  let listener: Function | null = null;
+  let docRef: FirebaseRef | null = null;
+  let user: firebase.User | null = null;
+
+  auth.onAuthStateChanged((newUser: firebase.User | null) => {
+
+    if (listener)
+      docRef?.off('value', listener as any);
+    listener = null;
+
+    user = newUser;
+
+  IS_DEBUG && console.log('auth state changed: ' + user?.uid);
+    //console.log(user);
+    docRef = userFirestoreDocRef(user);
+    __setFirebaseRef(docRef);
+
+    let first = true; // only upload data on first connect.
+    if (user) {
+      listener = docRef!.on('value', doc => {
+        if (doc?.exists()) {
+          // previous data exists. load from online.
+          const data = doc.val()! as FirebaseState;
+          data.__ref = docRef;
+        IS_DEBUG && console.log('... got snapshot from firebase', data);
+          __setFirebaseState(data as FirebaseState);
+          onSetState && onSetState();
+        } else if (first) {
+        IS_DEBUG && console.log('... no data on firebase, uploading.');
+          // no previous data exists. upload our data.
+          const data = cleanState ? cleanState(store.getState() as Model) : store.getState();
+        IS_DEBUG && console.log(data);
+          docRef?.set(data);
+          // store.dispatch(firebaseSnapshotAction(defaultState as unknown as S));
+        }
+        first = false;
+      });
+    } else {
+      // new user state is signed out. delete data.
+      __setFirebaseState(defaultState as unknown as FirebaseState);
+      onSetState && onSetState();
+    }
+  });
+};
+
+type ActionFunction<Model extends object, Payload> = (state: State<Model>, payload: Payload) => void | State<Model>;
+
+export const firebaseAction = <M extends object, P>(actionFunction: ActionFunction<M, P>): Thunk<M, P> => {
+  return thunk(async (actions, payload, { getState, getStoreState, meta }) => {
+    
+    const s = getStoreState();
+    
+    const prevState = getState();
+    const [, patches] = produceWithPatches(prevState, (s: State<M>) => actionFunction(s, payload));
+    
+    const updates: any = {};
+    const basePath = meta.parent.join('/');
+    for (const patch of patches) {
+      const path = basePath + patch.path.join('/');
+      updates[path] = patch.op === 'remove' ? null : (patch.value ?? null);
+    }
+    
+  IS_DEBUG && console.log("patches", patches);
+  IS_DEBUG && console.log("update", updates);
+    // @ts-ignore
+  IS_DEBUG && console.log(s.__ref);
+    // debugger;
+
+    if (Object.keys(updates)) {
+      // @ts-ignore
+      await (s.__ref as FirebaseModel['__ref'])?.update(updates);
+    }
+  });
+};
+
+export type FirebaseThunk<
+  Model extends object = {},
+  Payload = void,
+  Injections = any,
+  StoreModel extends object = {},
+  Result = any
+> = Thunk<Model & FirebaseModel, Payload, Injections, StoreModel, Result>;

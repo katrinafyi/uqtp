@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useReducer } from 'react';
 import Emoji from 'a11y-react-emoji'
 import './App.scss';
 
@@ -10,15 +10,16 @@ import { NewFirebaseLoginProps, NewFirebaseLogin } from './components/FirebaseSi
 import { Modal, ModalCard } from './components/Modal';
 import UserInfoView from './components/UserInfoView';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useStoreState, useStoreActions } from './state/persistState';
+import { IS_DEBUG } from './isDebug';
 
 
 const App = () => {
-  const user = useStoreState(s => s.user);
-  const setUser = useStoreActions(s => s.setUser);
+  // const user = useStoreState(s => s.user);
+  // const setUser = useStoreActions(s => s.setUser);
 
-  const [authUser, authLoading, authError] = useAuthState(auth);
-  const showMainSignIn = authUser == null;
+  const [user, authLoading] = useAuthState(auth);
+  const forceUpdate = useReducer(x => !x, false)[1];
+  const showMainSignIn = user == null;
  //console.log({authUser, authLoading, authError});
 
   const [showSignInModal, setShowSignIn] = useState(false);
@@ -30,8 +31,9 @@ const App = () => {
 
     try {
       const ref = userFirestoreDocRef(user?.uid ?? null);
-      if ((user?.isAnon ?? false) && ref)
-        await ref.delete();
+    IS_DEBUG && console.log(user, ref);      
+      if ((user?.isAnonymous ?? false) && ref)
+        await ref.remove();
     } catch (e) {
       console.error('failed to delete anonymous data', e);
     }
@@ -39,14 +41,10 @@ const App = () => {
     await auth.signOut();
   };
 
-  useEffect(() => {
-    if (!authLoading && !authError)
-      setUser(authUser ?? null);
-  }, [authUser, authLoading, authError, setUser]);
-
   const signInSuccess = () => {
     setShowUserInfo(false);
     setShowSignIn(false);
+    forceUpdate();
     return false;
   };
 
@@ -60,10 +58,10 @@ const App = () => {
   
   const [firebaseLoginElement] = useState(() => <NewFirebaseLogin {...signInConfig}></NewFirebaseLogin>);
   
-  const displayName = user?.name ?? user?.email ?? user?.phone;
-  const isAnon = user?.isAnon ?? false;
+  const displayName = user?.displayName ?? user?.email ?? user?.phoneNumber;
+  const isAnon = user?.isAnonymous ?? false;
   const uid = user?.uid;
-  const photo = user?.photo;
+  const photo = user?.photoURL;
 
   const isEmailLink = auth.isSignInWithEmailLink(window.location.href);
 
@@ -126,7 +124,7 @@ const App = () => {
         <div style={{display: authLoading ? 'none' : ''}}>
           {!showSignInModal && (showMainSignIn || isEmailLink) && firebaseLoginElement}
         </div>
-        {uid && <Main></Main>}
+        {user && <Main></Main>}
       </StateErrorBoundary>
     </section>
     <footer className="footer">

@@ -3,6 +3,8 @@
 
 .session-selector {
   
+  // background-color: transparent;
+  
   & .message-header {
     // background-color: $white-ter;
     // color: $black;
@@ -20,8 +22,11 @@
     }
   }
 
-  & .message-body .column {
-    max-width: 10rem;
+  & .message-body {
+    // border-top-width: 1px;
+    & .column {
+      max-width: 10rem;
+    }
   }
 
   border: 1px solid lightgrey;

@@ -1,7 +1,6 @@
 import { CourseEvent, CourseActivity, CourseActivityGroup, ClockTime, RGBAColour } from "../state/types";
 import _ from "lodash";
 import { memo } from "easy-peasy";
-import { differenceInCalendarDays } from "date-fns";
 
 export const computeDayTimeArrays = (sessions: CourseEvent[]) => {
     const byDayTime = _.range(7)
@@ -107,6 +106,10 @@ export const compareCourseEvents = (a: CourseEvent, b: CourseEvent) => {
         return a.time.hour - b.time.hour;
     if (a.time.minute !== b.time.minute)
         return a.time.minute - b.time.minute;
+    if (a.duration !== b.duration)
+        return a.duration - b.duration;
+    if (a.course !== b.course)
+        return a.course.localeCompare(b.course);
     return 0;
 };
 
@@ -138,7 +141,7 @@ export const makeActivityGroupKey = (g: CourseActivityGroup) =>
     `${g.course}|${g.activity}|${g.group}`;
 
 export const makeActivitySessionKey = (s: CourseEvent) => 
-    `${s.course}|${s.activity}|${s.group}|${s.day}${s.time.hour}|${s.time.minute}`;
+    `${s.course}|${s.activity}|${s.group}|${s.day}${s.time.hour}|${s.time.minute}|${s.duration}|${s.campus}`;
 
 export const getCourseCode = (longCode: string) => longCode.split('_')[0];
 
@@ -148,14 +151,19 @@ export const isHighlighted = (session: CourseActivityGroup, highlight: CourseAct
 export const coerceToArray = <T>(arg?: T | T[]) => 
     arg === undefined ? [] : (Array.isArray(arg) ? arg : [arg]);
 
-const parseDate = memo((d: string) => new Date(d), 10);
+const removeNullValues = <T>(arg: T): T => {
+    for (const key of Object.keys(arg)) {
+        // @ts-ignore
+        if (arg[key] == null)
+            // @ts-ignore
+            delete arg[key];
+    }
+    return arg;
+}
 
-export const isInWeek = (weekStart: Date, session: CourseEvent) => {
-    if (!session.startDate || !session.weekPattern) return true;
-    const diff = differenceInCalendarDays(weekStart, parseDate(session.startDate));
-    const index = Math.floor(diff / 7);
-    return (session.weekPattern[index] ?? '1') === '1';
-};
+export const coerceToObject = <T>(arg: {[k: string]: T} | T[]): {[k: string]: T} => 
+    // @ts-ignore
+    Array.isArray(arg) ? removeNullValues(Object.assign({}, arg)) : (arg ?? {});
 
 export const CUSTOM_COURSE = '(custom)';
 
@@ -175,5 +183,6 @@ export const makeCustomSession = (label: string, day: number, hour: number, dura
     };
 };
 
-export const toCSSColour = (c?: RGBAColour) => c;
-    // c && `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a ?? 1})`;
+export const toCSSColour = (c?: RGBAColour): any => 
+    // @ts-ignore
+    typeof c == 'string' ? c : (c ? `rgba(${c.r}, ${c.g}, ${c.b}, ${c.a ?? 1})` : undefined);

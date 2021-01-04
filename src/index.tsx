@@ -7,15 +7,14 @@ import { DEFAULT_PERSIST, CURRENT_VERSION, PersistState } from './state/schema';
 import { migratePeristState } from './state/migrations';
 import { model, cleanState } from './state/persistState';
 import { createStore, StoreProvider } from 'easy-peasy';
-import { makeFirestorePersistEnhancer } from './state/firebaseEnhancer';
-import { userFirestoreDocRef, auth } from './state/firebase';
+import { attachFirebasePersistListener, firebaseModel } from './state/firebaseEnhancer';
 import _ from 'lodash';
 
 const LOCALSTORAGE_KEY = 'timetableState';
 
 const previousJSON = localStorage.getItem(LOCALSTORAGE_KEY);
 
-let previousState = DEFAULT_PERSIST;
+let previousState: any = DEFAULT_PERSIST;
 try {
   if (previousJSON != null) {
     const parsed = JSON.parse(previousJSON);
@@ -38,21 +37,20 @@ if (migratedState) {
 }
 
 const initialState = migratedState ?? previousState;
+// debugger;
 
-const firestoreEnhancer = makeFirestorePersistEnhancer(
-  // @ts-ignore
-  auth, userFirestoreDocRef, '@action.setState', ['@action.setUser'],
-  DEFAULT_PERSIST, migratePeristState, cleanState);
-
-const rootStore = createStore(model, 
-  { initialState, enhancers: [firestoreEnhancer] });
+const rootStore = createStore({ ...firebaseModel, ...model }, 
+  { initialState });
+  
+attachFirebasePersistListener(rootStore, DEFAULT_PERSIST, cleanState,
+  rootStore.getActions().onSetState);
 
 // attachFirebaseListeners(rootStore);
 
 rootStore.subscribe(_.throttle(() => {
-  const s = rootStore.getState();
+  const s = rootStore.getState() as any;
  //console.log("subscribed to state: ", s);
-  saveLocalStorage(s);
+  saveLocalStorage(cleanState(s));
 }, 2000));
 
 ReactDOM.render(

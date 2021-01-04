@@ -1,7 +1,7 @@
 import { CourseEvent } from "../state/types";
 import { parse } from "date-fns";
 
-const ENDPOINT = 'https://asia-northeast1-uq-toilet-paper.cloudfunctions.net/proxy/even/rest/timetable/subjects';
+const ENDPOINT = 'https://asia-northeast1-uq-toilet-paper.cloudfunctions.net/proxy/odd/rest/timetable/subjects';
 
 export const fetchCourseData = async (query: string) =>
   fetch(ENDPOINT, {
