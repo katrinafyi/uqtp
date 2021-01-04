@@ -23,7 +23,8 @@ The built site is in build/ and can be hosted on a static web server of your cho
 ## Screenshots
 
 ### Main view  
-![image](https://user-images.githubusercontent.com/39479354/87900289-539ea600-ca97-11ea-8924-67cb92a4be64.png)
+![image](https://user-images.githubusercontent.com/39479354/103518130-ebb20f80-4ebe-11eb-97e7-1e36be68d283.png)
+![image](https://user-images.githubusercontent.com/39479354/103518387-68dd8480-4ebf-11eb-93c0-bd06b46ecbf4.png)
 
 ### Timetable
-![image](https://user-images.githubusercontent.com/39479354/87900356-8052bd80-ca97-11ea-8d7f-d3b574c93f82.png)
+![image](https://user-images.githubusercontent.com/39479354/103518352-56634b00-4ebf-11eb-9799-be57c9e1c865.png)
