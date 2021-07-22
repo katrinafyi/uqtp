@@ -39,7 +39,7 @@
     "typescript": "^3.9.7",
     "unstated-next": "^1.1.0",
     "uuid": "^3.4.0",
-    "xlsx": "^0.15.6"
+    "xlsx": "^0.17.0"
   },
   "scripts": {
     "start": "react-scripts start",
