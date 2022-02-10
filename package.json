@@ -24,7 +24,7 @@
     "jss": "^10.5.0",
     "jss-preset-default": "^10.3.0",
     "lodash": "^4.17.20",
-    "node-sass": "^4.14.1",
+    "node-sass": "^7.0.0",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-firebase-hooks": "^2.2.0",
