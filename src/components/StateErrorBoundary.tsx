@@ -25,7 +25,7 @@ export default class StateErrorBoundary extends React.Component<Props, State> {
                 <div className="message-header"><p>Error</p></div>
                 <div className="message-body">
                     <p>An error occured while rendering the view ({this.state.error.toString()}).</p>
-                    <p>Check the browser console for more details. Report bugs to <a href="mailto:kenton_lam@outlook.com">kenton_lam@outlook.com</a>.</p>
+                    <p>Check the browser console for more details. Report bugs to <a href="mailto:k@rina.fyi">k@rina.fyi</a>.</p>
                 </div>
             </div></div>;
         } else {

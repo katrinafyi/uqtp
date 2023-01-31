@@ -31,13 +31,13 @@ const App = () => {
 
     try {
       const ref = userFirestoreDocRef(user?.uid ?? null);
-    IS_DEBUG && console.log(user, ref);      
+    IS_DEBUG && console.log(user, ref);
       if ((user?.isAnonymous ?? false) && ref)
         await ref.remove();
     } catch (e) {
       console.error('failed to delete anonymous data', e);
     }
-    
+
     await auth.signOut();
   };
 
@@ -55,9 +55,9 @@ const App = () => {
       signInSuccess();
     },
   };
-  
+
   const [firebaseLoginElement] = useState(() => <NewFirebaseLogin {...signInConfig}></NewFirebaseLogin>);
-  
+
   const displayName = user?.displayName ?? user?.email ?? user?.phoneNumber;
   const isAnon = user?.isAnonymous ?? false;
   const uid = user?.uid;
@@ -131,8 +131,8 @@ const App = () => {
       <div className="content has-text-centered">
         <p>
           <strong>UQTP</strong> is an (unofficial) timetable planner for UQ, built by&nbsp;
-          <a href="https://kentonlam.xyz">Kenton Lam</a>.
-          The source code is available on <a href="https://github.com/kentonlam/uqtp">GitHub</a>.
+          <a href="https://rina.fyi">Kait Lam</a>.
+          The source code is available on <a href="https://github.com/katrinafyi/uqtp">GitHub</a>.
         </p>
         <p>
           <small>

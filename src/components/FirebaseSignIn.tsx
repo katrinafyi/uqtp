@@ -6,9 +6,9 @@ import 'firebase/auth';
 import * as firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css';
 
-export const getFirebaseUIConfig = 
+export const getFirebaseUIConfig =
   (signInSuccess?: NewFirebaseLoginProps['signInSuccess'],
-    mergeResolver?: NewFirebaseLoginProps['anonymousMergeConflict']): firebaseui.auth.Config => 
+    mergeResolver?: NewFirebaseLoginProps['anonymousMergeConflict']): firebaseui.auth.Config =>
   ({
     signInFlow: 'popup',
     signInOptions: [
