@@ -62,7 +62,7 @@ export const CourseSearcher = memo(() => {
 
   return <>
     <p className="mb-3">
-      <i>Updated for 2022!</i>
+      <i>Updated for 2023!</i>
     </p>
 
     <form className="form mb-3">
